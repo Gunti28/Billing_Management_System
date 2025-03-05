@@ -1,17 +1,20 @@
 package com.srnrit.BMS.dto;
 
+import java.io.Serializable;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+@SuppressWarnings("serial")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class UserRequestDTO {
+public class UserRequestDTO implements Serializable{
 	
 	private String userName;
 	private String userEmail;
