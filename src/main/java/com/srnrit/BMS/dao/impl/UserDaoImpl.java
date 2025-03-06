@@ -65,23 +65,12 @@ public class UserDaoImpl implements UserDao {
 	               user.setActive(false); 
 	               return userRepository.save(user) !=null?Optional.of("User deleted successfully with ID: " + userId):Optional.empty();
 	            }
-	            else
-	            {
-	                return Optional.of("User is not active.");
-	            }
-	        } else 
-	        {
-	            throw new UserNotFoundException("User does not exist with ID: " + userId);
-	        }
+	            else return Optional.of("User is not active.");
+	          
+	        } else  throw new UserNotFoundException("User does not exist with ID: " + userId);
+	        
         }
-        else 
-        {
-        	throw new UserNotFoundException("Userid can't be null or blank.");
-        	
-
-        }
-        else throw new UserNotFoundException("User can't be null.");
-  
+        else throw new UserNotFoundException("Userid can't be null or blank.");
     }
 
 	@Override
