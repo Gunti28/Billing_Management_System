@@ -78,15 +78,41 @@ public class UserServiceImpl implements UserService{
 					{
 						return userResponseDTO;
 					}
-					else throw new RuntimeException("User Not Updated , Try After Some Time");
+					else throw new RuntimeException("Something went wrong,try again some time");
 				}
-				else throw new RuntimeException("Something went wrong");
+				else throw new RuntimeException("User Not Updated , Try After Some Time");
 			}
 			else throw new RuntimeException("Userid must not be null or blank");
 		}
 		else throw new RuntimeException("UserRequestDTO must not be null");
 		
 	}
+
+	@Override
+	public UserResponseDTO findUserById(String userId)
+	{
+		if(userId!=null &&  ! userId.isBlank())
+		{
+			Optional<User> byUserId = this.userDao.findByUserId(userId);
+			if(byUserId.isPresent())
+			{
+				UserResponseDTO userResponseDTO = EntityToDTO.userEntityToUserResponseDTO(byUserId.get());
+				if(userResponseDTO!=null)
+				{
+					return userResponseDTO;
+				}
+				else throw new RuntimeException("Something went wrong, Try again sometime");
+			}
+			else throw new RuntimeException("User Not Found with Id: "+userId);
+		}
+		else throw new RuntimeException("Userid must not be null or blank");
+	}
+
+	
+	
+	
+	
+	
 
 	
 
