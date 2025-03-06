@@ -1,20 +1,28 @@
 package com.srnrit.BMS;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import com.srnrit.BMS.dao.UserDao;
 import com.srnrit.BMS.entity.User;
-import static org.junit.jupiter.api.Assertions.*;
+import com.srnrit.BMS.repository.UserRepository;
 
 @SpringBootTest
 class BmsApplicationTests {
 	
 	@Autowired
 	UserDao userDAO;
+	
+	@Mock
+	UserRepository userRepository ;
+	
+	
 
 	@Test
 	void userSaveTest() 
@@ -29,9 +37,10 @@ class BmsApplicationTests {
 		
 		Optional<User> saveuser = userDAO.saveuser(user);
 		 assertTrue(saveuser.isPresent()); 
-		 System.out.println(saveuser.get());
-		
-		
+		 System.out.println(saveuser.get());	
 	}
+}	
+	
+	
 
-}
+
