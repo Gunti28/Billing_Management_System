@@ -11,6 +11,7 @@ public class DTOToEntity {
 	{
 		User user = new User();
 		BeanUtils.copyProperties(dto, user);
+		user.setUserPhone(Long.parseLong(dto.getUserPhone()));
 		return user;
 	}
 	

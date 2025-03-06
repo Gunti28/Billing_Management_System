@@ -22,7 +22,7 @@ public class UserResponseDTO implements Serializable
 	private String userEmail;
 	private String userPassword;
 	private Boolean active;
-	private String profileImage;
+	private String userProfileImage;
 	private String userGender;
 	private Long userPhone;
 	private Boolean termsAndConditions;
