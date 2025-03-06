@@ -2,6 +2,7 @@ package com.srnrit.BMS.entity;
 
 import java.io.Serializable;
 
+
 import org.hibernate.annotations.GenericGenerator;
 
 import com.srnrit.BMS.util.idgenerator.ProductIdGenerator;

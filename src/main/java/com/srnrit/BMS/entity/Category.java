@@ -1,5 +1,7 @@
 package com.srnrit.BMS.entity;
 
+import java.io.Serializable;
+
 import org.hibernate.annotations.GenericGenerator;
 
 import com.srnrit.BMS.util.idgenerator.CategoryIdGenerator;
@@ -14,12 +16,13 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+@SuppressWarnings("serial")
 @Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "CATEGORY_TABLE")
-public class Category 
+public class Category implements Serializable
 {
 	@SuppressWarnings("deprecation")
 	@Id
