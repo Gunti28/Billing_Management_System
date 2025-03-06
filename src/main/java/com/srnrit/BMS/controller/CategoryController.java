@@ -19,12 +19,12 @@ public class CategoryController {
     @PostMapping(value="/addCategory")
     public ResponseEntity<?> addCategory(@RequestBody CategoryRequestDTO categoryRequest)
     {
-        return new ResponseEntity<CategoryResponseDTO> (this.categoryService.addCategory(categoryRequest), HttpStatus.OK);
+        return null;
     }
 
     @GetMapping(value="/allCategories")
     public ResponseEntity<List<CategoryResponseDTO>> getAllCategory()
     {
-        return new ResponseEntity<List<CategoryResponseDTO>>(this.categoryService.getAllCategory(),HttpStatus.OK);
+        return null;
     }
 }
