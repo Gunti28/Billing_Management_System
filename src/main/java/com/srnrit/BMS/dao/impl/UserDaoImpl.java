@@ -50,7 +50,7 @@ public class UserDaoImpl implements UserDao {
 	}
 	
 	@Override
-	public Optional<String> deleteUser(String userId) {
+	public Optional<String> deleteUserById(String userId) {
     	
         // Validate the User by userId
         if (userId != null && !userId.isBlank()) {
@@ -144,6 +144,15 @@ public class UserDaoImpl implements UserDao {
 	{
 		User byUserPhone = userRepository.findByUserPhone(userPhoneNumber);
 		return byUserPhone!=null?Optional.of(byUserPhone):Optional.empty();
+	}
+
+	@Override
+	public Optional<User> loginByEmailAndPassword(String userEmail, String userPassword) 
+	{
+		User user = userRepository.findByUserEmailAndUserPassword(userEmail, userPassword);
+		
+		return user!=null?Optional.of(user):Optional.empty();
+		
 	}
 	
 	
