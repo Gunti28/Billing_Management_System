@@ -22,7 +22,7 @@ public class UserIdGenerator implements IdentifierGenerator {
 	   try {
 		this.connection=session.getJdbcConnectionAccess().obtainConnection();
 		Statement sequenceStatement = this.connection.createStatement();
-		ResultSet rs = sequenceStatement.executeQuery("select user_id seq.nextval from dual");
+		ResultSet rs = sequenceStatement.executeQuery("select user_id_seq.nextval from dual");
 		if(rs.next()) 
 		{
 		int sequence = rs.getInt(1);

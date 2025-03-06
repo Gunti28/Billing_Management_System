@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.srnrit.BMS.dto.UserRequestDTO;
+import com.srnrit.BMS.dto.UserResponseDTO;
 import com.srnrit.BMS.service.UserService;
 
 import jakarta.validation.Valid;
@@ -25,10 +26,8 @@ public class UserController {
 			     produces = {"application/json"})
 	public ResponseEntity<?> createUser(@Valid @RequestBody UserRequestDTO dto)
 	{
-		//UserResponseDTO responseDTO = userService.saveUser(dto);
-		//return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
-		System.out.println(dto);
-		return ResponseEntity.status(HttpStatus.OK).body("User Created");
+		UserResponseDTO responseDTO = userService.saveUser(dto);
+		return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
 	}
 	
 

@@ -46,7 +46,7 @@ public class UserRequestDTO implements Serializable{
 	
 	@Positive(message = "Mobile no must be positive")
 	@Pattern(regexp = "^[1-9][0-9]{9}$",message = "Mobile number must be 10 digits and must not be started with 0")
-	private Long userPhone;
+	private String userPhone;
 	
 	@AssertTrue(message = "You must accept the terms and conditions.")
 	private Boolean termsAndConditions;
