@@ -1,5 +1,7 @@
 package com.srnrit.BMS.entity;
 
+import java.time.LocalDateTime;
+
 import org.hibernate.annotations.GenericGenerator;
 
 import com.srnrit.BMS.util.idgenerator.UserIdGenerator;
@@ -28,6 +30,9 @@ public class User {
 
 	@Column(name = "UseName")
 	private String userName;
+	
+	@Column(name="DateOfRegistration")
+	private LocalDateTime dateOfRegistration;
 
 	@Column(name = "IsActive")
 	private Boolean active;
