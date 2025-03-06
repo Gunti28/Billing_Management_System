@@ -59,7 +59,61 @@ public class UserServiceImpl implements UserService{
 	@Override
 	public String deleteUserById(String userId) {
 		Optional<String> deleteUser = userDao.deleteUser(userId);
-		return deleteUser.orElseThrow(()-> new UserNotFoundException("Something went wrong"));
+		return deleteUser.orElseThrow(()-> new RuntimeException("Something went wrong"));
 	}
+
+	@Override
+	public UserResponseDTO updateUserById(UserRequestDTO userRequestDTO,String userId) 
+	{
+		if(userRequestDTO!=null)
+		{
+			if(userId!=null && !userId.isBlank())
+			{
+				User user = DTOToEntity.userRequestDtoToUserEntity(userRequestDTO);
+				Optional<User> updateUser = this.userDao.updateByUserId(user, userId);
+				if(updateUser.isPresent())
+				{
+					UserResponseDTO userResponseDTO = EntityToDTO.userEntityToUserResponseDTO(updateUser.get());
+					if(userResponseDTO!=null)
+					{
+						return userResponseDTO;
+					}
+					else throw new RuntimeException("Something went wrong,try again some time");
+				}
+				else throw new RuntimeException("User Not Updated , Try After Some Time");
+			}
+			else throw new RuntimeException("Userid must not be null or blank");
+		}
+		else throw new RuntimeException("UserRequestDTO must not be null");
+		
+	}
+
+	@Override
+	public UserResponseDTO findUserById(String userId)
+	{
+		if(userId!=null &&  ! userId.isBlank())
+		{
+			Optional<User> byUserId = this.userDao.findByUserId(userId);
+			if(byUserId.isPresent())
+			{
+				UserResponseDTO userResponseDTO = EntityToDTO.userEntityToUserResponseDTO(byUserId.get());
+				if(userResponseDTO!=null)
+				{
+					return userResponseDTO;
+				}
+				else throw new RuntimeException("Something went wrong, Try again sometime");
+			}
+			else throw new RuntimeException("User Not Found with Id: "+userId);
+		}
+		else throw new RuntimeException("Userid must not be null or blank");
+	}
+
+	
+	
+	
+	
+	
+
+	
 
 }

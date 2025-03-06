@@ -36,6 +36,7 @@ public class UserController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
 	}
 	
+
 	@DeleteMapping(value = "/{userId}")
     public ResponseEntity<?> deleteUserById(@PathVariable String userId)
     {
@@ -62,5 +63,6 @@ public class UserController {
 		return ResponseEntity.status(HttpStatus.FOUND).body("UserFound");
 	}
 	
+
 	
 }
