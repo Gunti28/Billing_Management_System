@@ -42,6 +42,7 @@ public class Product implements Serializable {
 	@Column(name = "PRODUCT_STOCK")
 	private Boolean inStock;
 
+
 	@ManyToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "CATEGORY_ID")
 	private Category category;
