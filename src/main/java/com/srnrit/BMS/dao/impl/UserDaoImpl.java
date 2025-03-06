@@ -149,10 +149,9 @@ public class UserDaoImpl implements UserDao {
 	@Override
 	public Optional<User> loginByEmailAndPassword(String userEmail, String userPassword) 
 	{
+		
 		User user = userRepository.findByUserEmailAndUserPassword(userEmail, userPassword);
-		
-		return user!=null?Optional.of(user):Optional.empty();
-		
+		return user!=null?Optional.of(user):Optional.empty();	
 	}
 	
 	
