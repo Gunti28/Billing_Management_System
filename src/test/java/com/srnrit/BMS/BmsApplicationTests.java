@@ -35,20 +35,28 @@ class BmsApplicationTests {
 	@Autowired
 	UserService service;
 	
-	@Test
-	void saveUserService()
-	{
-		UserRequestDTO user = new UserRequestDTO();
-		user.setUserName("venu");
-		user.setUserEmail("venu@gmail.com");
-		user.setUserPassword("Venu@!2334");
-		user.setUserGender("Male");
-		user.setUserPhone("8712339224");
-		user.setTermsAndConditions(true);
-		UserResponseDTO saveUser = service.saveUser(user);
-		System.out.println(saveUser);
-	}
+//	@Test
+//	void saveUserService()
+//	{
+//		UserRequestDTO user = new UserRequestDTO();
+//		user.setUserName("venu");
+//		user.setUserEmail("venu@gmail.com");
+//		user.setUserPassword("Venu@!2334");
+//		user.setUserGender("Male");
+//		user.setUserPhone("8712339224");
+//		user.setTermsAndConditions(true);
+//		UserResponseDTO saveUser = service.saveUser(user);
+//		System.out.println(saveUser);
+//	}
 	
+	
+	//service layer unit testing
+	@Test
+	void deleteUserById()
+	{
+		String msg = service.deleteUserById("Uid_01");
+		System.out.println(msg);
+	}
 	
 	
 

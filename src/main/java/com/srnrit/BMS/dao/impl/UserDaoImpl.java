@@ -65,7 +65,7 @@ public class UserDaoImpl implements UserDao {
 	                return Optional.of("User deleted successfully with ID: " + userId);
 	            } else
 	            {
-	                return Optional.of("User with ID: " + userId + " is already deleted.");
+	                return Optional.of("User is not active.");
 	            }
 	        } else 
 	        {
@@ -74,7 +74,7 @@ public class UserDaoImpl implements UserDao {
         }
         else 
         {
-        	throw new UserNotFoundException("User can't be null.");
+        	throw new UserNotFoundException("Userid can't be null or blank.");
         	
         }
     }		    
