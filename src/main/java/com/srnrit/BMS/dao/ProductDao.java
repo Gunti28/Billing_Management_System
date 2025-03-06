@@ -7,13 +7,15 @@ import com.srnrit.BMS.entity.Product;
 
 public interface ProductDao {
 
-	Optional<Product> saveProduct(Product product);
+	Optional<Product> saveProduct(Product product,String categoryId);
 
-	Optional<Product> fetchProductById(String productId);
+	Optional<Product> fetchProductByAvailability(Boolean inStock);
 
 	Optional<Product> deleteProductById(String productId);
 
-	Optional<Product> updateProductById(Product newProduct, String oldProductId);
+	Optional<Product> updateProduct(Product product);
+	
+	Optional<Product> searchProductByName(String productName);
 
 	Optional<List<Product>> fetchAllProduct();
 }
