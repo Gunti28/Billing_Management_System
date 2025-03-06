@@ -141,7 +141,8 @@ public class UserDaoImpl implements UserDao {
 	}
 
 	@Override
-	public Optional<User> findByUserPhoneNumber(long userPhoneNumber) {
+	public Optional<User> findByUserPhoneNumber(long userPhoneNumber) 
+	{
 		User byUserPhone = userRepository.findByUserPhone(userPhoneNumber);
 		return byUserPhone!=null?Optional.of(byUserPhone):Optional.empty();
 	}
