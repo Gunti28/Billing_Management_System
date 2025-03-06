@@ -9,6 +9,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import com.srnrit.BMS.exception.userexceptions.UserNotFoundException;
 import com.srnrit.BMS.exception.userexceptions.UserNotcreatedException;
@@ -41,6 +42,12 @@ public class GlobalExceptionHandler {
 		return new ResponseEntity<Message>(new Message(e.getMessage()), HttpStatus.NOT_FOUND);
 	}
 	
+	@ExceptionHandler(exception = NoResourceFoundException.class)
+	public ResponseEntity<?> noResouceFoundException(NoResourceFoundException ex)
+	{
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+	}
+	
 	@ExceptionHandler(exception = RuntimeException.class)
 	public ResponseEntity<Message> runtimeException(RuntimeException e)
 	{
@@ -52,5 +59,7 @@ public class GlobalExceptionHandler {
 	{
 		return new ResponseEntity<Message>(new Message(e.getMessage()),HttpStatus.INTERNAL_SERVER_ERROR);
 	}
+	
+	
 	
 }
