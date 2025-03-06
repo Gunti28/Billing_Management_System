@@ -17,8 +17,9 @@ class BmsApplicationTests {
 	
 	@Mock
 	UserRepository userRepository ;
-	
+			
 }
+	
 	
 
 
