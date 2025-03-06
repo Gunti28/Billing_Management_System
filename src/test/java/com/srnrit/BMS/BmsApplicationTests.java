@@ -76,26 +76,16 @@ class BmsApplicationTests {
 	void deleteUserById()
 	{
 
-		User user = new User();
-		user.setUserName("venu");
-		user.setUserEmail("venu@gmail.com");
-		user.setUserPassword("Venu@!2334");
-		user.setUserGender("Male");
-		user.setUserPhone(8712339224L);
-		user.setTermsAndConditions(true);
-		
-		Optional<User> saveuser = userDAO.saveuser(user);
-		 assertTrue(saveuser.isPresent()); 
-		 System.out.println(saveuser.get());	
-	}
-}	
-	
-	
-
-
 		String msg = service.deleteUserById("Uid_01");
-		System.out.println(msg);
+		System.out.println(msg);	
 	}
+	
+	
+	
+
+
+		
+}
 	
 	
 
