@@ -13,7 +13,7 @@ import com.srnrit.BMS.dao.UserDao;
 import com.srnrit.BMS.dto.UserRequestDTO;
 import com.srnrit.BMS.dto.UserResponseDTO;
 import com.srnrit.BMS.entity.User;
-
+import com.srnrit.BMS.mapper.DTOToEntity;
 import com.srnrit.BMS.repository.UserRepository;
 
 import com.srnrit.BMS.service.UserService;
@@ -72,14 +72,23 @@ class BmsApplicationTests {
 	
 	
 	//service layer unit testing
-	@Test
-	void deleteUserById()
-	{
-
-		String msg = service.deleteUserById("Uid_01");
-		System.out.println(msg);	
-	}
+//	@Test
+//	void deleteUserById()
+//	{
+//
+//		String msg = service.deleteUserById("Uid_01");
+//		System.out.println(msg);	
+//	}
 	
+	
+	//find user By id in service layer 
+	
+	@Test
+	void findUserById()
+	{
+		UserResponseDTO userResponse = service.findUserById("Uid_02");
+		System.out.println(userResponse);
+	}
 	
 	
 
