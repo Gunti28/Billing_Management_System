@@ -1,18 +1,12 @@
 package com.srnrit.BMS;
 
-import java.util.Optional;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.srnrit.BMS.dao.UserDao;
 import com.srnrit.BMS.dto.UserRequestDTO;
 import com.srnrit.BMS.dto.UserResponseDTO;
-import com.srnrit.BMS.entity.User;
 import com.srnrit.BMS.service.UserService;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 class BmsApplicationTests {
