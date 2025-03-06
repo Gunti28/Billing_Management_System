@@ -1,5 +1,8 @@
 package com.srnrit.BMS.service;
 
-public interface UserService {
+import com.srnrit.BMS.dto.UserRequestDTO;
+import com.srnrit.BMS.dto.UserResponseDTO;
 
+public interface UserService {
+	UserResponseDTO saveUser(UserRequestDTO userRequestDTO);
 }
