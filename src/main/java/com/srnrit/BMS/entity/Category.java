@@ -38,11 +38,20 @@ public class Category implements Serializable
 	private String categoryname;
 	
 	@OneToMany(cascade = CascadeType.ALL,mappedBy = "category",orphanRemoval = true)
-	private List<Product> product;
+	private List<Product> products;
 	
+	//helper method to add product
 	public void addProduct(Product product)
 	{
-	    
+	    product.setCategory(this);
+	    products.add(product);
+	}
+	
+	//helper method to remove product
+	public void removeProduct(Product product)
+	{
+		products.remove(product);
+		product.setCategory(null);
 	}
 		
 }
