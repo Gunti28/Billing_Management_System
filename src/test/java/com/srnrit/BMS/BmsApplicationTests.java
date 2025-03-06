@@ -7,31 +7,55 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import com.srnrit.BMS.dao.UserDao;
+import com.srnrit.BMS.dto.UserRequestDTO;
+import com.srnrit.BMS.dto.UserResponseDTO;
 import com.srnrit.BMS.entity.User;
+import com.srnrit.BMS.service.UserService;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 class BmsApplicationTests {
 	
-	@Autowired
-	UserDao userDAO;
+//	@Autowired
+//	UserDao userDAO;
 
+//	@Test
+//	void userSaveTest() 
+//	{
+//		User user = new User();
+//		user.setUserName("venu");
+//		user.setUserEmail("venu@gmail.com");
+//		user.setUserPassword("Venu@!2334");
+//		user.setUserGender("Male");
+//		user.setUserPhone(8712339224L);
+//		user.setTermsAndConditions(true);
+//		
+//		Optional<User> saveuser = userDAO.saveuser(user);
+//		 assertTrue(saveuser.isPresent()); 
+//		 System.out.println(saveuser.get());
+//		
+//		
+//	}
+	
+	@Autowired
+	UserService service;
+	
 	@Test
-	void userSaveTest() 
+	void saveUserService()
 	{
-		User user = new User();
+		UserRequestDTO user = new UserRequestDTO();
 		user.setUserName("venu");
 		user.setUserEmail("venu@gmail.com");
 		user.setUserPassword("Venu@!2334");
 		user.setUserGender("Male");
 		user.setUserPhone(8712339224L);
 		user.setTermsAndConditions(true);
-		
-		Optional<User> saveuser = userDAO.saveuser(user);
-		 assertTrue(saveuser.isPresent()); 
-		 System.out.println(saveuser.get());
-		
-		
+		UserResponseDTO saveUser = service.saveUser(user);
+		System.out.println(saveUser);
 	}
+	
+	
+	
 
 }
