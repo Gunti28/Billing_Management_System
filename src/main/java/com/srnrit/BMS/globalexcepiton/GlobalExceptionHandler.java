@@ -40,5 +40,17 @@ public class GlobalExceptionHandler {
 	{
 		return new ResponseEntity<Message>(new Message(e.getMessage()), HttpStatus.NOT_FOUND);
 	}
-
+	
+	@ExceptionHandler(exception = RuntimeException.class)
+	public ResponseEntity<Message> runtimeException(RuntimeException e)
+	{
+		return new ResponseEntity<Message>(new Message(e.getMessage()),HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+	
+	@ExceptionHandler(exception = Exception.class)
+	public ResponseEntity<Message> exception(Exception e)
+	{
+		return new ResponseEntity<Message>(new Message(e.getMessage()),HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+	
 }
