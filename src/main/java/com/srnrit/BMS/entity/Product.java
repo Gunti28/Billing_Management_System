@@ -37,5 +37,6 @@ public class Product implements Serializable{
 	private Double productPrice;
 	@Column(name = "PRODUCT_STOCK")
 	private Boolean inStock;
-	
+
+
 }
