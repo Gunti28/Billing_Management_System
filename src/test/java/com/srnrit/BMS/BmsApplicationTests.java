@@ -49,7 +49,7 @@ class BmsApplicationTests {
 		user.setUserEmail("venu@gmail.com");
 		user.setUserPassword("Venu@!2334");
 		user.setUserGender("Male");
-		user.setUserPhone(8712339224L);
+		user.setUserPhone("8712339224");
 		user.setTermsAndConditions(true);
 		UserResponseDTO saveUser = service.saveUser(user);
 		System.out.println(saveUser);
