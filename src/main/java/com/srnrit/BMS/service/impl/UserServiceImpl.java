@@ -1,5 +1,6 @@
 package com.srnrit.BMS.service.impl;
 
-public class UserServiceImpl {
+public class UserServiceImpl 
+{
 
 }
