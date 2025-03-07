@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+
 import com.srnrit.BMS.dao.UserDao;
 import com.srnrit.BMS.dto.UserResponseDTO;
 import com.srnrit.BMS.repository.UserRepository;
@@ -74,11 +75,19 @@ class BmsApplicationTests {
 	
 	//find user By id in service layer 
 	
+//	@Test
+//	void findUserById()
+//	{
+//		UserResponseDTO userResponse = service.findUserById("Uid_02");
+//		System.out.println(userResponse);
+//	}
+	
+	
 	@Test
-	void findUserById()
+	void loginEmailAndPassword()
 	{
-		UserResponseDTO userResponse = service.findUserById("Uid_02");
-		System.out.println(userResponse);
+		UserResponseDTO userResponseDTO = service.loginUserByEmailAndPassword("venu@gmail.com", "venu@!2334");
+		System.out.println(userResponseDTO);
 	}
 	
 	

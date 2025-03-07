@@ -1,5 +1,6 @@
 package com.srnrit.BMS.service;
 
+import com.srnrit.BMS.dto.LoginRequestDTO;
 import com.srnrit.BMS.dto.UserRequestDTO;
 import com.srnrit.BMS.dto.UserResponseDTO;
 
@@ -8,5 +9,5 @@ public interface UserService {
 	String deleteUserById(String userId);
 	UserResponseDTO updateUserById(UserRequestDTO userRequestDTO, String userId);
 	UserResponseDTO findUserById(String userId);
-	
+	UserResponseDTO loginUserByEmailAndPassword(String email,String password);
 }
