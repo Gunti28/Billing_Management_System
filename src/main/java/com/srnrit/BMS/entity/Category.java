@@ -50,7 +50,7 @@ public class Category implements Serializable
 	//helper method to remove product
 	public void removeProduct(Product product)
 	{
-		products.remove(product);
+		products.remove(product);  //Here this.products.remove(product);
 		product.setCategory(null);
 	}
 		
