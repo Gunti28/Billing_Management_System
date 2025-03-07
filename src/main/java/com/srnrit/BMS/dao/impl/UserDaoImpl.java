@@ -5,12 +5,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
-
 import com.srnrit.BMS.dao.UserDao;
 import com.srnrit.BMS.entity.User;
 import com.srnrit.BMS.exception.userexceptions.UserAleadyExistException;
@@ -181,12 +180,16 @@ public class UserDaoImpl implements UserDao {
 	    // Validate user existence
 	    Optional<User> userOptional = userRepository.findById(userId);
 	    
-	    if (!userOptional.isPresent()) 
-	         throw new UserNotFoundException("User does not exist with ID: " + userId);
+	    
+	    if (!userOptional.isPresent() ) 
+	    	throw new UserNotFoundException("User does not exist with ID: " + userId);
 	    
 
 	    // Get the user
 	    User user = userOptional.get();
+	    
+	    if(!user.getActive())
+	    	throw new RuntimeException("User is not active ");
 	    
 	    //getting old profile image name
 	    String oldImageFileName=user.getUserProfileImage();
@@ -209,6 +212,12 @@ public class UserDaoImpl implements UserDao {
 		 	  
 		    	//create directories if not exist
 		 		Path path = Paths.get(targetDirectory);
+		 		
+		 		if(!Files.exists(path))
+				{
+					Files.createDirectories(path);
+				}
+				
 		 		
 		 		//save the file with new image file name
 		 		Path targetLocation= path.resolve(fileName);
@@ -238,6 +247,13 @@ public class UserDaoImpl implements UserDao {
 		 throw new RuntimeException(e.getMessage());
 	  }  
 	    
+	}
+
+	@Override
+	public Optional<List<User>> fetchAlluser() 
+	{
+		List<User> allUsers = userRepository.findAll();
+		return allUsers!=null && allUsers.size() > 0 ?Optional.of(allUsers):Optional.empty();
 	}
 }	
 
