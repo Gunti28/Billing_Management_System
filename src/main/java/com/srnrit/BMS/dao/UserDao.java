@@ -1,6 +1,9 @@
 package com.srnrit.BMS.dao;
 
 import java.util.Optional;
+
+import org.springframework.web.multipart.MultipartFile;
+
 import com.srnrit.BMS.entity.User;
 
 public interface UserDao {
@@ -12,6 +15,6 @@ public interface UserDao {
 	Optional<User> findByUserEmail(String userEmail);
 	Optional<User> findByUserPhoneNumber(long userPhoneNumber);
 	Optional<User> loginByEmailAndPassword(String userEmail,String userPassword);
-
+	Optional<User> editImage(MultipartFile file,String userId);
 	
 }
