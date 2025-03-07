@@ -162,9 +162,20 @@ public class UserDaoImpl implements UserDao {
 	@Override
 	public Optional<User> loginByEmailAndPassword(String userEmail, String userPassword) 
 	{
-		
 		User user = userRepository.findByUserEmailAndUserPassword(userEmail, userPassword);
-		return user!=null?Optional.of(user):Optional.empty();	
+		
+		if(user!=null)
+		{
+			if(user.getActive())
+			{
+				return Optional.of(user);
+			}
+			else throw new RuntimeException("user is not active.");
+		}
+		return Optional.empty();
+		
+		
+			
 	}
 
 
