@@ -57,7 +57,7 @@ public class UserServiceImpl implements UserService{
 
 	@Override
 	public String deleteUserById(String userId) {
-		Optional<String> deleteUser = userDao.deleteUser(userId);
+		Optional<String> deleteUser = userDao.deleteUserById(userId);
 		return deleteUser.orElseThrow(()-> new RuntimeException("Something went wrong"));
 	}
 
