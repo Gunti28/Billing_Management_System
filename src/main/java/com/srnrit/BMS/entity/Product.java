@@ -47,7 +47,7 @@ public class Product implements Serializable {
 	@JoinColumn(name = "CATEGORY_ID")
 	private Category category;
 
-	public Product(String productId, String productName, String productImage, Integer productQuantity,
+	public Product(String productName, String productImage, Integer productQuantity,
 			Double productPrice, Boolean inStock) {
 		super();
 		this.productName = productName;
