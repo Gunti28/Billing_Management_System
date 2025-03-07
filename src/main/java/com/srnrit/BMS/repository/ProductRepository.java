@@ -8,7 +8,7 @@ import com.srnrit.BMS.entity.Product;
 
 public interface ProductRepository extends JpaRepository<Product, String> {
 	
-	List<Product> findByAvailability(Boolean availability);
+	List<Product> findByInStock(Boolean inStock);
 
-	List<Product> findByNameContainingIgnoreCase(String name);
+	List<Product> findByProductNameContainingIgnoreCase(String productName);
 }

@@ -42,9 +42,10 @@ public class ProductDaoImpl implements ProductDao {
 	
 	@Override
 	public Optional<List<Product>> fetchProductByAvailability(Boolean availability) {
-	    List<Product> products = this.productRepository.findByAvailability(availability);
+	    List<Product> products = this.productRepository.findByInStock(availability);
 	    return products.isEmpty() ? Optional.empty() : Optional.of(products);
 	}
+
 
 
 	@Override
@@ -111,7 +112,7 @@ public class ProductDaoImpl implements ProductDao {
 
 	@Override
 	public Optional<List<Product>> searchProductByName(String name) {
-	    List<Product> products = this.productRepository.findByNameContainingIgnoreCase(name);
+	    List<Product> products = this.productRepository.findByProductNameContainingIgnoreCase(name);
 	    return products.isEmpty() ? Optional.empty() : Optional.of(products);
 	}
 
