@@ -1,5 +1,7 @@
 package com.srnrit.BMS.dto;
 
+import java.util.List;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -23,5 +25,6 @@ public class CategoryRequestDTO
    @Pattern(regexp = "^[A-Za-z ]+$",message = "Name must contain only alphabets")
    private String categoryName;
    
+   private List<ProductRequestDTO> products;
    
 }
