@@ -1,26 +1,34 @@
 package com.srnrit.BMS.service.impl;
 
+
+import java.util.Arrays;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.srnrit.BMS.dao.UserDao;
 import com.srnrit.BMS.dto.LoginRequestDTO;
 import com.srnrit.BMS.dto.UserRequestDTO;
 import com.srnrit.BMS.dto.UserResponseDTO;
 import com.srnrit.BMS.entity.User;
+import com.srnrit.BMS.exception.userexceptions.UnSupportedFileTypeException;
 import com.srnrit.BMS.exception.userexceptions.UserNotFoundException;
 import com.srnrit.BMS.exception.userexceptions.UserNotcreatedException;
 import com.srnrit.BMS.mapper.DTOToEntity;
 import com.srnrit.BMS.mapper.EntityToDTO;
 import com.srnrit.BMS.service.UserService;
+import com.srnrit.BMS.util.FileStorageProperties;
 
 @Service
 public class UserServiceImpl implements UserService{
 
 	@Autowired
 	private UserDao userDao;
+	
+	@Autowired
+	private FileStorageProperties fileStorageProperties;
 	
 	@Override
 	public UserResponseDTO saveUser(UserRequestDTO userRequestDTO) {
@@ -131,6 +139,52 @@ public class UserServiceImpl implements UserService{
 			else throw new IllegalArgumentException("Invalid Email Format");
 		}
 		else throw new IllegalArgumentException("Email and Password must not be null or blank");
+	}
+
+	@Override
+	public UserResponseDTO editUserImage(MultipartFile file, String userId) {
+		if(userId!=null && !userId.isBlank())
+		{
+			if(file!=null)
+			{
+				
+				long maxSize=fileStorageProperties.getMaxFileSize();
+				if(file.getSize()<=maxSize)
+				{
+					String contentType=file.getContentType();
+					if(contentType.startsWith("image/"))
+					{
+						String fileNameExtension=getFileExtension(file.getOriginalFilename());
+
+						if(Arrays.asList("jpg","jpeg","png").contains(fileNameExtension))
+						{
+							Optional<User> optionalUser = this.userDao.editImage(file, userId);
+							if(optionalUser.isPresent())
+							{
+								UserResponseDTO userResponseDTO = EntityToDTO.userEntityToUserResponseDTO(optionalUser.get());
+								return userResponseDTO;
+							}
+							else throw new RuntimeException("User image Not Updated ! Try again some time.");
+						}
+						else throw new UnSupportedFileTypeException("Invalid File Extension.");
+					}
+					else throw new UnSupportedFileTypeException("Invalid File Type ! Only images are allowed");
+				}
+				else throw new RuntimeException("File size exceeds maximum limit! Supported file size "+maxSize);
+			}
+			else throw new RuntimeException("File must not be null");
+		}
+		else throw new RuntimeException("Userid Must not be null or blank");
+	}
+	
+	private String getFileExtension(String fileName)
+	{
+		int dotIndex=fileName.lastIndexOf(".");
+		if(dotIndex==-1)
+		{
+			throw new UnSupportedFileTypeException("Invalid File");
+		}
+	    return fileName.substring(dotIndex+1);
 	}
 
 
