@@ -65,7 +65,8 @@ public class UserController {
 	@PostMapping(value = "/login")
 	public ResponseEntity<?> userLoginByEmailAndPassword(@Valid @RequestBody LoginRequestDTO dto)
 	{
-		
+		UserResponseDTO responseDTO = this.userService.loginUserByEmailAndPassword(dto.getEmail(), dto.getPassword());
+	    return ResponseEntity.status(HttpStatus.FOUND).body(responseDTO);
 	}
 	
 	
