@@ -70,6 +70,7 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(exception = RuntimeException.class)
 	public ResponseEntity<Message> runtimeException(RuntimeException e)
 	{
+		System.out.println("GlobalExceptionHandler.runtimeException()");
 		return new ResponseEntity<Message>(new Message(e.getMessage()),HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 	
@@ -77,6 +78,7 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(exception = Exception.class)
 	public ResponseEntity<Message> exception(Exception e)
 	{
+		e.printStackTrace();
 		return new ResponseEntity<Message>(new Message(e.getMessage()),HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 	
