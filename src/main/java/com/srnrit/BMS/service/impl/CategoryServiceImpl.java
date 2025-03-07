@@ -1,6 +1,7 @@
 package com.srnrit.BMS.service.impl;
 
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -10,10 +11,11 @@ import org.springframework.stereotype.Service;
 import com.srnrit.BMS.dao.ICategoryDao;
 import com.srnrit.BMS.dto.CategoryRequestDTO;
 import com.srnrit.BMS.dto.CategoryResponseDTO;
-import com.srnrit.BMS.dto.ProductRequestDTO;
+import com.srnrit.BMS.dto.ProductResponseDTO;
 import com.srnrit.BMS.entity.Category;
 import com.srnrit.BMS.entity.Product;
 import com.srnrit.BMS.exception.categoryexceptions.CategoryNotCreatedException;
+import com.srnrit.BMS.exception.categoryexceptions.CategoryNotFoundException;
 import com.srnrit.BMS.mapper.EntityToDTO;
 import com.srnrit.BMS.service.ICategoryService;
 
@@ -21,7 +23,6 @@ import com.srnrit.BMS.service.ICategoryService;
 public class CategoryServiceImpl implements ICategoryService 
 {
 	private ICategoryDao categoryDAO;
-
 
 	public CategoryServiceImpl(ICategoryDao categoryDAO) {
 		super();
@@ -47,39 +48,112 @@ public class CategoryServiceImpl implements ICategoryService
 
 			products.stream().forEach(product -> category.addProduct(product));
 
+			Optional<Category> insertCategory = this.categoryDAO.insertCategory(category);
+			if(insertCategory.isPresent())
+			{
+				CategoryResponseDTO categoryResponse = EntityToDTO.toCategoryResponse(category);
+				return categoryResponse;
+			}
+			else 
+			{
+				throw new CategoryNotCreatedException("Category not created !");
+			}
+
 		}
 		else 
 		{
 			Optional<Category> insertedCategory = this.categoryDAO.insertCategory(category);
 
-			/*
-			 * if(insertedCategory.isPresent()) { CategoryResponseDTO categoryResponse =
-			 * EntityToDTO.toCategoryResponse(category); return categoryResponse; } else {
-			 * throw new CategoryNotCreatedException("Category not created !"); }
-			 */
+
+			if(insertedCategory.isPresent()) 
+			{ 
+				CategoryResponseDTO categoryResponse = EntityToDTO.toCategoryResponse(category); 
+				return categoryResponse; 
+			} 
+			else 
+			{
+				throw new CategoryNotCreatedException("Category not created !"); 
+			}
+
 		}
-		return null;
 	}
 
 	@Override
 	public List<CategoryResponseDTO> getAllCategory() 
 	{
+		Optional<List<Category>> allCategory = categoryDAO.getAllCategory();
+		if(allCategory.isPresent())
+		{
+			List<CategoryResponseDTO> allCategoryResponse=new ArrayList<>();
+			List<Category> categories=allCategory.get();
 
-		return null;
+			for(Category category:categories)
+			{
+				List<Product> products=category.getProducts();
+				List<ProductResponseDTO> productResponse=new ArrayList<>();
+				for(Product product:products)
+				{
+					ProductResponseDTO productResponseDTO=EntityToDTO.toProductResponseDTO(product);
+					productResponse.add(productResponseDTO);
+				}
+				CategoryResponseDTO categoryResponseDTO=EntityToDTO.toCategoryResponse(category);
+				categoryResponseDTO.setProducts(productResponse);
+
+				allCategoryResponse.add(categoryResponseDTO);
+			}
+			return allCategoryResponse;
+		}
+		else 
+		{
+			throw new CategoryNotFoundException("No Category available");
+		}
+
+
 	}
 
 	@Override
 	public String updateCategory(String categoryId, String categoryName) 
 	{
 
-		return null;
+		if(categoryId == null)
+		{
+			throw new RuntimeException("CategoryId must not be null");
+		}
+		else if (categoryName == null || categoryName.length() < 3) 
+		{
+			throw new RuntimeException("CategoryName must not be null and it should be a valid categoryName");
+		}
+		else 
+		{
+			Optional<String> updateCategory = this.categoryDAO.updateCategory(categoryId, categoryName);
+			return updateCategory.orElseThrow(()->new CategoryNotFoundException("Category not exist with id : "+categoryId));
+		}
+
 	}
 
 	@Override
 	public CategoryResponseDTO findCategoryByCategoryId(String categoryId) 
 	{
 
-		return null;
+		if(categoryId != null)
+		{
+			Optional<Category> optionalcategory = this.categoryDAO.getCategoryByCategoryId(categoryId);
+			if(optionalcategory.isPresent())
+			{
+				Category category=optionalcategory.get();
+				CategoryResponseDTO categoryResponse = EntityToDTO.toCategoryResponse(category);
+				return categoryResponse;
+			}
+			else 
+			{
+				throw new CategoryNotFoundException("Category not exist with id : "+categoryId);
+			}
+		}
+		else 
+		{
+			throw new RuntimeException("Category must not be null");
+		}
+
 	}
 
 }
