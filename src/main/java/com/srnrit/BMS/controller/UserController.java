@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.srnrit.BMS.dto.LoginRequestDTO;
 import com.srnrit.BMS.dto.UserRequestDTO;
 import com.srnrit.BMS.dto.UserResponseDTO;
 import com.srnrit.BMS.service.UserService;
@@ -59,6 +60,15 @@ public class UserController {
 		UserResponseDTO responseDTO = this.userService.findUserById(userId);
 		return ResponseEntity.status(HttpStatus.FOUND).body(responseDTO);
 	}
+	
+	
+	@PostMapping(value = "/login")
+	public ResponseEntity<?> userLoginByEmailAndPassword(@Valid @RequestBody LoginRequestDTO dto)
+	{
+		
+	}
+	
+	
 	
 
 	
