@@ -6,9 +6,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.srnrit.BMS.dao.UserDao;
+import com.srnrit.BMS.dto.LoginRequestDTO;
 import com.srnrit.BMS.dto.UserRequestDTO;
 import com.srnrit.BMS.dto.UserResponseDTO;
 import com.srnrit.BMS.entity.User;
+import com.srnrit.BMS.exception.userexceptions.UserNotFoundException;
 import com.srnrit.BMS.exception.userexceptions.UserNotcreatedException;
 import com.srnrit.BMS.mapper.DTOToEntity;
 import com.srnrit.BMS.mapper.EntityToDTO;
@@ -105,6 +107,30 @@ public class UserServiceImpl implements UserService{
 			else throw new RuntimeException("User Not Found with Id: "+userId);
 		}
 		else throw new RuntimeException("Userid must not be null or blank");
+	}
+
+	@Override
+	public UserResponseDTO loginUserByEmailAndPassword(String email,String password) {
+		if((email!=null &&  ! email.isBlank()) && (password!=null && ! password.isBlank()))
+		{
+			if(email.matches("^[a-zA-Z][A-Za-z0-9._%+-]+@gmail\\.com$"))
+			{
+				if(password.length()>6)
+				{
+					Optional<User> userFetchedByEmailAndPassword = this.userDao.loginByEmailAndPassword(email,password);
+					if(userFetchedByEmailAndPassword.isPresent())
+					{
+						UserResponseDTO userResponseDTO = EntityToDTO.userEntityToUserResponseDTO(userFetchedByEmailAndPassword.get());
+						return userResponseDTO;
+						
+					}
+					else throw new UserNotFoundException("User Not Found with Email :"+email+" and Password: "+password);
+				}
+				else throw new IllegalArgumentException("Password Must be at least 6 characters");
+			}
+			else throw new IllegalArgumentException("Invalid Email Format");
+		}
+		else throw new IllegalArgumentException("Email and Password must not be null or blank");
 	}
 
 	
