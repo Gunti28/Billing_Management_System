@@ -99,7 +99,6 @@ public class UserDaoImpl implements UserDao {
 	}
 
 	
-	@SuppressWarnings("unused")
 	@Override
 	public Optional<User> updateByUserId(User user,String userId) {
 		if(user!=null)
@@ -171,7 +170,7 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public Optional<User> editImage(MultipartFile file, String userId) {
-        System.out.println("UserServiceImpl.editImage()");
+        System.out.println("update the profile.");
         
         if (file.isEmpty()) {
             throw new IllegalArgumentException("File is empty.");
