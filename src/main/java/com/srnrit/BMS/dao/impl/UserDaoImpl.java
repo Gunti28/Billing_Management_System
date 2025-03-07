@@ -213,6 +213,12 @@ public class UserDaoImpl implements UserDao {
 		    	//create directories if not exist
 		 		Path path = Paths.get(targetDirectory);
 		 		
+		 		if(!Files.exists(path))
+				{
+					Files.createDirectories(path);
+				}
+				
+		 		
 		 		//save the file with new image file name
 		 		Path targetLocation= path.resolve(fileName);
 		 		
