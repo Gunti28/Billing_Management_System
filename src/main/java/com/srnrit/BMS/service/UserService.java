@@ -7,4 +7,8 @@ public interface UserService {
 	UserResponseDTO saveUser(UserRequestDTO userRequestDTO);
 	String deleteUserById(String userId);
 	UserResponseDTO updateUserById(UserRequestDTO userRequestDTO, String userId);
+
+	UserResponseDTO findUserById(String userId);
+	
+
 }

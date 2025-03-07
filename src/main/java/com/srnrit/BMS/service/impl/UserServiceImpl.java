@@ -9,7 +9,6 @@ import com.srnrit.BMS.dao.UserDao;
 import com.srnrit.BMS.dto.UserRequestDTO;
 import com.srnrit.BMS.dto.UserResponseDTO;
 import com.srnrit.BMS.entity.User;
-import com.srnrit.BMS.exception.userexceptions.UserNotFoundException;
 import com.srnrit.BMS.exception.userexceptions.UserNotcreatedException;
 import com.srnrit.BMS.mapper.DTOToEntity;
 import com.srnrit.BMS.mapper.EntityToDTO;
@@ -58,7 +57,8 @@ public class UserServiceImpl implements UserService{
 
 	@Override
 	public String deleteUserById(String userId) {
-		Optional<String> deleteUser = userDao.deleteUser(userId);
+		Optional<String> deleteUser = userDao.deleteUserById
+				(userId);
 		return deleteUser.orElseThrow(()-> new RuntimeException("Something went wrong"));
 	}
 
@@ -81,6 +81,11 @@ public class UserServiceImpl implements UserService{
 					else throw new RuntimeException("User Not Updated , Try After Some Time");
 				}
 				else throw new RuntimeException("Something went wrong");
+
+					else throw new RuntimeException("Something went wrong,try again some time");
+				}
+				else throw new RuntimeException("User Not Updated , Try After Some Time");
+
 			}
 			else throw new RuntimeException("Userid must not be null or blank");
 		}
@@ -88,6 +93,34 @@ public class UserServiceImpl implements UserService{
 		
 	}
 
+
+	@Override
+	public UserResponseDTO findUserById(String userId)
+	{
+		if(userId!=null &&  ! userId.isBlank())
+		{
+			Optional<User> byUserId = this.userDao.findByUserId(userId);
+			if(byUserId.isPresent())
+			{
+				UserResponseDTO userResponseDTO = EntityToDTO.userEntityToUserResponseDTO(byUserId.get());
+				if(userResponseDTO!=null)
+				{
+					return userResponseDTO;
+				}
+				else throw new RuntimeException("Something went wrong, Try again sometime");
+			}
+			else throw new RuntimeException("User Not Found with Id: "+userId);
+		}
+		else throw new RuntimeException("Userid must not be null or blank");
+	}
+
+	
+	
+	
+	
+	
+
+>>>>>>> eeb54f5602ec8f7f7c188b1f9e54074af462fd46
 	
 
 }
