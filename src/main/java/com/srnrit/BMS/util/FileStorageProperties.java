@@ -18,7 +18,7 @@ public class FileStorageProperties {
     
     
     public long getMaxFileSize() {
-        return getMaxFileSize();
+        return getMaxfileSize;
     }
 }
 

@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -33,6 +34,15 @@ public class UserController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
 	}
 	
+
+	@PutMapping(value="Updateuser/{userId}") 
+	public ResponseEntity<UserResponseDTO> updateUser (@RequestBody UserRequestDTO userRequestDTO,@PathVariable String userId)
+	{
+		UserResponseDTO userResponseDTO = this.userService.updateUserById(userRequestDTO, userId);
+		return new ResponseEntity<UserResponseDTO>(userResponseDTO,HttpStatus.OK);
+		
+	}
+
 
 	@DeleteMapping(value = "/{userId}")
     public ResponseEntity<?> deleteUserById(@PathVariable String userId)
@@ -62,4 +72,6 @@ public class UserController {
 	
 
 	
+
 }
+
