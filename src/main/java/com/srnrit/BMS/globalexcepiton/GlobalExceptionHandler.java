@@ -2,7 +2,6 @@ package com.srnrit.BMS.globalexcepiton;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -11,6 +10,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
+import com.srnrit.BMS.exception.userexceptions.UserAleadyExistException;
 import com.srnrit.BMS.exception.userexceptions.UserNotFoundException;
 import com.srnrit.BMS.exception.userexceptions.UserNotcreatedException;
 import com.srnrit.BMS.util.Message;
@@ -27,7 +27,6 @@ public class GlobalExceptionHandler {
 		}
 
 		return new ResponseEntity<Map<String, String>>(errors, HttpStatus.BAD_REQUEST);
-
 	}
 
 	@ExceptionHandler(exception = UserNotcreatedException.class)
@@ -48,10 +47,22 @@ public class GlobalExceptionHandler {
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
 	}
 	
+	@ExceptionHandler(exception = UserAleadyExistException.class)
+	public ResponseEntity<?> userAlreadyExistException(UserAleadyExistException e)
+	{
+		return new ResponseEntity<Message>(new Message(e.getMessage()),HttpStatus.BAD_REQUEST);
+	}
+	
 	@ExceptionHandler(exception = RuntimeException.class)
 	public ResponseEntity<Message> runtimeException(RuntimeException e)
 	{
 		return new ResponseEntity<Message>(new Message(e.getMessage()),HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+	
+	@ExceptionHandler(exception = IllegalArgumentException.class)
+	public ResponseEntity<?> illegalArgumentException(IllegalArgumentException e)
+	{
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
 	}
 	
 	@ExceptionHandler(exception = Exception.class)
@@ -59,7 +70,6 @@ public class GlobalExceptionHandler {
 	{
 		return new ResponseEntity<Message>(new Message(e.getMessage()),HttpStatus.INTERNAL_SERVER_ERROR);
 	}
-	
 	
 	
 }
