@@ -1,33 +1,18 @@
 package com.srnrit.BMS;
 
-<<<<<<< HEAD
-=======
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.Optional;
-
->>>>>>> 63bb5fb3aaa44549e4ef47308d365122c0ef17f4
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.srnrit.BMS.dto.UserRequestDTO;
+import com.srnrit.BMS.dao.UserDao;
 import com.srnrit.BMS.dto.UserResponseDTO;
-<<<<<<< HEAD
-import com.srnrit.BMS.service.UserService;
-
-=======
-import com.srnrit.BMS.entity.User;
-import com.srnrit.BMS.mapper.DTOToEntity;
 import com.srnrit.BMS.repository.UserRepository;
-
 import com.srnrit.BMS.service.UserService;
 
-import static org.junit.jupiter.api.Assertions.*;
 
 
->>>>>>> 63bb5fb3aaa44549e4ef47308d365122c0ef17f4
 @SpringBootTest
 class BmsApplicationTests {
 	
@@ -90,11 +75,19 @@ class BmsApplicationTests {
 	
 	//find user By id in service layer 
 	
+//	@Test
+//	void findUserById()
+//	{
+//		UserResponseDTO userResponse = service.findUserById("Uid_02");
+//		System.out.println(userResponse);
+//	}
+	
+	
 	@Test
-	void findUserById()
+	void loginEmailAndPassword()
 	{
-		UserResponseDTO userResponse = service.findUserById("Uid_02");
-		System.out.println(userResponse);
+		UserResponseDTO userResponseDTO = service.loginUserByEmailAndPassword("venu@gmail.com", "venu@!2334");
+		System.out.println(userResponseDTO);
 	}
 	
 	
