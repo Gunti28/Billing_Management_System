@@ -25,7 +25,7 @@ public class CategoryDaoImpl implements ICategoryDao
 	//for category insertion
 	@Override
 	public Optional<Category> insertCategory(Category category) {
-		Category existingCategory = this.categoryRepository.findByCategoryName(category.getCategoryname());
+		Category existingCategory = this.categoryRepository.findByCategoryname(category.getCategoryname());
 		if(existingCategory == null)
 		{
 			Category savedCategory = this.categoryRepository.save(category);
