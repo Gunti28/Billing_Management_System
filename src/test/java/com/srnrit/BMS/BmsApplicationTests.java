@@ -75,11 +75,19 @@ class BmsApplicationTests {
 	
 	//find user By id in service layer 
 	
+//	@Test
+//	void findUserById()
+//	{
+//		UserResponseDTO userResponse = service.findUserById("Uid_02");
+//		System.out.println(userResponse);
+//	}
+	
+	
 	@Test
-	void findUserById()
+	void loginEmailAndPassword()
 	{
-		UserResponseDTO userResponse = service.findUserById("Uid_02");
-		System.out.println(userResponse);
+		UserResponseDTO userResponseDTO = service.loginUserByEmailAndPassword("venu@gmail.com", "venu@!2334");
+		System.out.println(userResponseDTO);
 	}
 	
 	
