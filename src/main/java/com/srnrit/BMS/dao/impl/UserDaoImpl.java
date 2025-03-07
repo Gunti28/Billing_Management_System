@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.srnrit.BMS.dao.UserDao;
 import com.srnrit.BMS.entity.User;
+import com.srnrit.BMS.exception.userexceptions.UnSupportedFileTypeException;
 import com.srnrit.BMS.exception.userexceptions.UserAleadyExistException;
 import com.srnrit.BMS.exception.userexceptions.UserNotFoundException;
 import com.srnrit.BMS.exception.userexceptions.UserNotcreatedException;
@@ -162,100 +163,74 @@ public class UserDaoImpl implements UserDao {
 	@Override
 	public Optional<User> loginByEmailAndPassword(String userEmail, String userPassword) 
 	{
-		User user = userRepository.findByUserEmailAndUserPassword(userEmail, userPassword);
-		
+		User user=null;
+		user = userRepository.findByUserEmail(userEmail);
 		if(user!=null)
 		{
-			if(user.getActive())
+			user=userRepository.findByUserPassword(userPassword);
+			if(user!=null)
 			{
-				return Optional.of(user);
+				return user.getActive() ? Optional.of(user):Optional.empty();	
 			}
-			else throw new RuntimeException("user is not active.");
+			else throw new RuntimeException("user not exists with password :"+userPassword);
 		}
-		return Optional.empty();
-		
-		
-			
+		else throw new RuntimeException("user not exists with email :"+userEmail);			
 	}
 
 
-    @Override
-    public Optional<User> editImage(MultipartFile file, String userId) {
-        System.out.println("update the profile.");
-        
-        if (file.isEmpty()) {
-            throw new IllegalArgumentException("File is empty.");
-        }
-        
-        long maxSize = fileStorageProperties.getMaxFileSize();// 10MB
-        if (file.getSize() > maxSize) {
-            throw new IllegalArgumentException("File size exceeds maximum limit of 10MB.");
-        }
-        
-        String contentType = file.getContentType();
-        if (contentType == null || !contentType.startsWith("image/")) {
-            throw new IllegalArgumentException("Invalid file type. Only images are allowed.");
-        }
-        
-        String filenameExtension = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf('.') + 1);
-        if (!Arrays.asList("jpg", "jpeg", "png", "gif").contains(filenameExtension.toLowerCase())) {
-            throw new IllegalArgumentException("Invalid file extension. Only .jpg, .jpeg, .png, .gif allowed.");
-        }
-        
-        if (userId == null || userId.trim().isEmpty()) {
-            throw new IllegalArgumentException("User ID is required.");
-        }
-        
-        boolean userExists = userRepository.existsById(userId);
-        if (!userExists) {
-            throw new IllegalArgumentException("User not found.");
-        }
-        
-        if (isVirus(file)) {
-            throw new SecurityException("File contains a virus.");
-        }
-        
-        String fileName = ImageFileNameGenerator.getNewFileName(file.getOriginalFilename());
-        String targetDirectory = fileStorageProperties.getImageStoragePath();
-        Path path = Paths.get(targetDirectory);
-        Path targetLocation = path.resolve(fileName);
-        
-        try {
-            if (!Files.exists(path)) {
-                Files.createDirectories(path);
-            }
-            
-            Optional<User> userOptional = userRepository.findById(userId);
-            
-            if (userOptional.isPresent()) {
-                User user = userOptional.get();
-                String oldImageFileName = user.getUserProfileImage();
-                user.setUserProfileImage(fileName);
-                User updatedUser = userRepository.save(user);
-                
-                if (updatedUser != null) {
-                    if (oldImageFileName != null && !oldImageFileName.isEmpty()) {
-                        File oldFile = new File(targetDirectory.concat(File.separator).concat(oldImageFileName));
-                        if (oldFile.exists()) {
-                            oldFile.delete();
-                        }
-                    }
-                    
-                    Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
-                    return Optional.of(updatedUser);
-                }
-            } else throw new UserNotFoundException("User not found with ID: " + userId);
-        } catch (IOException e) {
-            throw new RuntimeException("Image not stored successfully!", e);
-        }
-        return Optional.empty();
-    }
-    
-    private boolean isVirus(MultipartFile file) {
-        return false;
-    }
+	@Override
+	public Optional<User> editImage(MultipartFile file, String userId) {
+	    System.out.println("UserDAOImpl.editImage()");
+
+	    String targetDirectory;
+	    String fileName = ImageFileNameGenerator.getNewFileName(file.getOriginalFilename());
+
+	    // Validate file type
+	    if (!fileName.toLowerCase().endsWith(".jpg") && !fileName.toLowerCase().endsWith(".png")) {
+	        throw new UnSupportedFileTypeException("Unsupported file! Only .jpg or .png allowed.");
+	    }
+
+	    targetDirectory = this.fileStorageProperties.getImageStoragePath();
+
+	    // Create directories if not exist
+	    Path path = Paths.get(targetDirectory);
+	    Path targetLocation = path.resolve(fileName);
+	    
+	    try {
+	        if (!Files.exists(path)) {
+	            Files.createDirectories(path);
+	        }
+
+	        Optional<User> byId = this.userRepository.findById(userId);
+
+	        if (byId.isPresent()) {
+	            User user = byId.get();
+
+	            String oldImageFileName = user.getUserProfileImage();
+	            user.setUserProfileImage(fileName);
+	            User updatedUser = this.userRepository.save(user);
+
+	            if (updatedUser != null) {
+	                // Delete old image file if exists
+	                if (oldImageFileName != null && !oldImageFileName.isEmpty()) {
+	                    File oldFile = Paths.get(targetDirectory, oldImageFileName).toFile();
+	                    Files.deleteIfExists(oldFile.toPath());  // More reliable deletion
+	                }
+
+	                // Save new image
+	                Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
+	                return Optional.of(updatedUser);
+	            }
+	        } else {
+	            throw new UserNotFoundException("User does not exist with ID: " + userId);
+	        }
+	    } catch (IOException e) {
+	        throw new RuntimeException("Image not stored successfully!", e);
+	    }
+	    
+	    return Optional.empty();
+	}
 }
 
-	
 	
 
