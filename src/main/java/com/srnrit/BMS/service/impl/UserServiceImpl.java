@@ -1,7 +1,9 @@
 package com.srnrit.BMS.service.impl;
 
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +11,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.srnrit.BMS.dao.UserDao;
-import com.srnrit.BMS.dto.LoginRequestDTO;
 import com.srnrit.BMS.dto.UserRequestDTO;
 import com.srnrit.BMS.dto.UserResponseDTO;
 import com.srnrit.BMS.entity.User;
@@ -185,6 +186,31 @@ public class UserServiceImpl implements UserService{
 			throw new UnSupportedFileTypeException("Invalid File");
 		}
 	    return fileName.substring(dotIndex+1);
+	}
+
+	@Override
+	public List<UserResponseDTO> getAllUsers()
+	{
+		Optional<List<User>> optionalUsers = this.userDao.fetchAlluser();
+		if(optionalUsers.isPresent())
+		{
+			List<User> listOfUser=optionalUsers.get();
+			if(listOfUser!=null)
+			{
+				if(listOfUser.size()>0)
+				{
+					List<UserResponseDTO> listOfUserResponseDTO=new ArrayList<>();
+					for(User user:listOfUser)
+					{
+						UserResponseDTO userResponseDTO = EntityToDTO.userEntityToUserResponseDTO(user);
+						listOfUserResponseDTO.add(userResponseDTO);
+					}
+					return listOfUserResponseDTO;
+				}
+			}
+		}
+		throw new RuntimeException("No User is Present");
+		
 	}
 
 
