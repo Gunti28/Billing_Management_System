@@ -124,7 +124,7 @@ public class UserServiceImpl implements UserService{
 						return userResponseDTO;
 						
 					}
-					else throw new UserNotFoundException("User Not Found with Email :"+email+" and Password: "+password);
+					else throw new RuntimeException("User is not active");
 				}
 				else throw new IllegalArgumentException("Password Must be at least 6 characters");
 			}
@@ -133,11 +133,6 @@ public class UserServiceImpl implements UserService{
 		else throw new IllegalArgumentException("Email and Password must not be null or blank");
 	}
 
-	
-	
-	
-	
-	
 
 	
 

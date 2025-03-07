@@ -86,7 +86,7 @@ class BmsApplicationTests {
 	@Test
 	void loginEmailAndPassword()
 	{
-		UserResponseDTO userResponseDTO = service.loginUserByEmailAndPassword("venu@gmail.com", "venu@!2334");
+		UserResponseDTO userResponseDTO = service.loginUserByEmailAndPassword("venu123@gmail.com", "venu123");
 		System.out.println(userResponseDTO);
 	}
 	

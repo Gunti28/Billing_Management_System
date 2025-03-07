@@ -2,6 +2,7 @@ package com.srnrit.BMS.globalexcepiton;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -9,7 +10,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
-
+import com.srnrit.BMS.exception.userexceptions.UnSupportedFileTypeException;
 import com.srnrit.BMS.exception.userexceptions.UserAleadyExistException;
 import com.srnrit.BMS.exception.userexceptions.UserNotFoundException;
 import com.srnrit.BMS.exception.userexceptions.UserNotcreatedException;
@@ -53,10 +54,11 @@ public class GlobalExceptionHandler {
 		return new ResponseEntity<Message>(new Message(e.getMessage()),HttpStatus.BAD_REQUEST);
 	}
 	
-	@ExceptionHandler(exception = RuntimeException.class)
-	public ResponseEntity<Message> runtimeException(RuntimeException e)
+	@ExceptionHandler(exception = UnSupportedFileTypeException.class)
+	
+	public ResponseEntity<?> unSupportedFileTypeException(UnSupportedFileTypeException e)
 	{
-		return new ResponseEntity<Message>(new Message(e.getMessage()),HttpStatus.INTERNAL_SERVER_ERROR);
+		return new ResponseEntity<Message>(new Message(e.getMessage()),HttpStatus.BAD_REQUEST);
 	}
 	
 	@ExceptionHandler(exception = IllegalArgumentException.class)
@@ -64,6 +66,13 @@ public class GlobalExceptionHandler {
 	{
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
 	}
+	
+	@ExceptionHandler(exception = RuntimeException.class)
+	public ResponseEntity<Message> runtimeException(RuntimeException e)
+	{
+		return new ResponseEntity<Message>(new Message(e.getMessage()),HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+	
 	
 	@ExceptionHandler(exception = Exception.class)
 	public ResponseEntity<Message> exception(Exception e)

@@ -7,6 +7,7 @@ import com.srnrit.BMS.entity.User;
 public interface UserRepository extends JpaRepository<User, String>{
 	
 	User findByUserEmail(String userEmail);
+	User findByUserPassword(String userPassword);
 	User findByUserPhone(Long userphonenumber);
 	User findByUserEmailAndUserPassword(String userEmail,String userPassword);
 }
