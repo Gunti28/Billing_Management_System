@@ -27,7 +27,6 @@ public class GlobalExceptionHandler {
 		}
 
 		return new ResponseEntity<Map<String, String>>(errors, HttpStatus.BAD_REQUEST);
-
 	}
 
 	@ExceptionHandler(exception = UserNotcreatedException.class)
