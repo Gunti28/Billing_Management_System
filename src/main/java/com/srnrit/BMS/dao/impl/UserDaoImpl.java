@@ -1,22 +1,32 @@
 package com.srnrit.BMS.dao.impl;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 import com.srnrit.BMS.dao.UserDao;
 import com.srnrit.BMS.entity.User;
 import com.srnrit.BMS.exception.userexceptions.UserAleadyExistException;
 import com.srnrit.BMS.exception.userexceptions.UserNotFoundException;
 import com.srnrit.BMS.exception.userexceptions.UserNotcreatedException;
 import com.srnrit.BMS.repository.UserRepository;
+import com.srnrit.BMS.util.FileStorageProperties;
+import com.srnrit.BMS.util.idgenerator.ImageFileNameGenerator;
 
 @Component
 public class UserDaoImpl implements UserDao {
 
-	@Autowired
-	UserRepository userRepository;
+	 @Autowired
+     private UserRepository userRepository;
+	
+	 @Autowired
+	 private FileStorageProperties fileStorageProperties;
 	
 	@Override
 	public Optional<User> saveuser(User user) {
@@ -85,7 +95,6 @@ public class UserDaoImpl implements UserDao {
 	}
 
 	
-	@SuppressWarnings("unused")
 	@Override
 	public Optional<User> updateByUserId(User user,String userId) {
 		if(user!=null)
@@ -149,10 +158,104 @@ public class UserDaoImpl implements UserDao {
 	@Override
 	public Optional<User> loginByEmailAndPassword(String userEmail, String userPassword) 
 	{
-		
-		User user = userRepository.findByUserEmailAndUserPassword(userEmail, userPassword);
-		return user!=null?Optional.of(user):Optional.empty();	
+		User user=null;
+		user = userRepository.findByUserEmail(userEmail);
+		if(user!=null)
+		{
+			user=userRepository.findByUserPassword(userPassword);
+			if(user!=null)
+			{
+				return user.getActive() ? Optional.of(user):Optional.empty();	
+			}
+			else throw new RuntimeException("user not exists with password :"+userPassword);
+		}
+		else throw new RuntimeException("user not exists with email :"+userEmail);			
 	}
+
+
+	@Override
+	public Optional<User> editImage(MultipartFile file, String userId) 
+	{
+
+	    // Validate user existence
+	    Optional<User> userOptional = userRepository.findById(userId);
+	    
+	    
+	    if (!userOptional.isPresent() ) 
+	    	throw new UserNotFoundException("User does not exist with ID: " + userId);
+	    
+
+	    // Get the user
+	    User user = userOptional.get();
+	    
+	    if(!user.getActive())
+	    	throw new RuntimeException("User is not active ");
+	    
+	    //getting old profile image name
+	    String oldImageFileName=user.getUserProfileImage();
+	    
+	    // Generate a new file name
+	    String fileName = ImageFileNameGenerator.getNewFileName(file.getOriginalFilename());
+
+	    
+	    // Update user profile image in db
+	    user.setUserProfileImage(fileName);
+	    User updatedUser = userRepository.save(user); //update image in db
+	    
+	  try 
+	  { 
+		    if(updatedUser != null)
+		    {
+		    	//now update image in local driver
+		    	
+		    	String  targetDirectory=this.fileStorageProperties.getImageStoragePath();
+		 	  
+		    	//create directories if not exist
+		 		Path path = Paths.get(targetDirectory);
+		 		
+		 		if(!Files.exists(path))
+				{
+					Files.createDirectories(path);
+				}
+				
+		 		
+		 		//save the file with new image file name
+		 		Path targetLocation= path.resolve(fileName);
+		 		
+		 		
+		 		//for deleting purpose
+		 		//start
+		 		File oldFile = new File(targetDirectory.concat(oldImageFileName));
+		 		
+		 		 if(oldFile.exists() && !oldImageFileName.equals("default.png"))
+				     oldFile.delete();
+				 //end
+		 		  
+		 		//storing new image in the local driver 
+		 		long copied = Files.copy(file.getInputStream(), targetLocation);
+		 		
+		 		return copied > 0 ? Optional.of(updatedUser) : Optional.empty();
+		 		
+		    }
+		    else 
+		    {
+				throw new RuntimeException("User not updated successfully !");
+			}
+	  } 
+	  catch (Exception e) 
+	  {
+		 throw new RuntimeException(e.getMessage());
+	  }  
+	    
+	}
+
+	@Override
+	public Optional<List<User>> fetchAlluser() 
+	{
+		List<User> allUsers = userRepository.findAll();
+		return allUsers!=null && allUsers.size() > 0 ?Optional.of(allUsers):Optional.empty();
+	}
+}	
+
 	
-	
-}
+
