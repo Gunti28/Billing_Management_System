@@ -10,7 +10,7 @@ public class FileStorageProperties {
     private String imageStoragePath;
     
     @Value("${file.storage.max-size}")
-    private String getMaxfileSize;
+    private Long getMaxfileSize;
     
     public String getImageStoragePath() {
         return imageStoragePath;
