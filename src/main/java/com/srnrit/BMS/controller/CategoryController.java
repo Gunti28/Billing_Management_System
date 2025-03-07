@@ -14,7 +14,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/category")
 public class CategoryController {
-
     private  ICategoryService categoryService;
 
 
@@ -50,7 +49,7 @@ public class CategoryController {
     }
 
 
-    
+
     //API to Get Category by using CategoryId
     @GetMapping("/{categoryId}")
     public ResponseEntity<?> findCategoryById(@PathVariable String categoryId){
