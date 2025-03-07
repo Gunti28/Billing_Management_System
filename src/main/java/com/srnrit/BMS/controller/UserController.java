@@ -51,7 +51,7 @@ public class UserController {
 			                                        @PathVariable("userid") String userId
 			)
 	{
-		 UserResponseDTO userResponseDTO = this.userService.editProfileImage(file,userId);
+		 UserResponseDTO userResponseDTO = this.userService.editUserImage(file,userId);
 		 
 		 return new ResponseEntity<UserResponseDTO>(userResponseDTO,HttpStatus.OK);
 	}
