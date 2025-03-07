@@ -1,13 +1,10 @@
 package com.srnrit.BMS.dao.impl;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +13,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.srnrit.BMS.dao.UserDao;
 import com.srnrit.BMS.entity.User;
-import com.srnrit.BMS.exception.userexceptions.UnSupportedFileTypeException;
 import com.srnrit.BMS.exception.userexceptions.UserAleadyExistException;
 import com.srnrit.BMS.exception.userexceptions.UserNotFoundException;
 import com.srnrit.BMS.exception.userexceptions.UserNotcreatedException;
@@ -27,11 +23,11 @@ import com.srnrit.BMS.util.idgenerator.ImageFileNameGenerator;
 @Component
 public class UserDaoImpl implements UserDao {
 
-	@Autowired
-	UserRepository userRepository;
+	 @Autowired
+     private UserRepository userRepository;
 	
 	 @Autowired
-	    private FileStorageProperties fileStorageProperties;
+	 private FileStorageProperties fileStorageProperties;
 	
 	@Override
 	public Optional<User> saveuser(User user) {
@@ -179,58 +175,71 @@ public class UserDaoImpl implements UserDao {
 
 
 	@Override
-	public Optional<User> editImage(MultipartFile file, String userId) {
-	    System.out.println("UserDAOImpl.editImage()");
+	public Optional<User> editImage(MultipartFile file, String userId) 
+	{
 
-	    String targetDirectory;
+	    // Validate user existence
+	    Optional<User> userOptional = userRepository.findById(userId);
+	    
+	    if (!userOptional.isPresent()) 
+	         throw new UserNotFoundException("User does not exist with ID: " + userId);
+	    
+
+	    // Get the user
+	    User user = userOptional.get();
+	    
+	    //getting old profile image name
+	    String oldImageFileName=user.getUserProfileImage();
+	    
+	    // Generate a new file name
 	    String fileName = ImageFileNameGenerator.getNewFileName(file.getOriginalFilename());
 
-	    // Validate file type
-	    if (!fileName.toLowerCase().endsWith(".jpg") && !fileName.toLowerCase().endsWith(".png")) {
-	        throw new UnSupportedFileTypeException("Unsupported file! Only .jpg or .png allowed.");
-	    }
-
-	    targetDirectory = this.fileStorageProperties.getImageStoragePath();
-
-	    // Create directories if not exist
-	    Path path = Paths.get(targetDirectory);
-	    Path targetLocation = path.resolve(fileName);
 	    
-	    try {
-	        if (!Files.exists(path)) {
-	            Files.createDirectories(path);
-	        }
-
-	        Optional<User> byId = this.userRepository.findById(userId);
-
-	        if (byId.isPresent()) {
-	            User user = byId.get();
-
-	            String oldImageFileName = user.getUserProfileImage();
-	            user.setUserProfileImage(fileName);
-	            User updatedUser = this.userRepository.save(user);
-
-	            if (updatedUser != null) {
-	                // Delete old image file if exists
-	                if (oldImageFileName != null && !oldImageFileName.isEmpty()) {
-	                    File oldFile = Paths.get(targetDirectory, oldImageFileName).toFile();
-	                    Files.deleteIfExists(oldFile.toPath());  // More reliable deletion
-	                }
-
-	                // Save new image
-	                Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
-	                return Optional.of(updatedUser);
-	            }
-	        } else {
-	            throw new UserNotFoundException("User does not exist with ID: " + userId);
-	        }
-	    } catch (IOException e) {
-	        throw new RuntimeException("Image not stored successfully!", e);
-	    }
+	    // Update user profile image in db
+	    user.setUserProfileImage(fileName);
+	    User updatedUser = userRepository.save(user); //update image in db
 	    
-	    return Optional.empty();
+	  try 
+	  { 
+		    if(updatedUser != null)
+		    {
+		    	//now update image in local driver
+		    	
+		    	String  targetDirectory=this.fileStorageProperties.getImageStoragePath();
+		 	  
+		    	//create directories if not exist
+		 		Path path = Paths.get(targetDirectory);
+		 		
+		 		//save the file with new image file name
+		 		Path targetLocation= path.resolve(fileName);
+		 		
+		 		
+		 		//for deleting purpose
+		 		//start
+		 		File oldFile = new File(targetDirectory.concat(oldImageFileName));
+		 		
+		 		 if(oldFile.exists() && !oldImageFileName.equals("default.png"))
+				     oldFile.delete();
+				 //end
+		 		  
+		 		//storing new image in the local driver 
+		 		long copied = Files.copy(file.getInputStream(), targetLocation);
+		 		
+		 		return copied > 0 ? Optional.of(updatedUser) : Optional.empty();
+		 		
+		    }
+		    else 
+		    {
+				throw new RuntimeException("User not updated successfully !");
+			}
+	  } 
+	  catch (Exception e) 
+	  {
+		 throw new RuntimeException(e.getMessage());
+	  }  
+	    
 	}
-}
+}	
 
 	
 
