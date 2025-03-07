@@ -38,6 +38,15 @@ public class UserController {
 	}
 	
 
+	@PutMapping(value="Updateuser/{userId}") 
+	public ResponseEntity<UserResponseDTO> updateUser (@RequestBody UserRequestDTO userRequestDTO,@PathVariable String userId)
+	{
+		UserResponseDTO userResponseDTO = this.userService.updateUserById(userRequestDTO, userId);
+		return new ResponseEntity<UserResponseDTO>(userResponseDTO,HttpStatus.OK);
+		
+	}
+
+
 	@DeleteMapping(value = "/{userId}")
     public ResponseEntity<?> deleteUserById(@PathVariable String userId)
     {
@@ -80,4 +89,6 @@ public class UserController {
 	
 
 	
+
 }
+
