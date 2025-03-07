@@ -50,7 +50,6 @@ public class Product implements Serializable {
 	public Product(String productId, String productName, String productImage, Integer productQuantity,
 			Double productPrice, Boolean inStock) {
 		super();
-		this.productId = productId;
 		this.productName = productName;
 		this.productImage = productImage;
 		this.productQuantity = productQuantity;
