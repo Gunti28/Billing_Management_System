@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import com.srnrit.BMS.dao.ICategoryDao;
+import com.srnrit.BMS.entity.Category;
 
 @SpringBootTest
 class BmsApplicationTests 
@@ -33,6 +34,7 @@ class BmsApplicationTests
 	@Test
 	void getAllCategory()
 	{
+		Category category=new Category();
 		
 	}
 
