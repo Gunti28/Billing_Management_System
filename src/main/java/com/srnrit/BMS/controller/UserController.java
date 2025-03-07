@@ -7,9 +7,12 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.srnrit.BMS.dto.LoginRequestDTO;
 import com.srnrit.BMS.dto.UserRequestDTO;
@@ -42,7 +45,7 @@ public class UserController {
     	return ResponseEntity.status(HttpStatus.OK).body(msg);
     }
 	
-	/*
+	
 	@PutMapping("/editProfileImage/{userid}")
 	public ResponseEntity<UserResponseDTO> editProfileImage(@RequestParam MultipartFile file,
 			                                        @PathVariable("userid") String userId
@@ -52,7 +55,7 @@ public class UserController {
 		 
 		 return new ResponseEntity<UserResponseDTO>(userResponseDTO,HttpStatus.OK);
 	}
-	*/
+	
 	
 	@GetMapping(value = "/get/{userId}")
 	public ResponseEntity<?> getUserByUserId(@PathVariable String userId)
@@ -68,6 +71,8 @@ public class UserController {
 		UserResponseDTO responseDTO = this.userService.loginUserByEmailAndPassword(dto.getEmail(), dto.getPassword());
 	    return ResponseEntity.status(HttpStatus.FOUND).body(responseDTO);
 	}
+	
+	
 	
 	
 	
