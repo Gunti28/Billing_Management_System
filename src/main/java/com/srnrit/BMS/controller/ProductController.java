@@ -13,36 +13,34 @@ import com.srnrit.BMS.exception.categoryexceptions.CategoryNotFoundException;
 import com.srnrit.BMS.exception.productexceptions.ProductNotFoundException;
 import com.srnrit.BMS.service.IProductService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping(value = "/product")
 public class ProductController {
 
-    private final IProductService productService;
-    
     private static final Logger logger = LoggerFactory.getLogger(ProductController.class);
+    private final IProductService productService;
 
     public ProductController(IProductService productService) {
         this.productService = productService;
     }
 
-    // Add Product by Category 
+    // Add Product by Category with Validation
     @PostMapping(value = "/addProductByCategory")
-    public ResponseEntity<?> addProductByCategory(@RequestBody ProductRequestDTO productRequestDTO) {
+    public ResponseEntity<?> addProductByCategory(@Valid @RequestBody ProductRequestDTO productRequestDTO) {
         try {
-            if (productRequestDTO.getCategoryId() == null || productRequestDTO.getCategoryId().isEmpty()) {
-                return new ResponseEntity<>("Category ID is required!", HttpStatus.BAD_REQUEST);
-            }
             ProductResponseDTO productResponseDTO = this.productService.storeProduct(productRequestDTO);
             return new ResponseEntity<>(productResponseDTO, HttpStatus.CREATED);
         } catch (CategoryNotFoundException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.NOT_FOUND);
         } catch (Exception e) {
+            logger.error("Unexpected error while adding product: {}", e.getMessage(), e);
             return new ResponseEntity<>("An unexpected error occurred while adding the product.", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-    // Fetch Products by Availability with Validation
-    // http://localhost:8080/product/fetchByAvailability?inStock={true or false}
+    //Fetch Products by Availability
     @GetMapping(value = "/fetchByAvailability")
     public ResponseEntity<?> fetchProductByAvailability(@RequestParam Boolean inStock) {
         try {
@@ -56,67 +54,49 @@ public class ProductController {
         }
     }
 
- // Delete Product by ID 
- // http://localhost:8080/product/delete/{product_id}
+    // Delete Product by ID with Validation
     @DeleteMapping(value = "/delete/{productId}")
     public ResponseEntity<?> deleteProduct(@PathVariable String productId) {
         try {
-            if (productId == null || productId.isEmpty()) {
-                logger.error("Product deletion failed: Product ID is missing.");
-                return new ResponseEntity<>("Error: Product ID is required!", HttpStatus.BAD_REQUEST);
-            }
-            
             String message = this.productService.deleteProductByProductId(productId);
             logger.info("Product deleted successfully: {}", productId);
             return new ResponseEntity<>(message, HttpStatus.OK);
-            
         } catch (ProductNotFoundException e) {
             logger.error("Product deletion failed: {}", e.getMessage());
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.NOT_FOUND);
-            
         } catch (Exception e) {
             logger.error("Unexpected error while deleting product with ID {}: {}", productId, e.getMessage(), e);
             return new ResponseEntity<>("An unexpected error occurred while deleting the product: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-    // Update Product by ID with Validations
+    //  Update Product by ID with Validation
     @PutMapping(value = "/update/{productId}")
-    public ResponseEntity<?> updateProduct(@PathVariable String productId, @RequestBody ProductRequestDTO productRequestDTO) {
+    public ResponseEntity<?> updateProduct(@PathVariable String productId, @Valid @RequestBody ProductRequestDTO productRequestDTO) {
         try {
-            if (productId == null || productId.isEmpty()) {
-                return new ResponseEntity<>("Product ID is required!", HttpStatus.BAD_REQUEST);
-            }
-            if (productRequestDTO == null) {
-                return new ResponseEntity<>("Product data is required!", HttpStatus.BAD_REQUEST);
-            }
             ProductResponseDTO updatedProduct = this.productService.updateProductByProductId(productRequestDTO, productId);
             return new ResponseEntity<>(updatedProduct, HttpStatus.OK);
         } catch (ProductNotFoundException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             return new ResponseEntity<>("An unexpected error occurred while updating the product.", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-    // Search Product by Name with Validations
+    // Search Product by Name with Validation
     @GetMapping(value = "/searchByName")
     public ResponseEntity<?> searchProductByName(@RequestParam String productName) {
         try {
-            if (productName == null || productName.trim().isEmpty()) {
-                return new ResponseEntity<>("Product name is required!", HttpStatus.BAD_REQUEST);
-            }
             ProductResponseDTO productResponseDTO = this.productService.getProductByProductName(productName);
             return new ResponseEntity<>(productResponseDTO, HttpStatus.OK);
         } catch (ProductNotFoundException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             return new ResponseEntity<>("An unexpected error occurred while searching for the product.", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-    // Fetch All Products with Error Handling
-    // http://localhost:8080/product/getAllProducts
+    //  Fetch All Products with Validation
     @GetMapping(value = "/getAllProducts")
     public ResponseEntity<?> getAllProducts() {
         try {
