@@ -15,7 +15,6 @@ import com.srnrit.BMS.dto.UserRequestDTO;
 import com.srnrit.BMS.dto.UserResponseDTO;
 import com.srnrit.BMS.entity.User;
 import com.srnrit.BMS.exception.userexceptions.UnSupportedFileTypeException;
-import com.srnrit.BMS.exception.userexceptions.UserNotFoundException;
 import com.srnrit.BMS.exception.userexceptions.UserNotcreatedException;
 import com.srnrit.BMS.mapper.DTOToEntity;
 import com.srnrit.BMS.mapper.EntityToDTO;
@@ -148,7 +147,7 @@ public class UserServiceImpl implements UserService{
 		{
 			if(file!=null)
 			{
-				
+				System.out.println(file.getSize());
 				long maxSize=fileStorageProperties.getMaxFileSize();
 				if(file.getSize()<=maxSize)
 				{
@@ -157,7 +156,7 @@ public class UserServiceImpl implements UserService{
 					{
 						String fileNameExtension=getFileExtension(file.getOriginalFilename());
 
-						if(Arrays.asList("jpg","jpeg","png").contains(fileNameExtension))
+						if(Arrays.asList("jpg","jpeg","png","git","tiff","bmp","svg","webp","heif").contains(fileNameExtension))
 						{
 							Optional<User> optionalUser = this.userDao.editImage(file, userId);
 							if(optionalUser.isPresent())
