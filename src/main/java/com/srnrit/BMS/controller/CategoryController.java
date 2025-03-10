@@ -56,8 +56,6 @@ public class CategoryController {
        return new ResponseEntity<>(updateCategory,HttpStatus.OK);
     }
 
-
-
     //API to Get Category by using CategoryId
     @GetMapping("categoryById/{categoryId}")
     public ResponseEntity<?> findCategoryById(@PathVariable String categoryId){
