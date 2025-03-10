@@ -1,16 +1,25 @@
 package com.srnrit.BMS.userdao;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
 import java.util.Optional;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
 import com.srnrit.BMS.dao.impl.UserDaoImpl;
 import com.srnrit.BMS.entity.User;
+import com.srnrit.BMS.exception.userexceptions.UserAleadyExistException;
+import com.srnrit.BMS.exception.userexceptions.UserNotFoundException;
 import com.srnrit.BMS.repository.UserRepository;
 import com.srnrit.BMS.service.impl.UserServiceImpl;
 import com.srnrit.BMS.util.FileStorageProperties;
@@ -167,10 +176,231 @@ public class UserDAOTestCases {
 //    }
     
     //DELETEUSERBYID() IN USERDAO LAYER
-    
+    @Test
+    public void testDeleteUserById_ActiveUser() {
+        // Arrange
+        String userId = "Uid_021";
+        User user = new User();
+        user.setActive(true);
 
-  
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(userRepository.save(user)).thenReturn(user);
+
+        // Act
+        Optional<String> result = userDao.deleteUserById(userId);
+
+        // Assert
+        assertTrue(result.isPresent(), "Expected result to be present");
+        assertEquals("User deleted successfully with ID: " + userId, result.get(), "Expected success message");
+        assertFalse(user.getActive(), "User should be inactive after deletion");
+    }
+
+    @Test
+    public void testDeleteUserById_InactiveUser() {
+        // Arrange
+        String userId = "Uid_022";
+        User user = new User();
+        user.setActive(false);
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+        // Act
+        Optional<String> result = userDao.deleteUserById(userId);
+
+        // Assert
+        assertTrue(result.isPresent(), "Expected result to be present");
+        assertEquals("User is not active.", result.get(), "Expected inactive user message");
+    }
+
+    @Test
+    public void testDeleteUserById_UserNotFound() {
+        // Arrange
+        String userId = "Uid_023";
+
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        UserNotFoundException exception = assertThrows(UserNotFoundException.class, () -> {
+            userDao.deleteUserById(userId);
+        });
+
+        assertEquals("User does not exist with ID: " + userId, exception.getMessage());
+    }
+
+    @Test
+    public void testDeleteUserById_NullUserId() {
+        // Arrange
+        String userId = null;
+
+        // Act & Assert
+        UserNotFoundException exception = assertThrows(UserNotFoundException.class, () -> {
+            userDao.deleteUserById(userId);
+        });
+
+        assertEquals("Userid can't be null or blank.", exception.getMessage());
+    }
+
+    @Test
+    public void testDeleteUserById_BlankUserId() {
+        // Arrange
+        String userId = "   ";
+
+        // Act & Assert
+        UserNotFoundException exception = assertThrows(UserNotFoundException.class, () -> {
+            userDao.deleteUserById(userId);
+        });
+
+        assertEquals("Userid can't be null or blank.", exception.getMessage());
+    }
+
     //EDITIMAGE() IN USERDAO LAYER
+    
+    
+    //UPDATEUSERBYID() IN USERDAO LAYER
+//    @Test
+//    public void testUpdateByUserId_Success() {
+//        // Arrange
+//        String userId = "Uid_001";
+//        User existingUser = new User();
+//        existingUser.setActive(true);
+//
+//        User updatedUser = new User();
+//        updatedUser.setUserEmail("newemail@example.com");
+//        updatedUser.setUserPhone(1234567890L);
+//        updatedUser.setUserName("New Name");
+//        updatedUser.setUserPassword("NewPassword");
+//
+//        when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
+//        when(userRepository.findByUserEmail(updatedUser.getUserEmail())).thenReturn(null);
+//        when(userRepository.findByUserPhone(updatedUser.getUserPhone())).thenReturn(null);
+//
+//        // Act
+//        Optional<User> result = userDao.updateByUserId(updatedUser, userId);
+//
+//        // Assert
+//        assertTrue(result.isPresent(), "Expected user to be present");
+//
+//        // Capture the argument passed to save
+//        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+//        verify(userRepository).save(userCaptor.capture());
+//
+//        // Verify the captured user
+//        User savedUser = userCaptor.getValue();
+//        assertEquals(updatedUser.getUserEmail(), savedUser.getUserEmail(), "Expected email to match");
+//        assertEquals(updatedUser.getUserPhone(), savedUser.getUserPhone(), "Expected phone to match");
+//        assertEquals(updatedUser.getUserName(), savedUser.getUserName(), "Expected name to match");
+//        assertEquals(updatedUser.getUserPassword(), savedUser.getUserPassword(), "Expected password to match");
+//    }
+    @Test
+    public void testUpdateByUserId_UserNotFound() {
+        // Arrange
+        String userId = "Uid_002";
+        User user = new User();
+
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        UserNotFoundException exception = assertThrows(UserNotFoundException.class, () -> {
+            userDao.updateByUserId(user, userId);
+        });
+
+        assertEquals("User not exist with id : " + userId, exception.getMessage());
+    }
+    
+    @Test
+    public void testUpdateByUserId_InactiveUser() {
+        // Arrange
+        String userId = "Uid_003";
+        User existingUser = new User();
+        existingUser.setActive(false);
+
+        User user = new User();
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
+
+        // Act & Assert
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            userDao.updateByUserId(user, userId);
+        });
+
+        assertEquals("user is not active", exception.getMessage());
+    }
+
+    @Test
+    public void testUpdateByUserId_DuplicateEmail() {
+        // Arrange
+        String userId = "Uid_004";
+        User existingUser = new User();
+        existingUser.setActive(true);
+
+        User user = new User();
+        user.setUserEmail("duplicate@example.com");
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
+        when(userRepository.findByUserEmail(user.getUserEmail())).thenReturn(new User());
+
+        // Act & Assert
+        UserAleadyExistException exception = assertThrows(UserAleadyExistException.class, () -> {
+            userDao.updateByUserId(user, userId);
+        });
+
+        assertEquals("User already exist with email : " + user.getUserEmail(), exception.getMessage());
+    }
+
+    @Test
+    public void testUpdateByUserId_DuplicatePhone() {
+        // Arrange
+        String userId = "Uid_005";
+        User existingUser = new User();
+        existingUser.setActive(true);
+
+        User user = new User();
+        user.setUserPhone(1234567890L);
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
+        when(userRepository.findByUserEmail(user.getUserEmail())).thenReturn(null);
+        when(userRepository.findByUserPhone(user.getUserPhone())).thenReturn(new User());
+
+        // Act & Assert
+        UserAleadyExistException exception = assertThrows(UserAleadyExistException.class, () -> {
+            userDao.updateByUserId(user, userId);
+        });
+
+        assertEquals("User already exist with phoneNumber" + user.getUserPhone(), exception.getMessage());
+    }
+
+    @Test
+    public void testUpdateByUserId_NullUser() {
+        // Arrange
+        String userId = "Uid_006";
+
+        // Act & Assert
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            userDao.updateByUserId(null, userId);
+        });
+
+        assertEquals("User can't be null!", exception.getMessage());
+    }
+
+    @Test
+    public void testUpdateByUserId_NullOrBlankUserId() {
+        // Arrange
+        User user = new User();
+
+        // Act & Assert for null userId
+        UserNotFoundException exception1 = assertThrows(UserNotFoundException.class, () -> {
+            userDao.updateByUserId(user, null);
+        });
+
+        assertEquals("User id can't be null or blank!", exception1.getMessage());
+
+        // Act & Assert for blank userId
+        UserNotFoundException exception2 = assertThrows(UserNotFoundException.class, () -> {
+            userDao.updateByUserId(user, "   ");
+        });
+
+        assertEquals("User id can't be null or blank!", exception2.getMessage());
+    }
 
 	
 
