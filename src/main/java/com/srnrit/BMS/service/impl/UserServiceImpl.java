@@ -15,6 +15,7 @@ import com.srnrit.BMS.dto.UserRequestDTO;
 import com.srnrit.BMS.dto.UserResponseDTO;
 import com.srnrit.BMS.entity.User;
 import com.srnrit.BMS.exception.userexceptions.UnSupportedFileTypeException;
+import com.srnrit.BMS.exception.userexceptions.UserNotFoundException;
 import com.srnrit.BMS.exception.userexceptions.UserNotcreatedException;
 import com.srnrit.BMS.mapper.DTOToEntity;
 import com.srnrit.BMS.mapper.EntityToDTO;
@@ -209,6 +210,31 @@ public class UserServiceImpl implements UserService{
 			}
 		}
 		throw new RuntimeException("No User is Present");
+		
+	}
+
+	@Override
+	public UserResponseDTO updatePassword(String userEmail, String newPassword) 
+	{
+		if(userEmail!=null && !userEmail.isBlank())
+		{
+			if(newPassword!=null && !newPassword.isBlank())
+			{
+				Optional<User> optionalUser = this.userDao.changePassword(userEmail, newPassword);
+				if(optionalUser.isPresent())
+				{
+					UserResponseDTO userResponseDTO = EntityToDTO.userEntityToUserResponseDTO(optionalUser.get());
+					if(userResponseDTO!=null)
+					{
+						return userResponseDTO;
+					}
+					else throw new RuntimeException("Something went wrong"); 
+				}
+				else throw new UserNotFoundException("User Not Updated password Successfully");
+			}
+			else throw new RuntimeException("Password must not be null and empty");
+		}
+		else throw new RuntimeException("User Email can't be null or blank");
 		
 	}
 
