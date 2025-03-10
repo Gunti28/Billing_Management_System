@@ -16,11 +16,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.srnrit.BMS.dto.EmailRequestDTO;
 import com.srnrit.BMS.dto.LoginRequestDTO;
 import com.srnrit.BMS.dto.UpdateUserRequestDTO;
 import com.srnrit.BMS.dto.UserRequestDTO;
 import com.srnrit.BMS.dto.UserResponseDTO;
+import com.srnrit.BMS.dto.VerifyOTPRequestDTO;
 import com.srnrit.BMS.service.UserService;
+import com.srnrit.BMS.util.Message;
 
 import jakarta.validation.Valid;
 
@@ -82,16 +85,26 @@ public class UserController {
 	    return ResponseEntity.status(HttpStatus.FOUND).body(responseDTO);
 	}
 	
-
-	
 	@GetMapping(value="/allUsers")
 	public ResponseEntity<List<UserResponseDTO>> getAllUsers()
 	{
 	          List<UserResponseDTO> allUser = this.userService.getAllUsers();
 	          return new ResponseEntity<List<UserResponseDTO>>(allUser,HttpStatus.OK);	
 	}
-
 	
-
+	@PutMapping(value="/VerifyEmail")
+	public ResponseEntity<?> verifyEmail(@Valid @RequestBody EmailRequestDTO emailRequestDTO) 
+	{
+	      Message verifyUserByEmail = this.userService.verifyUserByEmail(emailRequestDTO);
+	    return new ResponseEntity<Message>(verifyUserByEmail,HttpStatus.OK);
+	}
+	
+	@PutMapping(value="/VerifyOTP")
+	public ResponseEntity<?> verifyOTP (@Valid @RequestBody VerifyOTPRequestDTO verifyOTPRequestDTO) 
+	{
+	    Message verifyOTP = this.userService.verifyOTP(verifyOTPRequestDTO);	
+		return new ResponseEntity<Message>(verifyOTP,HttpStatus.OK);
+		
+	}
 }
 
