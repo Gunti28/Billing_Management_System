@@ -18,6 +18,7 @@ public class ProductRequestDTO {
     @Size(max = 50, message = "Product name cannot be more than 50 characters")
     private String productName;
 
+    
     private String productImage;  // Stores the file path instead of MultipartFile
 
     @NotNull(message = "Product quantity cannot be null")

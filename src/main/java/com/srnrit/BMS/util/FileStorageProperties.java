@@ -12,6 +12,4 @@ public class FileStorageProperties {
     public String getImageStoragePath() {
         return imageStoragePath;
     }
-
-
 }
