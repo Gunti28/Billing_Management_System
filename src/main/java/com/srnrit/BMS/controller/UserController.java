@@ -57,14 +57,10 @@ public class UserController {
 	
 	@PutMapping(value="/editProfileImage/{userid}")
 	public ResponseEntity<?> editProfileImage(@RequestParam MultipartFile file,
-			                                  @PathVariable("userid") String userId
-			)
+			                                  @PathVariable("userid") String userId)
 	{
-		System.out.println("UserController.editProfileImage()");
-		System.out.println(userId);
-		 UserResponseDTO userResponseDTO = this.userService.editUserImage(file,userId);
-		 
-		 return new ResponseEntity<UserResponseDTO>(userResponseDTO,HttpStatus.OK);
+		UserResponseDTO userResponseDTO = this.userService.editUserImage(file,userId);
+		return new ResponseEntity<UserResponseDTO>(userResponseDTO,HttpStatus.OK);
 	}
 	
 	
