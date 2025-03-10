@@ -22,11 +22,11 @@ public class GlobalExceptionHandler
     {
    	 return new ResponseEntity<Message>( new  Message(e.getMessage()),HttpStatus.INTERNAL_SERVER_ERROR);
     }
-	@ExceptionHandler(exception = CategoryNotFoundException.class)
-   public ResponseEntity<?> categoryNotFoundException(CategoryNotFoundException e)
-   {
-  	 return new ResponseEntity<Message>( new  Message(e.getMessage()),HttpStatus.NOT_FOUND);
-   }
+	@ExceptionHandler(CategoryNotFoundException.class)
+	public ResponseEntity<String> handleCategoryNotFoundException(CategoryNotFoundException ex) {
+	    String errorMessage = ex.getMessage();  
+	    return new ResponseEntity<>(errorMessage, HttpStatus.INTERNAL_SERVER_ERROR);  // Return only the message
+	}
 	
 	  @ExceptionHandler(exception = MethodArgumentNotValidException.class) public
 	  ResponseEntity<Map<String, String>>
