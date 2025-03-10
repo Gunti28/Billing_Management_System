@@ -4,6 +4,9 @@ import java.util.List;
 
 import org.springframework.web.multipart.MultipartFile;
 
+
+import com.srnrit.BMS.dto.UpdateUserRequestDTO;
+
 import com.srnrit.BMS.dto.EmailRequestDTO;
 import com.srnrit.BMS.dto.UserRequestDTO;
 import com.srnrit.BMS.dto.UserResponseDTO;
@@ -14,7 +17,7 @@ import com.srnrit.BMS.util.Message;
 public interface UserService {
 	UserResponseDTO saveUser(UserRequestDTO userRequestDTO);
 	String deleteUserById(String userId);
-	UserResponseDTO updateUserById(UserRequestDTO userRequestDTO, String userId);
+	UserResponseDTO updateUserById(UpdateUserRequestDTO updateUserRequestDTO, String userId);
 	UserResponseDTO findUserById(String userId);
 	UserResponseDTO loginUserByEmailAndPassword(String email,String password);
 	UserResponseDTO editUserImage(MultipartFile file,String userId);
