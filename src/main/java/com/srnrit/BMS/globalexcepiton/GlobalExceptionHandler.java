@@ -9,7 +9,10 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
+
+import com.srnrit.BMS.exception.userexceptions.InvalideOTPException;
 import com.srnrit.BMS.exception.userexceptions.UnSupportedFileTypeException;
 import com.srnrit.BMS.exception.userexceptions.UserAleadyExistException;
 import com.srnrit.BMS.exception.userexceptions.UserNotFoundException;
@@ -67,6 +70,14 @@ public class GlobalExceptionHandler {
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
 	}
 	
+	
+	@ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<?> handleMaxSizeException(MaxUploadSizeExceededException e) 
+	{
+        return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
+                .body(new Message("File size exceeds the maximum limit!"));
+    }
+	
 	@ExceptionHandler(exception = RuntimeException.class)
 	public ResponseEntity<Message> runtimeException(RuntimeException e)
 	{
@@ -76,6 +87,13 @@ public class GlobalExceptionHandler {
 	
 	@ExceptionHandler(exception = Exception.class)
 	public ResponseEntity<Message> exception(Exception e)
+	{
+		e.printStackTrace();
+		return new ResponseEntity<Message>(new Message(e.getMessage()),HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+	
+	@ExceptionHandler(exception = InvalideOTPException.class)
+	public ResponseEntity<Message> invalidOTPException(InvalideOTPException e)
 	{
 		return new ResponseEntity<Message>(new Message(e.getMessage()),HttpStatus.INTERNAL_SERVER_ERROR);
 	}
