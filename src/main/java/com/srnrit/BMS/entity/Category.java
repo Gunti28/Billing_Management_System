@@ -37,7 +37,7 @@ public class Category implements Serializable
 	private String categoryId;
 	
 	@Column(name = "CATEGORY_NAME")
-	private String categoryname;
+	private String categoryName;
 	
 	@OneToMany(cascade = CascadeType.ALL,mappedBy = "category",fetch = FetchType.LAZY,orphanRemoval = true)
 	private List<Product> products;
@@ -55,7 +55,7 @@ public class Category implements Serializable
 	//helper method to remove product
 	public void removeProduct(Product product)
 	{
-		products.remove(product);  //Here this.products.remove(product);
+		this.products.remove(product);  //Here this.products.remove(product);
 		product.setCategory(null);
 	}
 		

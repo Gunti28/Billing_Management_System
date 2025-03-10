@@ -35,24 +35,24 @@ public class CategoryDAOTest
 	    void setUp() {
 	        category = new Category();
 	        category.setCategoryId("1");
-	        category.setCategoryname("Electronics");
+	        category.setCategoryName("Electronics");
 	    }
 	    
 	    // Test for insertCategory
 	    @Test
 	    void testInsertCategory_Success() {
-	        when(categoryRepository.findByCategoryname(category.getCategoryname())).thenReturn(null);
+	        when(categoryRepository.findByCategoryName(category.getCategoryName())).thenReturn(null);
 	        when(categoryRepository.save(category)).thenReturn(category);
 
 	        Optional<Category> result = categoryDaoImpl.insertCategory(category);
 
 	        assertTrue(result.isPresent());
-	        assertEquals(category.getCategoryname(), result.get().getCategoryname());
+	        assertEquals(category.getCategoryName(), result.get().getCategoryName());
 	    }
 	    
 	    @Test
 	    void testInsertCategory_AlreadyExists() {
-	        when(categoryRepository.findByCategoryname(category.getCategoryname())).thenReturn(category);
+	        when(categoryRepository.findByCategoryName(category.getCategoryName())).thenReturn(category);
 
 	        assertThrows(CategoryNotCreatedException.class, () -> categoryDaoImpl.insertCategory(category));
 	    }
@@ -107,7 +107,7 @@ public class CategoryDAOTest
 	        Optional<Category> result = categoryDaoImpl.getCategoryByCategoryId("1");
 
 	        assertTrue(result.isPresent());
-	        assertEquals(category.getCategoryname(), result.get().getCategoryname());
+	        assertEquals(category.getCategoryName(), result.get().getCategoryName());
 	    }
 
 	    @Test

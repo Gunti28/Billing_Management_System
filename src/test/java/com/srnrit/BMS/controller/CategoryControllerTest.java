@@ -1,16 +1,21 @@
 package com.srnrit.BMS.controller;
 
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -20,6 +25,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.srnrit.BMS.dto.CategoryRequestDTO;
 import com.srnrit.BMS.dto.CategoryResponseDTO;
+import com.srnrit.BMS.dto.UpdateCategoryRequestDTO;
 import com.srnrit.BMS.service.ICategoryService;
 
 @WebMvcTest(CategoryController.class) // Loads only CategoryController for testing
@@ -91,13 +97,28 @@ public class CategoryControllerTest {
     // Test for Updating a Category (Success)
     @Test
     void testUpdateCategory_Success() throws Exception {
-        when(categoryService.updateCategory("123", "UpdatedName")).thenReturn("Category updated successfully");
+        UpdateCategoryRequestDTO categoryRequestDTO = new UpdateCategoryRequestDTO();
+        categoryRequestDTO.setCategoryId("123");
+        categoryRequestDTO.setCategoryName("UpdatedName");
 
-        mockMvc.perform(put("/category/updateCategory/123/UpdatedName"))
+        when(categoryService.updateCategory("123", "UpdatedName")).thenReturn("Category updated successfully");
+        mockMvc.perform(put("/category/updateCategoryById")
+                .contentType(MediaType.APPLICATION_JSON)  
+                .content(asJsonString(categoryRequestDTO))) 
                 .andExpect(status().isOk())
                 .andExpect(content().string("Category updated successfully"));
 
         verify(categoryService, times(1)).updateCategory("123", "UpdatedName");
     }
+
+    private String asJsonString(final Object obj) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            return objectMapper.writeValueAsString(obj);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 
 }

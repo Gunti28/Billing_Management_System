@@ -32,9 +32,9 @@ public class EntityToDTO {
 					.stream()
 					.map(EntityToDTO :: toProductResponseDTO) 
 					.collect(Collectors.toList());
-			return new CategoryResponseDTO(category.getCategoryId(),category.getCategoryname(),categoryResponses); 
+			return new CategoryResponseDTO(category.getCategoryId(),category.getCategoryName(),categoryResponses); 
 		} 
-		return new CategoryResponseDTO(category.getCategoryId(),category.getCategoryname(),null); 
+		return new CategoryResponseDTO(category.getCategoryId(),category.getCategoryName(),null); 
 	}
 
 }
