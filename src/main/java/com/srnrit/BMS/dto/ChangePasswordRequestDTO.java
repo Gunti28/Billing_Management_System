@@ -6,7 +6,14 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
+@SuppressWarnings("serial")
+@Getter
+@Setter
+@ToString
 public class ChangePasswordRequestDTO implements Serializable 
 {
 	@NotBlank(message = "Email can't be blank")

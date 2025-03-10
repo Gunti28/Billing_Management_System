@@ -24,7 +24,6 @@ public class OTPOperation
 	 public  void storeOTP(String email,String OTP)
 	 {
 		this.otpStore.put(email,OTP);
-		System.out.println(this.otpStore);
 	 }
 	 
 	 public Optional<String> validateOTP(String email,String OTP)
@@ -37,27 +36,20 @@ public class OTPOperation
 				 this.otpStore.remove(email);
 				 return  Optional.of("OTP Validation Successfull");
 			 }
-			 else
-			 {
-				 return Optional.empty();
-			 }
-			 
+			 else return Optional.empty();
 			 
 		 }
-		 else 
-		 {
-			return Optional.empty();
-		 }
+		 else return Optional.empty();
+		 
 	 }
 	 
 	 public String getOTP()
 	 {
-		  Optional<StringBuilder> otp = OTPGenerator.generateOTP(4);
+		Optional<StringBuilder> otp = OTPGenerator.generateOTP(4);
 		  if(otp.isPresent())
-		  {
-			 return new String(otp.get()); 
-		  }
-		  else throw new RuntimeException("OTP  Generation Failed");
+		        return new String(otp.get()); 
+		  else 
+			    throw new RuntimeException("OTP  Generation Failed");
 	 }
      
      
