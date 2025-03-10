@@ -1,13 +1,16 @@
 package com.srnrit.BMS.globalexcepiton;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.logging.log4j.message.Message;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.srnrit.BMS.exception.productexceptions.ProductNotCreatedException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -23,5 +26,12 @@ public class GlobalExceptionHandler {
         });
 
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+    	
     }
+    
+//    @ExceptionHandler(exception = ProductNotCreatedException.class)
+//    public ResponseEntity<Message> productNotCreatedException(ProductNotCreatedException e ){
+//    	
+//    	return new ResponseEntity<Message>(new Message(e.getMessage()),HttpStatus.BAD_REQUEST);    
+//    	}
 }
