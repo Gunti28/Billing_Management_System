@@ -3,23 +3,30 @@ package com.srnrit.BMS.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import com.srnrit.BMS.dao.ICategoryDao;
-import com.srnrit.BMS.dto.CategoryRequestDTO;
-import com.srnrit.BMS.dto.CategoryResponseDTO;
-import com.srnrit.BMS.entity.Category;
-import com.srnrit.BMS.exception.categoryexceptions.CategoryNotFoundException;
-import com.srnrit.BMS.service.impl.CategoryServiceImpl;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Optional;
+import com.srnrit.BMS.dao.ICategoryDao;
+import com.srnrit.BMS.dto.CategoryRequestDTO;
+import com.srnrit.BMS.dto.CategoryResponseDTO;
+import com.srnrit.BMS.entity.Category;
+import com.srnrit.BMS.exception.categoryexceptions.CategoryNotCreatedException;
+import com.srnrit.BMS.exception.categoryexceptions.CategoryNotFoundException;
+import com.srnrit.BMS.mapper.EntityToDTO;
+import com.srnrit.BMS.service.impl.CategoryServiceImpl;
 
 @ExtendWith(MockitoExtension.class)
-public class CategoryServiceTest {
+class CategoryServiceImplTest {
 
     @Mock
     private ICategoryDao categoryDAO;
@@ -29,35 +36,134 @@ public class CategoryServiceTest {
 
     private Category category;
     private CategoryRequestDTO categoryRequestDTO;
+    private CategoryResponseDTO categoryResponseDTO;
 
     @BeforeEach
     void setUp() {
-        category = new Category("1", "Electronics", null);
-        categoryRequestDTO = new CategoryRequestDTO("Electronics", null);
-    }
+        MockitoAnnotations.openMocks(this);
 
-    // Test case for updating category name successfully
+        // Mock Category Entity
+        category = new Category();
+        category.setCategoryname("Electronics");
+        category.setProducts(new ArrayList<>());  
+
+        // Mock Request DTO
+        categoryRequestDTO = new CategoryRequestDTO();
+        categoryRequestDTO.setCategoryName("Electronics");
+
+        // Mock Response DTO
+        categoryResponseDTO = new CategoryResponseDTO();
+        categoryResponseDTO.setCategoryName("Electronics");
+    }
+    
+
+
+ //  Test for Adding a Category Successfully
     @Test
-    void testUpdateCategory_NotFound() {
-        when(categoryDAO.updateCategory("99", "Unknown")).thenReturn(Optional.empty());
+    void testAddCategoryWithProducts_Success() {
+        // Create a mock category object
+        Category category = new Category();
+        category.setCategoryname("Electronics");
 
-        Exception exception = assertThrows(CategoryNotFoundException.class, () -> {
-            categoryService.updateCategory("99", "Unknown");
-        });
+        when(categoryDAO.insertCategory(any(Category.class))).thenReturn(Optional.of(category));
 
-        assertEquals("Category not exist with id : 99", exception.getMessage());
+        //  Manually create the expected response instead of relying on EntityToDTO
+        CategoryResponseDTO expectedResponse = new CategoryResponseDTO();
+        expectedResponse.setCategoryName("Electronics");  
+
+        CategoryResponseDTO response = categoryService.addCategoryWithProducts(categoryRequestDTO);
+
+        assertNotNull(response);
+        assertEquals(expectedResponse.getCategoryName(), response.getCategoryName());
     }
 
 
-//    //  Test case when category is not found
-//    @Test
-//    void testUpdateCategory_NotFound() {
-//        when(categoryDAO.updateCategory("99", "Unknown")).thenReturn(Optional.empty());
-//
-//        Exception exception = assertThrows(CategoryNotFoundException.class, () -> {
-//            categoryService.updateCategory("99", "Unknown");
-//        });
-//
-//        assertEquals("Category not exist with id: 99", exception.getMessage());
-//    }
+    //  Test for Adding a Category Failure
+    @Test
+    void testAddCategoryWithProducts_Failure() {
+        when(categoryDAO.insertCategory(any(Category.class))).thenReturn(Optional.empty());
+
+        assertThrows(CategoryNotCreatedException.class, () -> categoryService.addCategoryWithProducts(categoryRequestDTO));
+    }
+
+ // Test for Fetching All Categories (Success)
+    @Test
+    void testGetAllCategory_Success() {
+        List<Category> categoryList = Arrays.asList(category);
+        when(categoryDAO.getAllCategory()).thenReturn(Optional.of(categoryList));
+
+        // ✅ Manually create expected response instead of relying on EntityToDTO
+        CategoryResponseDTO expectedResponse = new CategoryResponseDTO();
+        expectedResponse.setCategoryName(category.getCategoryname()); 
+
+        List<CategoryResponseDTO> response = categoryService.getAllCategory();
+
+        assertNotNull(response);
+        assertEquals(1, response.size());
+        assertEquals(expectedResponse.getCategoryName(), response.get(0).getCategoryName());
+    }
+
+
+    //  Test for Fetching All Categories (Failure)
+    @Test
+    void testGetAllCategory_Failure() {
+        when(categoryDAO.getAllCategory()).thenReturn(Optional.empty());
+
+        assertThrows(CategoryNotFoundException.class, () -> categoryService.getAllCategory());
+    }
+
+    //  Test for Fetching Category by ID (Success)
+    @Test
+    void testFindCategoryByCategoryId_Success() {
+        when(categoryDAO.getCategoryByCategoryId("123")).thenReturn(Optional.of(category));
+
+        // Convert manually instead of mocking
+        CategoryResponseDTO expectedResponse = EntityToDTO.toCategoryResponse(category);
+
+        CategoryResponseDTO response = categoryService.findCategoryByCategoryId("123");
+
+        assertNotNull(response);
+        assertEquals(expectedResponse.getCategoryName(), response.getCategoryName());
+    }
+
+
+    // Test for Updating Category (Success)
+    @Test
+    void testUpdateCategory_Success() {
+        when(categoryDAO.updateCategory(anyString(), anyString())).thenReturn(Optional.of("Updated Successfully"));
+
+        String response = categoryService.updateCategory("123", "Updated Category");
+
+        assertEquals("Updated Successfully", response);
+    }
+
+    // Test for Updating Category (Failure - Category Not Found)
+    @Test
+    void testUpdateCategory_Failure() {
+        when(categoryDAO.updateCategory(anyString(), anyString())).thenReturn(Optional.empty());
+
+        assertThrows(CategoryNotFoundException.class, () -> categoryService.updateCategory("123", "Updated Category"));
+    }
+
+    
+
+    // Test for Fetching Category by ID (Failure)
+    @Test
+    void testFindCategoryByCategoryId_Failure() {
+        when(categoryDAO.getCategoryByCategoryId("123")).thenReturn(Optional.empty());
+
+        assertThrows(CategoryNotFoundException.class, () -> categoryService.findCategoryByCategoryId("123"));
+    }
+
+    // Test for Updating Category with Null ID
+    @Test
+    void testUpdateCategory_NullId() {
+        assertThrows(RuntimeException.class, () -> categoryService.updateCategory(null, "Updated Category"));
+    }
+
+    // Test for Updating Category with Invalid Name
+    @Test
+    void testUpdateCategory_InvalidName() {
+        assertThrows(RuntimeException.class, () -> categoryService.updateCategory("123", ""));
+    }
 }

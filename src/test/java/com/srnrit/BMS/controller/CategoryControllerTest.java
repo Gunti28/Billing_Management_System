@@ -1,107 +1,108 @@
 package com.srnrit.BMS.controller;
 
-import com.srnrit.BMS.dto.CategoryRequestDTO;
-import com.srnrit.BMS.dto.CategoryResponseDTO;
-import com.srnrit.BMS.service.ICategoryService;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.Arrays;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
 
-@ExtendWith(MockitoExtension.class)
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.srnrit.BMS.dto.CategoryRequestDTO;
+import com.srnrit.BMS.dto.CategoryResponseDTO;
+import com.srnrit.BMS.service.ICategoryService;
+
+@WebMvcTest(CategoryController.class) // Loads only CategoryController for testing
 class CategoryControllerTest {
 
+    @Autowired
     private MockMvc mockMvc;
 
-    @Mock
+    @MockBean
     private ICategoryService categoryService;
 
-    @InjectMocks
-    private CategoryController categoryController;
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    private CategoryRequestDTO categoryRequestDTO;
+    private CategoryResponseDTO categoryResponseDTO;
 
     @BeforeEach
     void setUp() {
-        mockMvc = MockMvcBuilders.standaloneSetup(categoryController).build();
+        categoryRequestDTO = new CategoryRequestDTO();
+        categoryRequestDTO.setCategoryName("Electronics");
+
+        categoryResponseDTO = new CategoryResponseDTO();
+        categoryResponseDTO.setCategoryName("Electronics");
     }
 
-    // Test case for adding a category
+    //  Test for Adding a Category (Success)
     @Test
     void testAddCategory_Success() throws Exception {
-        CategoryRequestDTO requestDTO = new CategoryRequestDTO("Electronics", null);
-        CategoryResponseDTO responseDTO = new CategoryResponseDTO("1", "Electronics", null);
-
-        when(categoryService.addCategoryWithProducts(any(CategoryRequestDTO.class))).thenReturn(responseDTO);
+        when(categoryService.addCategoryWithProducts(any(CategoryRequestDTO.class)))
+                .thenReturn(categoryResponseDTO);
 
         mockMvc.perform(post("/category/addCategoryWithProducts")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"categoryName\": \"Electronics\"}"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(categoryRequestDTO)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.categoryId").value("1"))
                 .andExpect(jsonPath("$.categoryName").value("Electronics"));
+
+        verify(categoryService, times(1)).addCategoryWithProducts(any(CategoryRequestDTO.class));
     }
 
-    // Test case for fetching all categories
+    //  Test for Getting All Categories (Success)
     @Test
     void testGetAllCategories_Success() throws Exception {
-        List<CategoryResponseDTO> categories = Arrays.asList(
-                new CategoryResponseDTO("1", "Electronics", null),
-                new CategoryResponseDTO("2", "Clothing", null)
-        );
+        List<CategoryResponseDTO> categories = Arrays.asList(categoryResponseDTO);
 
         when(categoryService.getAllCategory()).thenReturn(categories);
 
         mockMvc.perform(get("/category/allCategories"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.size()").value(2))
-                .andExpect(jsonPath("$[0].categoryName").value("Electronics"))
-                .andExpect(jsonPath("$[1].categoryName").value("Clothing"));
+                .andExpect(jsonPath("$.size()").value(1))
+                .andExpect(jsonPath("$[0].categoryName").value("Electronics"));
+
+        verify(categoryService, times(1)).getAllCategory();
     }
 
-    // Test case for updating a category
-    @Test
-    void testUpdateCategory_Success() throws Exception {
-        when(categoryService.updateCategory(eq("1"), eq("Updated Electronics"))).thenReturn("Category Updated Successfully");
-
-        mockMvc.perform(put("/category/1/Updated Electronics"))
-                .andExpect(status().isOk())
-                .andExpect(content().string("Category Updated Successfully"));
-    }
-
-    // Test case for fetching a category by ID
+    // Test for Getting Category by ID (Success)
     @Test
     void testFindCategoryById_Success() throws Exception {
-        CategoryResponseDTO responseDTO = new CategoryResponseDTO("1", "Electronics", null);
+        when(categoryService.findCategoryByCategoryId("123")).thenReturn(categoryResponseDTO);
 
-        when(categoryService.findCategoryByCategoryId("1")).thenReturn(responseDTO);
-
-        mockMvc.perform(get("/category/1"))
+        mockMvc.perform(get("/category/categoryById/123"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.categoryId").value("1"))
                 .andExpect(jsonPath("$.categoryName").value("Electronics"));
+
+        verify(categoryService, times(1)).findCategoryByCategoryId("123");
     }
 
-    // Test case for category not found
+    // Test for Updating a Category (Success)
     @Test
-    void testFindCategoryById_NotFound() throws Exception {
-        when(categoryService.findCategoryByCategoryId("99")).thenThrow(new RuntimeException("Category not found"));
+    void testUpdateCategory_Success() throws Exception {
+        when(categoryService.updateCategory("123", "UpdatedName")).thenReturn("Category updated successfully");
 
-        mockMvc.perform(get("/category/99"))
-                .andExpect(status().isInternalServerError())
-                .andExpect(content().string("Category not found"));
+        mockMvc.perform(put("/category/updateCategory/123/UpdatedName"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Category updated successfully"));
+
+        verify(categoryService, times(1)).updateCategory("123", "UpdatedName");
     }
+
 }

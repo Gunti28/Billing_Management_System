@@ -1,4 +1,4 @@
-package com.srnrit.BMS.test;
+package com.srnrit.BMS.dao.test;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
