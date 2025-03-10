@@ -255,6 +255,28 @@ public class UserDaoImpl implements UserDao {
 		List<User> allUsers = userRepository.findAll();
 		return allUsers!=null && allUsers.size() > 0 ?Optional.of(allUsers):Optional.empty();
 	}
+
+	
+	@Override
+	public Optional<User> changePassword(String userEmail, String newPassword) {
+		
+			  Optional<User> byUserEmail = this.findByUserEmail(userEmail);
+			  if(byUserEmail.isPresent())
+			  {
+				  User user = byUserEmail.get();
+				  if(user.getActive())
+				  {
+					  user.setUserPassword(newPassword);
+					  User updatePassword = userRepository.save(user);
+					  return updatePassword!=null?Optional.of(updatePassword):Optional.empty();
+				  }
+				  else throw new RuntimeException("User is not active");
+				  
+			  }
+			  else throw new RuntimeException("User not exist with email "+userEmail);
+	
+		
+	}
 }	
 
 	
