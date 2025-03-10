@@ -16,13 +16,22 @@ public class EmailSender
 	}
 	 
 	
-	public static void sendOtpEmail(String to, String otp) 
+	public static boolean sendOTPToEmail(String to, String otp) 
 	{
-		SimpleMailMessage message = new SimpleMailMessage();
-		message.setTo(to);
-		message.setSubject("Your Otp Code");
-		message.setText("Your Otp Code is :" + otp);
-		javaMailSender.send(message);
+		boolean flag=false;
+		try 
+		{
+			SimpleMailMessage message = new SimpleMailMessage();
+			message.setTo(to);
+			message.setSubject("Your Otp Code");
+			message.setText("Your Otp Code is :" + otp);
+			javaMailSender.send(message);
+			flag=true;
+		} 
+		catch (Exception e) {
+			throw new RuntimeException(e.getMessage());
+		}
+		return flag;
 	}
 
 	

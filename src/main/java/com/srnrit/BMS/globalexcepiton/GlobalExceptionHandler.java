@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
+import com.srnrit.BMS.exception.userexceptions.InvalideOTPException;
 import com.srnrit.BMS.exception.userexceptions.UnSupportedFileTypeException;
 import com.srnrit.BMS.exception.userexceptions.UserAleadyExistException;
 import com.srnrit.BMS.exception.userexceptions.UserNotFoundException;
@@ -88,6 +89,12 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<Message> exception(Exception e)
 	{
 		e.printStackTrace();
+		return new ResponseEntity<Message>(new Message(e.getMessage()),HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+	
+	@ExceptionHandler(exception = InvalideOTPException.class)
+	public ResponseEntity<Message> invalidOTPException(InvalideOTPException e)
+	{
 		return new ResponseEntity<Message>(new Message(e.getMessage()),HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 	

@@ -50,7 +50,7 @@ public class OTPOperation
 		 }
 	 }
 	 
-	 public String generateOTP()
+	 public String getOTP()
 	 {
 		  Optional<StringBuilder> otp = OTPGenerator.generateOTP(4);
 		  if(otp.isPresent())
