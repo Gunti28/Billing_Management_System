@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.srnrit.BMS.dao.UserDao;
+import com.srnrit.BMS.dto.UpdateUserRequestDTO;
 import com.srnrit.BMS.dto.UserRequestDTO;
 import com.srnrit.BMS.dto.UserResponseDTO;
 import com.srnrit.BMS.entity.User;
@@ -72,13 +73,13 @@ public class UserServiceImpl implements UserService{
 	}
 
 	@Override
-	public UserResponseDTO updateUserById(UserRequestDTO userRequestDTO,String userId) 
+	public UserResponseDTO updateUserById(UpdateUserRequestDTO updateUserRequestDTO,String userId) 
 	{
-		if(userRequestDTO!=null)
+		if(updateUserRequestDTO!=null)
 		{
 			if(userId!=null && !userId.isBlank())
 			{
-				User user = DTOToEntity.userRequestDtoToUserEntity(userRequestDTO);
+				User user = DTOToEntity.userUpdateRequestDtoToUserEntity(updateUserRequestDTO);
 				Optional<User> updateUser = this.userDao.updateByUserId(user, userId);
 				if(updateUser.isPresent())
 				{
