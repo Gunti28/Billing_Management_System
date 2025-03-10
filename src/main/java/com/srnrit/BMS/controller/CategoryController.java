@@ -47,17 +47,8 @@ public class CategoryController {
         List<CategoryResponseDTO> categories=categoryService.getAllCategory();
         return new ResponseEntity<>(categories,HttpStatus.OK);
     }
-/*
-    //API to update a Category by using CategoryId
-    @PutMapping("/updateCategoryById")
-    public ResponseEntity<?> updateCategory(@RequestBody UpdateCategoryRequestDTO categoryRequest) {
-        String categoryId = categoryRequest.getCategoryId();
-        String categoryName = categoryRequest.getCategoryName();
 
-        String updateCategory = categoryService.updateCategory(categoryId, categoryName);
-        return new ResponseEntity<>(updateCategory, HttpStatus.OK);
-    }
-*/
+    //API to update a Category by using CategoryId
     @PutMapping("/updateCategoryById")
     public ResponseEntity<?> updateCategory(@RequestBody UpdateCategoryRequestDTO categoryRequest) {
         String categoryId = categoryRequest.getCategoryId();
