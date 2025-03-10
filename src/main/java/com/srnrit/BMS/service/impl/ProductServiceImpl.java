@@ -1,88 +1,118 @@
 package com.srnrit.BMS.service.impl;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.srnrit.BMS.dao.ProductDao;
 import com.srnrit.BMS.dto.ProductRequestDTO;
 import com.srnrit.BMS.dto.ProductResponseDTO;
 import com.srnrit.BMS.entity.Product;
 import com.srnrit.BMS.exception.productexceptions.ProductNotCreatedException;
+import com.srnrit.BMS.exception.productexceptions.ProductNotFoundException;
 import com.srnrit.BMS.mapper.DTOToEntity;
 import com.srnrit.BMS.mapper.EntityToDTO;
 import com.srnrit.BMS.service.IProductService;
+import com.srnrit.BMS.util.FileStorageProperties;
 
 @Service
 public class ProductServiceImpl implements IProductService {
     
     private final ProductDao productDao;
+    private final FileStorageProperties fileStorageProperties;
 
-    public ProductServiceImpl(ProductDao productDao) {
+    public ProductServiceImpl(ProductDao productDao, FileStorageProperties fileStorageProperties) {
         this.productDao = productDao;
+        this.fileStorageProperties = fileStorageProperties;
     }
 
-    // Storing a new product by category
     @Override
-    public ProductResponseDTO storeProduct(ProductRequestDTO productRequestDTO) {
-        if (productRequestDTO != null) {
-            Product product = DTOToEntity.toProduct(productRequestDTO);
-            Optional<Product> productStored = this.productDao.saveProduct(product, productRequestDTO.getCategoryId());
+    public ProductResponseDTO storeProduct(ProductRequestDTO productRequestDTO, MultipartFile productImage) {
+        if (productRequestDTO == null) {
+            throw new RuntimeException("Invalid product data!");
+        }
 
-            return EntityToDTO.toProductResponseDTO(
-                productStored.orElseThrow(() -> new ProductNotCreatedException("Product not created"))
-            );
-        } else {
-            throw new RuntimeException("Invalid JSON!");
+        Product product = DTOToEntity.toProduct(productRequestDTO);
+
+        if (productImage != null && !productImage.isEmpty()) {
+            String imagePath = saveImage(productImage);
+            product.setProductImage(imagePath);
+        }
+
+        Optional<Product> productStored = this.productDao.saveProduct(product, productRequestDTO.getCategoryId());
+
+        return EntityToDTO.toProductResponseDTO(
+            productStored.orElseThrow(() -> new ProductNotCreatedException("Failed to save product."))
+        );
+    }
+
+    private String saveImage(MultipartFile imageFile) {
+        try {
+            String storagePath = fileStorageProperties.getImageStoragePath();
+
+            File directory = new File(storagePath);
+            if (!directory.exists()) {
+                directory.mkdirs();
+            }
+
+            String uniqueFileName = UUID.randomUUID().toString() + "_" + imageFile.getOriginalFilename();
+            String filePath = storagePath + uniqueFileName;
+
+            File file = new File(filePath);
+            imageFile.transferTo(file);
+
+            return filePath;
+        } catch (IOException e) {
+            throw new RuntimeException("Error saving image file: " + e.getMessage());
         }
     }
 
-    // Fetch a product by name
     @Override
     public ProductResponseDTO getProductByProductName(String productName) {
         Optional<List<Product>> products = this.productDao.searchProductByName(productName);
         if (products.isPresent() && !products.get().isEmpty()) {
-            return EntityToDTO.toProductResponseDTO(products.get().get(0)); // Return first match
+            return EntityToDTO.toProductResponseDTO(products.get().get(0));
         } else {
-            throw new RuntimeException("Product not found!");
+            throw new ProductNotFoundException("No product found with name: " + productName);
         }
     }
 
-    // Delete a product by ID
     @Override
     public String deleteProductByProductId(String productId) {
         Optional<String> result = this.productDao.deleteProductById(productId);
-        return result.orElseThrow(() -> new RuntimeException("Product not found for deletion"));
+        return result.orElseThrow(() -> new ProductNotFoundException("Product not found for deletion with ID: " + productId));
     }
 
-    // Update a product by ID
     @Override
     public ProductResponseDTO updateProductByProductId(ProductRequestDTO productRequestDTO, String productId) {
         Product product = DTOToEntity.toProduct(productRequestDTO);
-        product.setProductId(productId); // Ensure correct ID is updated
+        product.setProductId(productId);
 
         Optional<Product> updatedProduct = this.productDao.updateProduct(product);
-        return EntityToDTO.toProductResponseDTO(updatedProduct.orElseThrow(() -> new RuntimeException("Product update failed!")));
+        return EntityToDTO.toProductResponseDTO(updatedProduct.orElseThrow(() -> new ProductNotFoundException("Failed to update product with ID: " + productId)));
     }
 
-    // Fetch all products from the database
     @Override
     public List<ProductResponseDTO> getAllProducts() {
         Optional<List<Product>> products = this.productDao.fetchAllProduct();
-        return products.orElseThrow(() -> new RuntimeException("No products found!"))
+        return products.orElseThrow(() -> new RuntimeException("No products available!"))
                 .stream()
                 .map(EntityToDTO::toProductResponseDTO)
                 .collect(Collectors.toList());
     }
 
-    // Fetch products based on availability
     @Override
     public List<ProductResponseDTO> fetchProductByAvailability(Boolean inStock) {
         Optional<List<Product>> products = this.productDao.fetchProductByAvailability(inStock);
-        return products.orElseThrow(() -> new RuntimeException("No products found with the given availability!"))
+        return products.orElseThrow(() -> new RuntimeException("No products found with specified availability!"))
                 .stream()
                 .map(EntityToDTO::toProductResponseDTO)
                 .collect(Collectors.toList());
     }
-    
 }

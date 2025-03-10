@@ -1,13 +1,14 @@
 package com.srnrit.BMS.service;
 
 import java.util.List;
+import org.springframework.web.multipart.MultipartFile;
 import com.srnrit.BMS.dto.ProductRequestDTO;
 import com.srnrit.BMS.dto.ProductResponseDTO;
 
 public interface IProductService {
     
-    // Adding product by category
-    ProductResponseDTO storeProduct(ProductRequestDTO productRequestDTO);
+    // Adding product by category (supports image upload)
+    ProductResponseDTO storeProduct(ProductRequestDTO productRequestDTO, MultipartFile productImage);
     
     // Fetching product by name
     ProductResponseDTO getProductByProductName(String productName);
