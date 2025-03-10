@@ -89,6 +89,9 @@ public class UserController {
 	List<UserResponseDTO> allUser = this.userService.getAllUsers();
 	return new ResponseEntity<List<UserResponseDTO>>(allUser,HttpStatus.OK);	
 	}
+	
+	
+	
     
 
 	
