@@ -29,13 +29,13 @@ public class CategoryServiceImpl implements ICategoryService
 		this.categoryDAO = categoryDAO;
 	}
 
+	//Add Category Method for the Service Layer
 	@Override
 	public CategoryResponseDTO addCategoryWithProducts(CategoryRequestDTO categoryRequestDTO) {
 		Category category=new Category();
 		category.setCategoryname(categoryRequestDTO.getCategoryName());
 
-		if(categoryRequestDTO.getProducts()!=null)
-		{
+		if(categoryRequestDTO.getProducts()!=null) {
 			List<Product> products = categoryRequestDTO.getProducts().stream()
 					.map(productRequest -> new Product(
 							productRequest.getProductName(),
@@ -49,50 +49,40 @@ public class CategoryServiceImpl implements ICategoryService
 			products.stream().forEach(product -> category.addProduct(product));
 
 			Optional<Category> insertCategory = this.categoryDAO.insertCategory(category);
-			if(insertCategory.isPresent())
-			{
+			if(insertCategory.isPresent()) {
 				CategoryResponseDTO categoryResponse = EntityToDTO.toCategoryResponse(category);
 				return categoryResponse;
 			}
-			else 
-			{
+			else {
 				throw new CategoryNotCreatedException("Category not created !");
 			}
-
 		}
-		else 
-		{
+		else {
 			Optional<Category> insertedCategory = this.categoryDAO.insertCategory(category);
 
-
-			if(insertedCategory.isPresent()) 
-			{ 
+			if(insertedCategory.isPresent()) {
 				CategoryResponseDTO categoryResponse = EntityToDTO.toCategoryResponse(category); 
 				return categoryResponse; 
 			} 
-			else 
-			{
+			else {
 				throw new CategoryNotCreatedException("Category not created !"); 
 			}
-
 		}
 	}
 
+	//Get All Category method in the Service Layer
 	@Override
-	public List<CategoryResponseDTO> getAllCategory() 
-	{
+	public List<CategoryResponseDTO> getAllCategory() {
 		Optional<List<Category>> allCategory = categoryDAO.getAllCategory();
-		if(allCategory.isPresent())
-		{
+
+		if(allCategory.isPresent()) {
 			List<CategoryResponseDTO> allCategoryResponse=new ArrayList<>();
 			List<Category> categories=allCategory.get();
 
-			for(Category category:categories)
-			{
+			for(Category category:categories) {
 				List<Product> products=category.getProducts();
 				List<ProductResponseDTO> productResponse=new ArrayList<>();
-				for(Product product:products)
-				{
+				for(Product product:products) {
 					ProductResponseDTO productResponseDTO=EntityToDTO.toProductResponseDTO(product);
 					productResponse.add(productResponseDTO);
 				}
@@ -103,28 +93,23 @@ public class CategoryServiceImpl implements ICategoryService
 			}
 			return allCategoryResponse;
 		}
-		else 
-		{
+		else {
 			throw new CategoryNotFoundException("No Category available");
 		}
-
-
 	}
 
-	@Override
-	public String updateCategory(String categoryId, String categoryName) 
-	{
 
-		if(categoryId == null)
-		{
+
+	@Override
+	public String updateCategory(String categoryId, String categoryName) {
+
+		if(categoryId == null) {
 			throw new RuntimeException("CategoryId must not be null");
 		}
-		else if (categoryName == null || categoryName.length() < 3) 
-		{
+		else if (categoryName == null || categoryName.length() < 3) {
 			throw new RuntimeException("CategoryName must not be null and it should be a valid categoryName");
 		}
-		else 
-		{
+		else {
 			Optional<String> updateCategory = this.categoryDAO.updateCategory(categoryId, categoryName);
 			return updateCategory.orElseThrow(()->new CategoryNotFoundException("Category not exist with id : "+categoryId));
 		}

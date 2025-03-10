@@ -1,12 +1,7 @@
 package com.srnrit.BMS.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+public class Message {
 
-@Data
-@AllArgsConstructor
-public class Message 
-{
-    private String message;
-    
+    public Message(String message) {
+    }
 }

@@ -26,13 +26,11 @@ public class CategoryDaoImpl implements ICategoryDao
 	@Override
 	public Optional<Category> insertCategory(Category category) {
 		Category existingCategory = this.categoryRepository.findByCategoryname(category.getCategoryname());
-		if(existingCategory == null)
-		{
+		if(existingCategory == null) {
 			Category savedCategory = this.categoryRepository.save(category);
 			return savedCategory!=null?Optional.of(savedCategory):Optional.empty();
 		}
-		else 
-		{
+		else {
 			throw new CategoryNotCreatedException("Category already available with name : "+category.getCategoryname());
 		} 
 	}
@@ -40,15 +38,12 @@ public class CategoryDaoImpl implements ICategoryDao
 
 	//for fetching category
 	@Override
-	public Optional<List<Category>> getAllCategory() 
-	{
+	public Optional<List<Category>> getAllCategory() {
 		long count = categoryRepository.count();
-		if(count > 0)
-		{
+		if(count > 0) {
 			List<Category> categories = categoryRepository.findAll();
 			return Optional.of(categories);
-		}else 
-		{
+		}else {
 			return Optional.empty();
 		}
 
@@ -69,8 +64,7 @@ public class CategoryDaoImpl implements ICategoryDao
 	//for fetching category
 	@Override
 	public Optional<Category> getCategoryByCategoryId(String categoryId) {
-		if(this.categoryRepository.existsById(categoryId))
-		{
+		if(this.categoryRepository.existsById(categoryId)) {
 			return  this.categoryRepository.findById(categoryId);
 		}
 		return Optional.empty();
@@ -79,13 +73,11 @@ public class CategoryDaoImpl implements ICategoryDao
 	//Delete by id
 	@Override
 	public Optional<String> deleteCategory(String categoryId) {
-		if(categoryRepository.existsById(categoryId))
-		{
+		if(categoryRepository.existsById(categoryId)) {
 			this.categoryRepository.deleteById(categoryId);
 			return Optional.of("categoryId deleted successfully");
 		}
-		else
-		{
+		else {
 			return Optional.empty();
 		}
 
