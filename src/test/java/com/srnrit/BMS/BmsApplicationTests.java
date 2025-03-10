@@ -1,54 +1,43 @@
 package com.srnrit.BMS;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
 
-import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.srnrit.BMS.dao.UserDao;
-import com.srnrit.BMS.dto.UserResponseDTO;
+import com.srnrit.BMS.dao.impl.UserDaoImpl;
+import com.srnrit.BMS.entity.User;
 import com.srnrit.BMS.repository.UserRepository;
-import com.srnrit.BMS.service.UserService;
-
-
+import com.srnrit.BMS.service.impl.UserServiceImpl;
+import com.srnrit.BMS.util.FileStorageProperties;
 
 @SpringBootTest
 class BmsApplicationTests {
 	
 
-	@Autowired
-	UserDao userDAO;
-	
 	@Mock
-	UserRepository userRepository ;
-	
-	
-//	@Autowired
-//	UserDao userDAO;
+    private UserRepository userRepository;
 
-//	@Test
-//	void userSaveTest() 
-//	{
-//		User user = new User();
-//		user.setUserName("venu");
-//		user.setUserEmail("venu@gmail.com");
-//		user.setUserPassword("Venu@!2334");
-//		user.setUserGender("Male");
-//		user.setUserPhone(8712339224L);
-//		user.setTermsAndConditions(true);
-//		
-//		Optional<User> saveuser = userDAO.saveuser(user);
-//		 assertTrue(saveuser.isPresent()); 
-//		 System.out.println(saveuser.get());
-//		
-//		
-//	}
+    @Mock
+    private FileStorageProperties fileStorageProperties;
+
+    @InjectMocks
+    private UserDaoImpl userDao;
+
+    @InjectMocks
+    private UserServiceImpl userService;
+    
+    
+
 	
-	@Autowired
-	UserService service;
 	
 //	@Test
 //	void saveUserService()
@@ -92,12 +81,12 @@ class BmsApplicationTests {
 //		System.out.println(userResponseDTO);
 //	}
 	
-	@Test
-	void getAllUser()
-	{
-		List<UserResponseDTO> allUsers = service.getAllUsers();
-		System.out.println(allUsers);
-	}
+//	@Test
+//	void getAllUser()
+//	{
+//		List<UserResponseDTO> allUsers = service.getAllUsers();
+//		System.out.println(allUsers);
+//	}
 	
 	
 
