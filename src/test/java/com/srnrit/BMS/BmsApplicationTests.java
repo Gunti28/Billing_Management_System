@@ -1,6 +1,8 @@
 package com.srnrit.BMS;
 
 
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,11 +85,18 @@ class BmsApplicationTests {
 //	}
 	
 	
+//	@Test
+//	void loginEmailAndPassword()
+//	{
+//		UserResponseDTO userResponseDTO = service.loginUserByEmailAndPassword("venu123@gmail.com", "venu123");
+//		System.out.println(userResponseDTO);
+//	}
+	
 	@Test
-	void loginEmailAndPassword()
+	void getAllUser()
 	{
-		UserResponseDTO userResponseDTO = service.loginUserByEmailAndPassword("venu@gmail.com", "venu@!2334");
-		System.out.println(userResponseDTO);
+		List<UserResponseDTO> allUsers = service.getAllUsers();
+		System.out.println(allUsers);
 	}
 	
 	
@@ -97,5 +106,4 @@ class BmsApplicationTests {
 }
 	
 	
-
 
