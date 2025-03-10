@@ -1,7 +1,7 @@
 package com.srnrit.BMS;
 
 
-import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -9,9 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import com.srnrit.BMS.dao.UserDao;
-import com.srnrit.BMS.dto.UserResponseDTO;
+import com.srnrit.BMS.dto.EmailRequestDTO;
+import com.srnrit.BMS.entity.User;
 import com.srnrit.BMS.repository.UserRepository;
 import com.srnrit.BMS.service.UserService;
+import com.srnrit.BMS.util.Message;
 
 
 
@@ -26,8 +28,7 @@ class BmsApplicationTests {
 	UserRepository userRepository ;
 	
 	
-//	@Autowired
-//	UserDao userDAO;
+	
 
 //	@Test
 //	void userSaveTest() 
@@ -92,11 +93,24 @@ class BmsApplicationTests {
 //		System.out.println(userResponseDTO);
 //	}
 	
+//	@Test
+//	void getAllUser()
+//	{
+//		List<UserResponseDTO> allUsers = service.getAllUsers();
+//		System.out.println(allUsers);
+//	}
+	
+	
 	@Test
-	void getAllUser()
+	void verifyEmail()
 	{
-		List<UserResponseDTO> allUsers = service.getAllUsers();
-		System.out.println(allUsers);
+		EmailRequestDTO emailRequestDTO=new EmailRequestDTO();
+		emailRequestDTO.setEmail("sujitmaharana1111@gmail.com");
+		Message verifyUserByEmail = this.service.verifyUserByEmail(emailRequestDTO);
+		System.out.println(verifyUserByEmail);
+		
+		
+		
 	}
 	
 	
