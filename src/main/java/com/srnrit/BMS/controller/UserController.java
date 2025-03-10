@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.srnrit.BMS.dto.ChangePasswordRequestDTO;
 import com.srnrit.BMS.dto.EmailRequestDTO;
 import com.srnrit.BMS.dto.LoginRequestDTO;
 import com.srnrit.BMS.dto.UpdateUserRequestDTO;
@@ -93,19 +94,28 @@ public class UserController {
 	}
 
 	
-	@PutMapping(value="/VerifyEmail")
+	@PostMapping(value="/VerifyEmail")
 	public ResponseEntity<?> verifyEmail(@Valid @RequestBody EmailRequestDTO emailRequestDTO) 
 	{
 	      Message verifyUserByEmail = this.userService.verifyUserByEmail(emailRequestDTO);
 	    return new ResponseEntity<Message>(verifyUserByEmail,HttpStatus.OK);
 	}
 	
-	@PutMapping(value="/VerifyOTP")
+	@PostMapping(value="/VerifyOTP")
 	public ResponseEntity<?> verifyOTP (@Valid @RequestBody VerifyOTPRequestDTO verifyOTPRequestDTO) 
 	{
 	    Message verifyOTP = this.userService.verifyOTP(verifyOTPRequestDTO);	
 		return new ResponseEntity<Message>(verifyOTP,HttpStatus.OK);
 		
 	}
+	
+	@PostMapping(value="/UpdatePassword")
+	public ResponseEntity<UserResponseDTO> updatePassword(@Valid @RequestBody ChangePasswordRequestDTO changePasswordRequestDTO) 
+	{
+		 UserResponseDTO updatePassword = this.userService.updatePassword(changePasswordRequestDTO);
+		return new ResponseEntity<UserResponseDTO>(updatePassword,HttpStatus.OK);
+		
+	}
+
 }
 
