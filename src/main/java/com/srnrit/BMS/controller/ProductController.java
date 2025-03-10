@@ -1,11 +1,13 @@
 package com.srnrit.BMS.controller;
 
+import java.io.IOException;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.srnrit.BMS.dto.ProductRequestDTO;
 import com.srnrit.BMS.dto.ProductResponseDTO;
@@ -26,17 +28,27 @@ public class ProductController {
         this.productService = productService;
     }
 
-    // Add Product by Category with Validation
-    @PostMapping(value = "/addProductByCategory")
-    public ResponseEntity<?> addProductByCategory(@Valid @RequestBody ProductRequestDTO productRequestDTO) {
+    // ✅ Add Product by Category with Image Upload
+    @PostMapping(value = "/addProductByCategory", consumes = "multipart/form-data")
+    public ResponseEntity<?> addProductByCategory(
+            @RequestParam("categoryId") String categoryId,
+            @RequestParam("productName") String productName,
+            @RequestParam("productQuantity") Integer productQuantity,
+            @RequestParam("productPrice") Double productPrice,
+            @RequestParam("inStock") Boolean inStock,
+            @RequestParam(value = "productImage", required = false) MultipartFile productImage) throws IOException {
+
         try {
-            ProductResponseDTO productResponseDTO = this.productService.storeProduct(productRequestDTO);
+            // ✅ Create ProductRequestDTO
+            ProductRequestDTO productRequestDTO = new ProductRequestDTO(
+                    categoryId, productName, null, productQuantity, productPrice, inStock
+            );
+
+            // ✅ Pass the productRequestDTO and image to service
+            ProductResponseDTO productResponseDTO = this.productService.storeProduct(productRequestDTO, productImage);
             return new ResponseEntity<>(productResponseDTO, HttpStatus.CREATED);
         } catch (CategoryNotFoundException e) {
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.NOT_FOUND);
-        } catch (Exception e) {
-            logger.error("Unexpected error while adding product: {}", e.getMessage(), e);
-            return new ResponseEntity<>("An unexpected error occurred while adding the product.", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
