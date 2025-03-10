@@ -1,5 +1,7 @@
 package com.srnrit.BMS.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -70,6 +72,7 @@ public class UserController {
 		UserResponseDTO responseDTO = this.userService.findUserById(userId);
 		return ResponseEntity.status(HttpStatus.FOUND).body(responseDTO);
 	}
+
 	
 	
 	@PostMapping(value = "/login")
@@ -80,9 +83,13 @@ public class UserController {
 	}
 	
 	
-	
-	
-	
+	@GetMapping(value="/allUsers")
+	public ResponseEntity<List<UserResponseDTO>> getAllUsers()
+	{
+	List<UserResponseDTO> allUser = this.userService.getAllUsers();
+	return new ResponseEntity<List<UserResponseDTO>>(allUser,HttpStatus.OK);	
+	}
+
 
 	
 
