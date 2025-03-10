@@ -3,10 +3,12 @@ package com.srnrit.BMS.dao.impl;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Component;
 
 import com.srnrit.BMS.dao.ICategoryDao;
 import com.srnrit.BMS.entity.Category;
+import com.srnrit.BMS.exception.categoryexceptions.CategoryNameAlreadyExistsException;
 import com.srnrit.BMS.exception.categoryexceptions.CategoryNotCreatedException;
 import com.srnrit.BMS.exception.categoryexceptions.CategoryNotFoundException;
 import com.srnrit.BMS.repository.CategoryRepository;
@@ -25,13 +27,13 @@ public class CategoryDaoImpl implements ICategoryDao
 	//for category insertion
 	@Override
 	public Optional<Category> insertCategory(Category category) {
-		Category existingCategory = this.categoryRepository.findByCategoryname(category.getCategoryname());
+		Category existingCategory = this.categoryRepository.findByCategoryName(category.getCategoryName());
 		if(existingCategory == null) {
 			Category savedCategory = this.categoryRepository.save(category);
 			return savedCategory!=null?Optional.of(savedCategory):Optional.empty();
 		}
 		else {
-			throw new CategoryNotCreatedException("Category already available with name : "+category.getCategoryname());
+			throw new CategoryNotCreatedException("Category already available with name : "+category.getCategoryName());
 		} 
 	}
 
@@ -46,22 +48,22 @@ public class CategoryDaoImpl implements ICategoryDao
 		}else {
 			return Optional.empty();
 		}
-
 	}
 
 
 	//for updating category
 	public Optional<String> updateCategory(String categoryId, String categoryName) {
-        Category category = categoryRepository.findById(categoryId).orElseThrow(() -> new CategoryNotFoundException("Category not found with id: " + categoryId));
-        
-        category.setCategoryname(categoryName);
-        categoryRepository.save(category);
-        
-        return Optional.of("Category updated successfully with id: " + categoryId);
-    }
+	    Category category = categoryRepository.findById(categoryId)
+	        .orElseThrow(() -> new CategoryNotFoundException("Category not found with id: " + categoryId));
+	    category.setCategoryName(categoryName);  
 
+	    categoryRepository.save(category);
+	    return Optional.of("Category updated successfully with id: " + categoryId);
+	}
 
-	//for fetching category
+	
+
+	//for fetching category by Id
 	@Override
 	public Optional<Category> getCategoryByCategoryId(String categoryId) {
 		if(this.categoryRepository.existsById(categoryId)) {
