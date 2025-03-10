@@ -1,15 +1,23 @@
 package com.srnrit.BMS.controller;
 
+import java.util.List;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.srnrit.BMS.dto.CategoryRequestDTO;
 import com.srnrit.BMS.dto.CategoryResponseDTO;
 import com.srnrit.BMS.service.ICategoryService;
-import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/category")
@@ -51,7 +59,7 @@ public class CategoryController {
 
 
     //API to Get Category by using CategoryId
-    @GetMapping("/{categoryId}")
+    @GetMapping("categoryById/{categoryId}")
     public ResponseEntity<?> findCategoryById(@PathVariable String categoryId){
         CategoryResponseDTO foundCategory =categoryService.findCategoryByCategoryId(categoryId);
         return  new ResponseEntity<>(foundCategory,HttpStatus.OK) ;
