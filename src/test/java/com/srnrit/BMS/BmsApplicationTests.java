@@ -1,13 +1,24 @@
 package com.srnrit.BMS;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
 
+
+import com.srnrit.BMS.dao.impl.UserDaoImpl;
+import com.srnrit.BMS.entity.User;
+import com.srnrit.BMS.repository.UserRepository;
+import com.srnrit.BMS.service.impl.UserServiceImpl;
+import com.srnrit.BMS.util.FileStorageProperties;
 import com.srnrit.BMS.dao.UserDao;
 import com.srnrit.BMS.dto.EmailRequestDTO;
 import com.srnrit.BMS.entity.User;
@@ -17,39 +28,33 @@ import com.srnrit.BMS.util.Message;
 
 
 
+
 @SpringBootTest
 class BmsApplicationTests {
 	
 
-	@Autowired
-	UserDao userDAO;
-	
 	@Mock
+
+    private UserRepository userRepository;
+
+    @Mock
+    private FileStorageProperties fileStorageProperties;
+
+    @InjectMocks
+    private UserDaoImpl userDao;
+
+    @InjectMocks
+    private UserServiceImpl userService;
+    
+    
+
 	UserRepository userRepository ;
 	
 	
 	
 
-//	@Test
-//	void userSaveTest() 
-//	{
-//		User user = new User();
-//		user.setUserName("venu");
-//		user.setUserEmail("venu@gmail.com");
-//		user.setUserPassword("Venu@!2334");
-//		user.setUserGender("Male");
-//		user.setUserPhone(8712339224L);
-//		user.setTermsAndConditions(true);
-//		
-//		Optional<User> saveuser = userDAO.saveuser(user);
-//		 assertTrue(saveuser.isPresent()); 
-//		 System.out.println(saveuser.get());
-//		
-//		
-//	}
+
 	
-	@Autowired
-	UserService service;
 	
 //	@Test
 //	void saveUserService()
@@ -99,6 +104,7 @@ class BmsApplicationTests {
 //		List<UserResponseDTO> allUsers = service.getAllUsers();
 //		System.out.println(allUsers);
 //	}
+
 	
 	
 	@Test
@@ -112,6 +118,7 @@ class BmsApplicationTests {
 		
 		
 	}
+
 	
 	
 
