@@ -1,5 +1,6 @@
 package com.srnrit.BMS.controller;
 
+
 import java.io.IOException;
 import java.util.List;
 import org.slf4j.Logger;
@@ -37,14 +38,20 @@ public class ProductController {
             @RequestParam("productPrice") Double productPrice,
             @RequestParam("inStock") Boolean inStock,
             @RequestParam(value = "productImage", required = false) MultipartFile productImage) throws IOException {
-
+    		
+    	if(productImage==null || productImage.isEmpty()) {
+    		return ResponseEntity.badRequest().body("Error: Product Image is required.");
+    	}
+    	
         try {
-            // ✅ Create ProductRequestDTO
+            // Create ProductRequestDTO
             ProductRequestDTO productRequestDTO = new ProductRequestDTO(
                     categoryId, productName, null, productQuantity, productPrice, inStock
             );
+            
+            
 
-            // ✅ Pass the productRequestDTO and image to service
+            //Pass the productRequestDTO and image to service
             ProductResponseDTO productResponseDTO = this.productService.storeProduct(productRequestDTO, productImage);
             return new ResponseEntity<>(productResponseDTO, HttpStatus.CREATED);
         } catch (CategoryNotFoundException e) {
