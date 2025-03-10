@@ -1,13 +1,9 @@
 package com.srnrit.BMS;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import java.util.Optional;
-
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+<<<<<<< HEAD
 import com.srnrit.BMS.dao.ICategoryDao;
 import com.srnrit.BMS.entity.Category;
 import com.srnrit.BMS.entity.Product;
@@ -58,6 +54,16 @@ class BmsApplicationTests
 	  */
 	
 	  }
+=======
+@SpringBootTest
+class BmsApplicationTests 
+{	
+	@Test
+	void contextLoads() {
+	}
+	
+	
+>>>>>>> 7310227eab35dca7c21368dda96b10ccc685ec5b
 }
 
 
