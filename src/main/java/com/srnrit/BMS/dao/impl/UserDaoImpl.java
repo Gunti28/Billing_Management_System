@@ -106,28 +106,31 @@ public class UserDaoImpl implements UserDao {
 				if(byId.isPresent()) 
 				{
 					User oldUser = byId.get();
-					if(userRepository.findByUserEmail(user.getUserEmail()) == null ) 
+					if(oldUser.getActive())
 					{
-						
-						if(userRepository.findByUserPhone(user.getUserPhone()) == null)
+						if(userRepository.findByUserEmail(user.getUserEmail()) == null ) 
 						{
 							
-							
-							oldUser.setUserEmail(user.getUserEmail());
-							oldUser.setUserName(user.getUserName());
-							oldUser.setUserPassword(user.getUserPassword());
-							oldUser.setUserPhone(user.getUserPhone());
-							
-							oldUser = userRepository.save(oldUser);
-							
-							return oldUser!=null?Optional.of(oldUser):Optional.empty();
+							if(userRepository.findByUserPhone(user.getUserPhone()) == null)
+							{
+								
+								
+								oldUser.setUserEmail(user.getUserEmail());
+								oldUser.setUserName(user.getUserName());
+								oldUser.setUserPassword(user.getUserPassword());
+								oldUser.setUserPhone(user.getUserPhone());
+								
+								oldUser = userRepository.save(oldUser);
+								
+								return oldUser!=null?Optional.of(oldUser):Optional.empty();
+								
+							}
+							else throw new UserAleadyExistException("User already exist with phoneNumber"+user.getUserPhone());
 							
 						}
-						else throw new UserAleadyExistException("User already exist with phoneNumber"+user.getUserPhone());
-						
+						else throw new UserAleadyExistException("User already exist with email : "+user.getUserEmail());	
 					}
-					else throw new UserAleadyExistException("User already exist with email : "+user.getUserEmail());	
-						
+					else throw new RuntimeException("user is not active");			
 				}
 				else throw new UserNotFoundException("User not exist with id : "+userId);
 				
