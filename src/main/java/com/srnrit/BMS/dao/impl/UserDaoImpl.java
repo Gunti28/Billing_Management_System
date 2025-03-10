@@ -106,28 +106,31 @@ public class UserDaoImpl implements UserDao {
 				if(byId.isPresent()) 
 				{
 					User oldUser = byId.get();
-					if(userRepository.findByUserEmail(user.getUserEmail()) == null ) 
+					if(oldUser.getActive())
 					{
-						
-						if(userRepository.findByUserPhone(user.getUserPhone()) == null)
+						if(userRepository.findByUserEmail(user.getUserEmail()) == null ) 
 						{
 							
-							
-							oldUser.setUserEmail(user.getUserEmail());
-							oldUser.setUserName(user.getUserName());
-							oldUser.setUserPassword(user.getUserPassword());
-							oldUser.setUserPhone(user.getUserPhone());
-							
-							oldUser = userRepository.save(oldUser);
-							
-							return oldUser!=null?Optional.of(oldUser):Optional.empty();
+							if(userRepository.findByUserPhone(user.getUserPhone()) == null)
+							{
+								
+								
+								oldUser.setUserEmail(user.getUserEmail());
+								oldUser.setUserName(user.getUserName());
+								oldUser.setUserPassword(user.getUserPassword());
+								oldUser.setUserPhone(user.getUserPhone());
+								
+								oldUser = userRepository.save(oldUser);
+								
+								return oldUser!=null?Optional.of(oldUser):Optional.empty();
+								
+							}
+							else throw new UserAleadyExistException("User already exist with phoneNumber"+user.getUserPhone());
 							
 						}
-						else throw new UserAleadyExistException("User already exist with phoneNumber"+user.getUserPhone());
-						
+						else throw new UserAleadyExistException("User already exist with email : "+user.getUserEmail());	
 					}
-					else throw new UserAleadyExistException("User already exist with email : "+user.getUserEmail());	
-						
+					else throw new RuntimeException("user is not active");			
 				}
 				else throw new UserNotFoundException("User not exist with id : "+userId);
 				
@@ -143,7 +146,11 @@ public class UserDaoImpl implements UserDao {
 		if(userEmail!=null && !userEmail.isBlank())
 		{
 			User byUserEmail = userRepository.findByUserEmail(userEmail);
-			return byUserEmail!=null ? Optional.of(byUserEmail) : Optional.empty();
+			if(byUserEmail.getActive())
+			{
+				return byUserEmail!=null ? Optional.of(byUserEmail) : Optional.empty();
+			}
+			else throw new RuntimeException("user is not active.");	
 		}
 		else throw new RuntimeException("user Email must not be null or blank!.");	
 	}
@@ -254,6 +261,28 @@ public class UserDaoImpl implements UserDao {
 	{
 		List<User> allUsers = userRepository.findAll();
 		return allUsers!=null && allUsers.size() > 0 ?Optional.of(allUsers):Optional.empty();
+	}
+
+	
+	@Override
+	public Optional<User> changePassword(String userEmail, String newPassword) {
+		
+			  Optional<User> byUserEmail = this.findByUserEmail(userEmail);
+			  if(byUserEmail.isPresent())
+			  {
+				  User user = byUserEmail.get();
+				  if(user.getActive())
+				  {
+					  user.setUserPassword(newPassword);
+					  User updatePassword = userRepository.save(user);
+					  return updatePassword!=null?Optional.of(updatePassword):Optional.empty();
+				  }
+				  else throw new RuntimeException("User is not active");
+				  
+			  }
+			  else throw new RuntimeException("User not exist with email "+userEmail);
+	
+		
 	}
 }	
 

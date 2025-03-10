@@ -28,7 +28,7 @@ public class User {
 	@Column(name = "UserId",length = 20)
 	private String userId;
 
-	@Column(name = "UseName")
+	@Column(name = "UserName")
 	private String userName;
 	
 	@Column(name="DateOfRegistration")
