@@ -28,14 +28,16 @@ public class GlobalExceptionHandler
   	 return new ResponseEntity<Message>( new  Message(e.getMessage()),HttpStatus.NOT_FOUND);
    }
 	
-	@ExceptionHandler(exception = MethodArgumentNotValidException.class)
-	public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
-		Map<String, String> errors = new HashMap<>();
-
-		for (FieldError error : ex.getBindingResult().getFieldErrors()) {
-			errors.put(error.getField(), error.getDefaultMessage());
-		}
-		return new ResponseEntity<Map<String, String>>(errors, HttpStatus.BAD_REQUEST);
-	}
+	  @ExceptionHandler(exception = MethodArgumentNotValidException.class) public
+	  ResponseEntity<Map<String, String>>
+	  handleValidationExceptions(MethodArgumentNotValidException ex) { Map<String,
+	  String> errors = new HashMap<>();
+	  
+	  for (FieldError error : ex.getBindingResult().getFieldErrors()) {
+	  errors.put(error.getField(), error.getDefaultMessage()); } return new
+	  ResponseEntity<Map<String, String>>(errors, HttpStatus.BAD_REQUEST); 
+	  }
+	 
+	 
 	
 }

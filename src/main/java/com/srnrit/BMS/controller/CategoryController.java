@@ -50,8 +50,8 @@ public class CategoryController {
 
 
     //API to update a Category by using CategoryId
-    @PutMapping("/updateCategory/{CategoryId}")
-    public ResponseEntity<?>  updateCategory(@PathVariable String CategoryId,@RequestParam String CategoryName){
+    @PutMapping("/updateCategory/{CategoryId}/{CategoryName}")
+    public ResponseEntity<?>  updateCategory(@PathVariable String CategoryId,@PathVariable String CategoryName){
        String updateCategory =categoryService.updateCategory(CategoryId,CategoryName);
        return new ResponseEntity<>(updateCategory,HttpStatus.OK);
     }
@@ -59,7 +59,7 @@ public class CategoryController {
 
 
     //API to Get Category by using CategoryId
-    @GetMapping("/{categoryId}")
+    @GetMapping("categoryById/{categoryId}")
     public ResponseEntity<?> findCategoryById(@PathVariable String categoryId){
         CategoryResponseDTO foundCategory =categoryService.findCategoryByCategoryId(categoryId);
         return  new ResponseEntity<>(foundCategory,HttpStatus.OK) ;
