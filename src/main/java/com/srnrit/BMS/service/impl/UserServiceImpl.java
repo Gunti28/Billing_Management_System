@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.srnrit.BMS.dao.UserDao;
+import com.srnrit.BMS.dto.EmailRequestDTO;
 import com.srnrit.BMS.dto.UserRequestDTO;
 import com.srnrit.BMS.dto.UserResponseDTO;
 import com.srnrit.BMS.entity.User;
@@ -236,6 +237,15 @@ public class UserServiceImpl implements UserService{
 		}
 		else throw new RuntimeException("User Email can't be null or blank");
 		
+	}
+
+	@Override
+	public User verifyUserByEmail(EmailRequestDTO emailRequestDTO) {
+		if(emailRequestDTO!=null)
+		{
+			
+		}
+		else throw new RuntimeException("Email can't be null");
 	}
 
 

@@ -4,8 +4,10 @@ import java.util.List;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import com.srnrit.BMS.dto.EmailRequestDTO;
 import com.srnrit.BMS.dto.UserRequestDTO;
 import com.srnrit.BMS.dto.UserResponseDTO;
+import com.srnrit.BMS.entity.User;
 
 public interface UserService {
 	UserResponseDTO saveUser(UserRequestDTO userRequestDTO);
@@ -16,5 +18,6 @@ public interface UserService {
 	UserResponseDTO editUserImage(MultipartFile file,String userId);
 	List<UserResponseDTO> getAllUsers();
 	UserResponseDTO updatePassword(String userEmail,String newPassword);
+	User verifyUserByEmail(EmailRequestDTO emailRequestDTO);
 }
 
