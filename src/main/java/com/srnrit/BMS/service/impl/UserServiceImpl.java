@@ -291,9 +291,4 @@ public class UserServiceImpl implements UserService{
 		else throw new RuntimeException("something went wrong! try again after some time.");
 	}
 	
-	
-
-
-	
-
 }
