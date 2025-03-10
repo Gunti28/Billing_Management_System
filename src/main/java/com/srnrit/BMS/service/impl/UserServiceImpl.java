@@ -1,7 +1,9 @@
 package com.srnrit.BMS.service.impl;
 
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -154,7 +156,7 @@ public class UserServiceImpl implements UserService{
 					{
 						String fileNameExtension=getFileExtension(file.getOriginalFilename());
 
-						if(Arrays.asList("jpg","jpeg","png").contains(fileNameExtension))
+						if(Arrays.asList("jpg","jpeg","png","git","tiff","bmp","svg","webp","heif").contains(fileNameExtension))
 						{
 							Optional<User> optionalUser = this.userDao.editImage(file, userId);
 							if(optionalUser.isPresent())
@@ -183,6 +185,31 @@ public class UserServiceImpl implements UserService{
 			throw new UnSupportedFileTypeException("Invalid File");
 		}
 	    return fileName.substring(dotIndex+1);
+	}
+
+	@Override
+	public List<UserResponseDTO> getAllUsers()
+	{
+		Optional<List<User>> optionalUsers = this.userDao.fetchAlluser();
+		if(optionalUsers.isPresent())
+		{
+			List<User> listOfUser=optionalUsers.get();
+			if(listOfUser!=null)
+			{
+				if(listOfUser.size()>0)
+				{
+					List<UserResponseDTO> listOfUserResponseDTO=new ArrayList<>();
+					for(User user:listOfUser)
+					{
+						UserResponseDTO userResponseDTO = EntityToDTO.userEntityToUserResponseDTO(user);
+						listOfUserResponseDTO.add(userResponseDTO);
+					}
+					return listOfUserResponseDTO;
+				}
+			}
+		}
+		throw new RuntimeException("No User is Present");
+		
 	}
 
 
