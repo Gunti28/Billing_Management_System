@@ -5,11 +5,12 @@ import org.springframework.beans.factory.annotation.Value;
 
 @Component
 public class FileStorageProperties {
+
     
     @Value("${file.storage.images}")
     private String imageStoragePath;
     
-    @Value("${file.storage.max-size}")
+    @Value("${spring.servlet.multipart.max-file-size}")
     private Long getMaxfileSize;
     
     public String getImageStoragePath() {

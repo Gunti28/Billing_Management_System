@@ -12,8 +12,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.srnrit.BMS.dto.LoginRequestDTO;
 import com.srnrit.BMS.dto.UserRequestDTO;
 import com.srnrit.BMS.dto.UserResponseDTO;
 import com.srnrit.BMS.service.UserService;
@@ -53,17 +56,15 @@ public class UserController {
     	return ResponseEntity.status(HttpStatus.OK).body(msg);
     }
 	
-	/*
-	@PutMapping("/editProfileImage/{userid}")
-	public ResponseEntity<UserResponseDTO> editProfileImage(@RequestParam MultipartFile file,
-			                                        @PathVariable("userid") String userId
-			)
+	
+	@PutMapping(value="/editProfileImage/{userid}")
+	public ResponseEntity<?> editProfileImage(@RequestParam MultipartFile file,
+			                                  @PathVariable("userid") String userId)
 	{
-		 UserResponseDTO userResponseDTO = this.userService.editProfileImage(file,userId);
-		 
-		 return new ResponseEntity<UserResponseDTO>(userResponseDTO,HttpStatus.OK);
+		UserResponseDTO userResponseDTO = this.userService.editUserImage(file,userId);
+		return new ResponseEntity<UserResponseDTO>(userResponseDTO,HttpStatus.OK);
 	}
-	*/
+	
 	
 	@GetMapping(value = "/get/{userId}")
 	public ResponseEntity<?> getUserByUserId(@PathVariable String userId)
@@ -71,12 +72,24 @@ public class UserController {
 		UserResponseDTO responseDTO = this.userService.findUserById(userId);
 		return ResponseEntity.status(HttpStatus.FOUND).body(responseDTO);
 	}
+
+	
+	
+	@PostMapping(value = "/login")
+	public ResponseEntity<?> userLoginByEmailAndPassword(@Valid @RequestBody LoginRequestDTO dto)
+	{
+		UserResponseDTO responseDTO = this.userService.loginUserByEmailAndPassword(dto.getEmail(), dto.getPassword());
+	    return ResponseEntity.status(HttpStatus.FOUND).body(responseDTO);
+	}
+	
+	
 	@GetMapping(value="/allUsers")
 	public ResponseEntity<List<UserResponseDTO>> getAllUsers()
 	{
 	List<UserResponseDTO> allUser = this.userService.getAllUsers();
 	return new ResponseEntity<List<UserResponseDTO>>(allUser,HttpStatus.OK);	
 	}
+    
 
 	
 
