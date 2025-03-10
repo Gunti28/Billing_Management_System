@@ -3,7 +3,6 @@ package com.srnrit.BMS.dao.impl;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Component;
 
 import com.srnrit.BMS.dao.ICategoryDao;
@@ -52,11 +51,18 @@ public class CategoryDaoImpl implements ICategoryDao
 
 
 	//for updating category
+	@Override
 	public Optional<String> updateCategory(String categoryId, String categoryName) {
 	    Category category = categoryRepository.findById(categoryId)
 	        .orElseThrow(() -> new CategoryNotFoundException("Category not found with id: " + categoryId));
-	    category.setCategoryName(categoryName);  
 
+	    boolean isCategoryExists = categoryRepository.existsByCategoryName(categoryName);
+
+	    if (isCategoryExists && !category.getCategoryName().equalsIgnoreCase(categoryName))
+	    {
+	        throw new CategoryNameAlreadyExistsException("Category name already exists: " + categoryName);
+	    }
+	    category.setCategoryName(categoryName);
 	    categoryRepository.save(category);
 	    return Optional.of("Category updated successfully with id: " + categoryId);
 	}
