@@ -20,6 +20,7 @@ import com.srnrit.BMS.mapper.DTOToEntity;
 import com.srnrit.BMS.mapper.EntityToDTO;
 import com.srnrit.BMS.service.IProductService;
 import com.srnrit.BMS.util.FileStorageProperties;
+import com.srnrit.BMS.util.idgenerator.ProductImageFileNameGenerator;
 
 @Service
 public class ProductServiceImpl implements IProductService {
@@ -32,14 +33,18 @@ public class ProductServiceImpl implements IProductService {
         this.fileStorageProperties = fileStorageProperties;
     }
 
+    /**
+     * Store a new product along with an image file
+     */
     @Override
     public ProductResponseDTO storeProduct(ProductRequestDTO productRequestDTO, MultipartFile productImage) {
         if (productRequestDTO == null) {
-            throw new RuntimeException("Invalid product data!");
+            throw new IllegalArgumentException("Invalid product data!");
         }
 
         Product product = DTOToEntity.toProduct(productRequestDTO);
 
+        // Handle image saving if provided
         if (productImage != null && !productImage.isEmpty()) {
             String imagePath = saveImage(productImage);
             product.setProductImage(imagePath);
@@ -52,43 +57,55 @@ public class ProductServiceImpl implements IProductService {
         );
     }
 
+    /**
+     * Save image file and return its stored path
+     */
     private String saveImage(MultipartFile imageFile) {
         try {
             String storagePath = fileStorageProperties.getImageStoragePath();
 
+            // Ensure the storage directory exists
             File directory = new File(storagePath);
             if (!directory.exists()) {
                 directory.mkdirs();
             }
 
-            String uniqueFileName = UUID.randomUUID().toString() + "_" + imageFile.getOriginalFilename();
-            String filePath = storagePath + uniqueFileName;
+            // Generate a unique filename with sequence (imageName_1.png)
+            String uniqueFileName = ProductImageFileNameGenerator.getNewFileName(imageFile.getOriginalFilename());
+            String filePath = storagePath + File.separator + uniqueFileName;
 
+            // Save the file to the system
             File file = new File(filePath);
             imageFile.transferTo(file);
 
-            return filePath;
+            return uniqueFileName; // Store only the generated file name in the DB
         } catch (IOException e) {
             throw new RuntimeException("Error saving image file: " + e.getMessage());
         }
     }
 
+    /**
+     * Fetch product by name
+     */
     @Override
     public ProductResponseDTO getProductByProductName(String productName) {
         Optional<List<Product>> products = this.productDao.searchProductByName(productName);
-        if (products.isPresent() && !products.get().isEmpty()) {
-            return EntityToDTO.toProductResponseDTO(products.get().get(0));
-        } else {
-            throw new ProductNotFoundException("No product found with name: " + productName);
-        }
+        return products.flatMap(list -> list.stream().findFirst().map(EntityToDTO::toProductResponseDTO))
+                       .orElseThrow(() -> new ProductNotFoundException("No product found with name: " + productName));
     }
 
+    /**
+     * Delete product by ID
+     */
     @Override
     public String deleteProductByProductId(String productId) {
         Optional<String> result = this.productDao.deleteProductById(productId);
         return result.orElseThrow(() -> new ProductNotFoundException("Product not found for deletion with ID: " + productId));
     }
 
+    /**
+     * Update product by ID
+     */
     @Override
     public ProductResponseDTO updateProductByProductId(ProductRequestDTO productRequestDTO, String productId) {
         Product product = DTOToEntity.toProduct(productRequestDTO);
@@ -98,21 +115,27 @@ public class ProductServiceImpl implements IProductService {
         return EntityToDTO.toProductResponseDTO(updatedProduct.orElseThrow(() -> new ProductNotFoundException("Failed to update product with ID: " + productId)));
     }
 
+    /**
+     * Fetch all products
+     */
     @Override
     public List<ProductResponseDTO> getAllProducts() {
         Optional<List<Product>> products = this.productDao.fetchAllProduct();
         return products.orElseThrow(() -> new RuntimeException("No products available!"))
-                .stream()
-                .map(EntityToDTO::toProductResponseDTO)
-                .collect(Collectors.toList());
+                       .stream()
+                       .map(EntityToDTO::toProductResponseDTO)
+                       .collect(Collectors.toList());
     }
 
+    /**
+     * Fetch products by availability status
+     */
     @Override
     public List<ProductResponseDTO> fetchProductByAvailability(Boolean inStock) {
         Optional<List<Product>> products = this.productDao.fetchProductByAvailability(inStock);
         return products.orElseThrow(() -> new RuntimeException("No products found with specified availability!"))
-                .stream()
-                .map(EntityToDTO::toProductResponseDTO)
-                .collect(Collectors.toList());
+                       .stream()
+                       .map(EntityToDTO::toProductResponseDTO)
+                       .collect(Collectors.toList());
     }
 }

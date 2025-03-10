@@ -28,7 +28,7 @@ public class ProductController {
         this.productService = productService;
     }
 
-    // ✅ Add Product by Category with Image Upload
+    // Add Product by Category with Image Upload
     @PostMapping(value = "/addProductByCategory", consumes = "multipart/form-data")
     public ResponseEntity<?> addProductByCategory(
             @RequestParam("categoryId") String categoryId,
