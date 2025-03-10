@@ -146,11 +146,15 @@ public class UserDaoImpl implements UserDao {
 		if(userEmail!=null && !userEmail.isBlank())
 		{
 			User byUserEmail = userRepository.findByUserEmail(userEmail);
-			if(byUserEmail.getActive())
+			if(byUserEmail!=null)
 			{
-				return byUserEmail!=null ? Optional.of(byUserEmail) : Optional.empty();
+				if(byUserEmail.getActive())
+				{
+					return  Optional.of(byUserEmail);
+				}
+				else throw new RuntimeException("user is not active.");	
 			}
-			else throw new RuntimeException("user is not active.");	
+			else throw new UserNotFoundException("user not exist with email : "+userEmail);
 		}
 		else throw new RuntimeException("user Email must not be null or blank!.");	
 	}

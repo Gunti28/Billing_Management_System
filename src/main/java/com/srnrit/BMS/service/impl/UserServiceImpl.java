@@ -280,14 +280,12 @@ public class UserServiceImpl implements UserService{
 			   	String otp = this.otpOperation.getOTP();
 			   	System.out.println(otp);
 			   	boolean otpIsSendedToEmail = EmailSender.sendOTPToEmail(emailRequestDTO.getEmail(), otp);
-//			   	if(otpIsSendedToEmail)
-//			   	{
-//			   		this.otpOperation.storeOTP(emailRequestDTO.getEmail(), otp);
-//			   		return new  Message("OTP Sended Successfully.");
-//			   	}
-//			   	else throw new RuntimeException("something went wrong! try again after some time.");
-			   	System.out.println(otpIsSendedToEmail);
-			   	return null;
+			   	if(otpIsSendedToEmail)
+			   	{
+			   		this.otpOperation.storeOTP(emailRequestDTO.getEmail(), otp);
+			   		return new  Message("OTP Sended Successfully.");
+			   	}
+			   	else throw new RuntimeException("something went wrong! try again after some time.");
 			}
 			else
 			{
