@@ -39,7 +39,7 @@ public class CategoryServiceImpl implements ICategoryService
 			List<Product> products = categoryRequestDTO.getProducts().stream()
 					.map(productRequest -> new Product(
 							productRequest.getProductName(),
-							productRequest.getProductImage(),							
+							productRequest.getProductImage().toString(),							
 							productRequest.getProductQuantity(),
 							productRequest.getProductPrice(),
 							productRequest.getInStock()
