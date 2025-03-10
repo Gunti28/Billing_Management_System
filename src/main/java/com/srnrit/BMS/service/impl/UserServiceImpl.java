@@ -11,21 +11,35 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.srnrit.BMS.dao.UserDao;
+
+import com.srnrit.BMS.dto.UpdateUserRequestDTO;
+import com.srnrit.BMS.dto.ChangePasswordRequestDTO;
+import com.srnrit.BMS.dto.EmailRequestDTO;
+
 import com.srnrit.BMS.dto.UserRequestDTO;
 import com.srnrit.BMS.dto.UserResponseDTO;
+import com.srnrit.BMS.dto.VerifyOTPRequestDTO;
 import com.srnrit.BMS.entity.User;
+import com.srnrit.BMS.exception.userexceptions.InvalideOTPException;
 import com.srnrit.BMS.exception.userexceptions.UnSupportedFileTypeException;
+import com.srnrit.BMS.exception.userexceptions.UserNotFoundException;
 import com.srnrit.BMS.exception.userexceptions.UserNotcreatedException;
 import com.srnrit.BMS.mapper.DTOToEntity;
 import com.srnrit.BMS.mapper.EntityToDTO;
 import com.srnrit.BMS.service.UserService;
+import com.srnrit.BMS.util.EmailSender;
 import com.srnrit.BMS.util.FileStorageProperties;
+import com.srnrit.BMS.util.Message;
+import com.srnrit.BMS.util.OTPOperation;
 
 @Service
 public class UserServiceImpl implements UserService{
 
 	@Autowired
 	private UserDao userDao;
+	
+	@Autowired
+	private OTPOperation otpOperation;
 	
 	@Autowired
 	private FileStorageProperties fileStorageProperties;
@@ -72,13 +86,13 @@ public class UserServiceImpl implements UserService{
 	}
 
 	@Override
-	public UserResponseDTO updateUserById(UserRequestDTO userRequestDTO,String userId) 
+	public UserResponseDTO updateUserById(UpdateUserRequestDTO updateUserRequestDTO,String userId) 
 	{
-		if(userRequestDTO!=null)
+		if(updateUserRequestDTO!=null)
 		{
 			if(userId!=null && !userId.isBlank())
 			{
-				User user = DTOToEntity.userRequestDtoToUserEntity(userRequestDTO);
+				User user = DTOToEntity.userUpdateRequestDtoToUserEntity(updateUserRequestDTO);
 				Optional<User> updateUser = this.userDao.updateByUserId(user, userId);
 				if(updateUser.isPresent())
 				{
@@ -147,7 +161,7 @@ public class UserServiceImpl implements UserService{
 		{
 			if(file!=null)
 			{
-				
+				System.out.println(file.getSize());
 				long maxSize=fileStorageProperties.getMaxFileSize();
 				if(file.getSize()<=maxSize)
 				{
@@ -211,6 +225,99 @@ public class UserServiceImpl implements UserService{
 		throw new RuntimeException("No User is Present");
 		
 	}
+
+	@Override
+	public UserResponseDTO updatePassword(ChangePasswordRequestDTO changePasswordRequestDTO) 
+	{
+		
+		if(changePasswordRequestDTO!=null)
+		{
+			if(changePasswordRequestDTO.getEmail()!=null && !changePasswordRequestDTO.getEmail().isBlank())
+			{
+				if(changePasswordRequestDTO.getNewPassword()!=null && ! changePasswordRequestDTO.getNewPassword().isBlank())
+				{
+					if(changePasswordRequestDTO.getConfirmPassword()!=null && ! changePasswordRequestDTO.getConfirmPassword().isBlank())
+					{
+						if(changePasswordRequestDTO.getNewPassword().equals(changePasswordRequestDTO.getConfirmPassword()))
+						{
+							Optional<User> optionalUser = this.userDao.changePassword(changePasswordRequestDTO.getEmail(),changePasswordRequestDTO.getNewPassword());
+							if(optionalUser.isPresent())
+							{
+								UserResponseDTO userResponseDTO = EntityToDTO.userEntityToUserResponseDTO(optionalUser.get());
+								if(userResponseDTO!=null)
+								{
+									return userResponseDTO;
+								}
+								else throw new RuntimeException("Something went wrong ! try again"); 
+							}
+							else throw new UserNotFoundException("User password not updated !");
+						}
+						else throw new RuntimeException("New Password and Confirm Password Should be Same.");
+					}
+					else throw new RuntimeException("confirm password can't be null or blank");
+				}
+				else throw new RuntimeException("New Password must not be null and blank");
+			}
+			else throw new RuntimeException("User Email can't be null or blank");
+		}
+		else throw new RuntimeException("Password Credential Can't be null");
+	
+		
+	}
+
+	@Override
+	public Message verifyUserByEmail(EmailRequestDTO emailRequestDTO) {
+		
+		System.out.println("UserServiceImpl.verifyUserByEmail()");
+		if(emailRequestDTO!=null)
+		{
+			
+			Optional<User> optionalUser = this.userDao.findByUserEmail(emailRequestDTO.getEmail());
+			System.out.println(optionalUser.get()+emailRequestDTO.getEmail());
+			if(optionalUser.isPresent())
+			{
+				System.out.println("inside if");
+			   	String otp = this.otpOperation.getOTP();
+			   	System.out.println(otp);
+			   	boolean otpIsSendedToEmail = EmailSender.sendOTPToEmail(emailRequestDTO.getEmail(), otp);
+//			   	if(otpIsSendedToEmail)
+//			   	{
+//			   		this.otpOperation.storeOTP(emailRequestDTO.getEmail(), otp);
+//			   		return new  Message("OTP Sended Successfully.");
+//			   	}
+//			   	else throw new RuntimeException("something went wrong! try again after some time.");
+			   	System.out.println(otpIsSendedToEmail);
+			   	return null;
+			}
+			else
+			{
+				System.err.println("inavlid operation");
+				throw new RuntimeException("something went wrong! try again after some time.");
+			}
+		}
+		else throw new RuntimeException("Email can't be null");
+	}
+
+	@Override
+	public Message verifyOTP(VerifyOTPRequestDTO verifyOTPRequestDTO) {
+		if(verifyOTPRequestDTO!=null)
+		{
+			Optional<User> optionalUser = this.userDao.findByUserEmail(verifyOTPRequestDTO.getEmail());
+			if(optionalUser.isPresent())
+			{
+			   Optional<String> validateOTP = this.otpOperation.validateOTP(verifyOTPRequestDTO.getEmail(), verifyOTPRequestDTO.getOtp());
+			   if(validateOTP.isPresent())
+			   {
+				   return new Message(validateOTP.get());
+			   }
+			   else throw new InvalideOTPException("Invalid OTP!");
+			}
+			else throw new RuntimeException("something went wrong! try again after some time.");
+		}
+		else throw new RuntimeException("something went wrong! try again after some time.");
+	}
+	
+	
 
 
 	

@@ -13,17 +13,28 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
 
+
 import com.srnrit.BMS.dao.impl.UserDaoImpl;
 import com.srnrit.BMS.entity.User;
 import com.srnrit.BMS.repository.UserRepository;
 import com.srnrit.BMS.service.impl.UserServiceImpl;
 import com.srnrit.BMS.util.FileStorageProperties;
+import com.srnrit.BMS.dao.UserDao;
+import com.srnrit.BMS.dto.EmailRequestDTO;
+import com.srnrit.BMS.entity.User;
+import com.srnrit.BMS.repository.UserRepository;
+import com.srnrit.BMS.service.UserService;
+import com.srnrit.BMS.util.Message;
+
+
+
 
 @SpringBootTest
 class BmsApplicationTests {
 	
 
 	@Mock
+
     private UserRepository userRepository;
 
     @Mock
@@ -36,6 +47,12 @@ class BmsApplicationTests {
     private UserServiceImpl userService;
     
     
+
+	UserRepository userRepository ;
+	
+	
+	
+
 
 	
 	
@@ -87,6 +104,21 @@ class BmsApplicationTests {
 //		List<UserResponseDTO> allUsers = service.getAllUsers();
 //		System.out.println(allUsers);
 //	}
+
+	
+	
+	@Test
+	void verifyEmail()
+	{
+		EmailRequestDTO emailRequestDTO=new EmailRequestDTO();
+		emailRequestDTO.setEmail("sujitmaharana1111@gmail.com");
+		Message verifyUserByEmail = this.service.verifyUserByEmail(emailRequestDTO);
+		System.out.println(verifyUserByEmail);
+		
+		
+		
+	}
+
 	
 	
 
