@@ -147,7 +147,7 @@ public class UserServiceImpl implements UserService{
 		{
 			if(file!=null)
 			{
-				
+				System.out.println(file.getSize());
 				long maxSize=fileStorageProperties.getMaxFileSize();
 				if(file.getSize()<=maxSize)
 				{
