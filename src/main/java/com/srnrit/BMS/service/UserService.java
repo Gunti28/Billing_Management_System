@@ -14,7 +14,6 @@ public interface UserService {
 	UserResponseDTO findUserById(String userId);
 	UserResponseDTO loginUserByEmailAndPassword(String email,String password);
 	UserResponseDTO editUserImage(MultipartFile file,String userId);
-
 	List<UserResponseDTO> getAllUsers();
 }
 
