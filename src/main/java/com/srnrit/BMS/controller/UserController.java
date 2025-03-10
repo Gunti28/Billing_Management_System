@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.srnrit.BMS.dto.UpdateUserRequestDTO;
 import com.srnrit.BMS.dto.UserRequestDTO;
 import com.srnrit.BMS.dto.UserResponseDTO;
 import com.srnrit.BMS.service.UserService;
@@ -36,11 +37,10 @@ public class UserController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
 	}
 	
-
 	@PutMapping(value="Updateuser/{userId}") 
-	public ResponseEntity<UserResponseDTO> updateUser (@RequestBody UserRequestDTO userRequestDTO,@PathVariable String userId)
+	public ResponseEntity<UserResponseDTO> updateUser (@RequestBody UpdateUserRequestDTO updateUserRequestDTO,@PathVariable String userId)
 	{
-		UserResponseDTO userResponseDTO = this.userService.updateUserById(userRequestDTO, userId);
+		UserResponseDTO userResponseDTO = this.userService.updateUserById(updateUserRequestDTO, userId);
 		return new ResponseEntity<UserResponseDTO>(userResponseDTO,HttpStatus.OK);
 		
 	}
@@ -53,31 +53,20 @@ public class UserController {
     	return ResponseEntity.status(HttpStatus.OK).body(msg);
     }
 	
-	/*
-	@PutMapping("/editProfileImage/{userid}")
-	public ResponseEntity<UserResponseDTO> editProfileImage(@RequestParam MultipartFile file,
-			                                        @PathVariable("userid") String userId
-			)
-	{
-		 UserResponseDTO userResponseDTO = this.userService.editProfileImage(file,userId);
-		 
-		 return new ResponseEntity<UserResponseDTO>(userResponseDTO,HttpStatus.OK);
-	}
-	*/
-	
 	@GetMapping(value = "/get/{userId}")
 	public ResponseEntity<?> getUserByUserId(@PathVariable String userId)
 	{
 		UserResponseDTO responseDTO = this.userService.findUserById(userId);
 		return ResponseEntity.status(HttpStatus.FOUND).body(responseDTO);
 	}
+	
 	@GetMapping(value="/allUsers")
 	public ResponseEntity<List<UserResponseDTO>> getAllUsers()
 	{
-	List<UserResponseDTO> allUser = this.userService.getAllUsers();
-	return new ResponseEntity<List<UserResponseDTO>>(allUser,HttpStatus.OK);	
+	          List<UserResponseDTO> allUser = this.userService.getAllUsers();
+	          return new ResponseEntity<List<UserResponseDTO>>(allUser,HttpStatus.OK);	
 	}
-
+  
 	
 
 }
