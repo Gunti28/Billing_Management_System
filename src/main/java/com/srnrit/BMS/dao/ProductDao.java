@@ -18,4 +18,7 @@ public interface ProductDao {
 	Optional<List<Product>> searchProductByName(String productName);
 
 	Optional<List<Product>> fetchAllProduct();
+	
+	
+	
 }
