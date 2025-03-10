@@ -1,45 +1,28 @@
 package com.srnrit.BMS;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.Optional;
+
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-<<<<<<< HEAD
 import com.srnrit.BMS.dao.ICategoryDao;
 import com.srnrit.BMS.entity.Category;
-import com.srnrit.BMS.entity.Product;
 
 @SpringBootTest
 class BmsApplicationTests 
 {
 
-	
-	  @Test void categoryTest() 
-	  { 
-	  Product product=new Product();
-	  product.setProductName("Biryani");
-	  product.setProductPrice(500.0);
-	  product.setProductImage("default.png");
-	  product.setProductQuantity(1);
-	  product.setInStock(true);
-	  
-	  Product product1=new Product();
-	  product1.setProductName("Biryani");
-	  product1.setProductPrice(500.0);
-	  product1.setProductImage("default.png");
-	  product1.setProductQuantity(1);
-	  product1.setInStock(true);
-	  
-	  
-	  
-	  
-	  
-//	  List<Product> list=new ArrayList<>();
-//	  list.add(new Product("Watch", "default.img",5, 500.0, true)); list.add(new
-//	  Product("Mobile", "default.img",5, 15000.0, true));
-//	  category.setProducts(list); System.out.println(category); }
-	 
-	
 	/*
+	 * @Test void categoryTest() { Category category=new Category();
+	 * category.setCategoryname("Watch"); List<Product> list=new ArrayList<>();
+	 * list.add(new Product("Watch", "default.img",5, 500.0, true)); list.add(new
+	 * Product("Mobile", "default.img",5, 15000.0, true));
+	 * category.setProducts(list); System.out.println(category); }
+	 */
+	
 	  @Autowired 
 	  private ICategoryDao iCategoryDao;
 	  
@@ -51,19 +34,6 @@ class BmsApplicationTests
 	  assertTrue(categoryRegister.isPresent());
 	  System.out.println(categoryRegister.get()); 
 	  }	 
-	  */
-	
-	  }
-=======
-@SpringBootTest
-class BmsApplicationTests 
-{	
-	@Test
-	void contextLoads() {
-	}
-	
-	
->>>>>>> 7310227eab35dca7c21368dda96b10ccc685ec5b
 }
 
 

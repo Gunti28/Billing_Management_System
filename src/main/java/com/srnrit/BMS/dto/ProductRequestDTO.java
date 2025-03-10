@@ -12,18 +12,9 @@ import org.springframework.web.multipart.MultipartFile;
 @NoArgsConstructor  
 public class ProductRequestDTO {
 
-<<<<<<< HEAD
     @NotNull(message = "Category ID cannot be null")
     @NotBlank(message = "Category ID cannot be blank")
     private String categoryId;
-=======
-	private String productId;
-	private String productName;
-	private String productImage;
-	private Integer productQuantity;
-	private Double productPrice;
-	private Boolean inStock;
->>>>>>> 7310227eab35dca7c21368dda96b10ccc685ec5b
 
     @NotNull(message = "Product name cannot be null")
     @NotBlank(message = "Product name cannot be blank")
