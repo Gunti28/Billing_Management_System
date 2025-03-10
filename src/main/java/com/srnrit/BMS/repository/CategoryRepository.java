@@ -6,4 +6,6 @@ import com.srnrit.BMS.entity.Category;
 
 public interface CategoryRepository extends JpaRepository<Category,String>{
 	Category findByCategoryname(String categoryName);
+	 boolean existsByCategoryname(String categoryName);
 }
+

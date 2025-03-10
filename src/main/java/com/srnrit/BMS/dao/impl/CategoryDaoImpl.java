@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import com.srnrit.BMS.dao.ICategoryDao;
 import com.srnrit.BMS.entity.Category;
+import com.srnrit.BMS.exception.categoryexceptions.CategoryAlreadyExistsException;
 import com.srnrit.BMS.exception.categoryexceptions.CategoryNotCreatedException;
 import com.srnrit.BMS.exception.categoryexceptions.CategoryNotFoundException;
 import com.srnrit.BMS.repository.CategoryRepository;
@@ -50,15 +51,23 @@ public class CategoryDaoImpl implements ICategoryDao
 	}
 
 
-	//for updating category
 	public Optional<String> updateCategory(String categoryId, String categoryName) {
-        Category category = categoryRepository.findById(categoryId).orElseThrow(() -> new CategoryNotFoundException("Category not found with id: " + categoryId));
-        
-        category.setCategoryname(categoryName);
-        categoryRepository.save(category);
-        
-        return Optional.of("Category updated successfully with id: " + categoryId);
-    }
+	    Category category = categoryRepository.findById(categoryId)
+	        .orElseThrow(() -> new CategoryNotFoundException("Category not found with id: " + categoryId));
+
+	    // Check if the category name already exists
+	    boolean isCategoryExists = categoryRepository.existsByCategoryname(categoryName);
+	    
+	    if (isCategoryExists && !category.getCategoryname().equalsIgnoreCase(categoryName)) {
+	        throw new CategoryAlreadyExistsException("Category name already exists: " + categoryName);
+	    }
+
+	    category.setCategoryname(categoryName);
+	    categoryRepository.save(category);
+
+	    return Optional.of("Category updated successfully with id: " + categoryId);
+	}
+
 
 
 	//for fetching category
