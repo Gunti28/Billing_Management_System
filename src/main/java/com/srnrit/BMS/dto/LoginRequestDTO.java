@@ -25,9 +25,9 @@ public class LoginRequestDTO implements Serializable{
 	@Pattern(regexp = "^[a-zA-Z][A-Za-z0-9._%+-]+@gmail\\.com$",message = "Invalid email")
 	private String email;
 	
-	@NotNull(message = "Password can't be null")
 	@NotBlank(message = "Password can't be blank")
-	@Size(min=6,message = "Password must be at least 6 characters")
+	@NotNull(message = "Password can't be null")
+	@Size(min = 6, message = "Password must contain atleast 6 character ")
 	private String password;
 
 }

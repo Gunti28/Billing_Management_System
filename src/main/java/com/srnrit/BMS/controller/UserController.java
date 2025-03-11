@@ -43,18 +43,22 @@ public class UserController {
 	}
 
 
-	@PutMapping(value = "Updateuser/{userId}")
-	public ResponseEntity<UserResponseDTO> updateUser(@RequestBody UpdateUserRequestDTO updateUserRequestDTO,
-			@PathVariable String userId) {
-		UserResponseDTO userResponseDTO = this.userService.updateUserById(updateUserRequestDTO, userId);
-		return new ResponseEntity<UserResponseDTO>(userResponseDTO, HttpStatus.OK);
 
+	
+	@PutMapping(value="/Updateuser/{userId}") 
+	public ResponseEntity<UserResponseDTO> updateUser (@Valid @RequestBody UpdateUserRequestDTO updateUserRequestDTO,@PathVariable String userId)
+	{
+		UserResponseDTO userResponseDTO = this.userService.updateUserById(updateUserRequestDTO, userId);
+		return new ResponseEntity<UserResponseDTO>(userResponseDTO,HttpStatus.OK);
+		
 	}
+
+
 
 	@DeleteMapping(value = "/{userId}")
 	public ResponseEntity<?> deleteUserById(@PathVariable String userId) {
 		String msg = this.userService.deleteUserById(userId);
-		return ResponseEntity.status(HttpStatus.OK).body(msg);
+		return ResponseEntity.status(HttpStatus.OK).body(new Message(msg));
 	}
 
 	@PutMapping(value = "/editProfileImage/{userid}")
@@ -97,7 +101,7 @@ public class UserController {
 		
 
 	}
-	
+
 	@PostMapping(value="/UpdatePassword")
 	public ResponseEntity<UserResponseDTO> updatePassword(@Valid @RequestBody ChangePasswordRequestDTO changePasswordRequestDTO) 
 	{
