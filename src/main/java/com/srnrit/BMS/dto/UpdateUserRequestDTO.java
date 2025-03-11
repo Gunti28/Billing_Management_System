@@ -24,7 +24,7 @@ public class UpdateUserRequestDTO implements Serializable{
   @NotBlank(message="Name Can't Be Blank")
   @NotNull(message="Name Can't be Null")
   @Size(min = 3, max = 50, message = "Name must be between 3 and 50 characters")
-  @Pattern(regexp = "^[A-Za-z]+$",message = "Name must Combine Uppercase and LowerCase letters")
+  @Pattern(regexp = "^[A-Za-z ]+$",message = "Name must Combine Uppercase and LowerCase letters")
   private String userName;
 
   @NotBlank(message="E-mail Can't Be Blank")
