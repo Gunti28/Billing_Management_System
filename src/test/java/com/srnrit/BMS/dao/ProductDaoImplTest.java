@@ -157,18 +157,25 @@ class ProductDaoImplTest {
         // Act
         Optional<Product> result = productDao.updateProduct(updatedProduct);
 
-     
+        // Log the returned product details before assertions
+        if (result.isPresent()) {
+            System.out.println("Product update successful! New details: " + result.get());
+        } else {
+            System.err.println("Product update failed! Returned Optional.empty()");
+        }
 
-        // Assert
-        assertTrue(result.isPresent(), "Product update failed - returned empty Optional<>");
+        // Assertions with better failure messages
+        assertTrue(result.isPresent(), "Product update failed - returned empty Optional");
         assertEquals("New Name", result.get().getProductName(), "Product name mismatch");
         assertEquals("updated.png", result.get().getProductImage(), "Product image mismatch");
         assertEquals(10, result.get().getProductQuantity(), "Product quantity mismatch");
         assertEquals(700.0, result.get().getProductPrice(), "Product price mismatch");
         assertFalse(result.get().getInStock(), "Product stock status mismatch");
 
+        // Verify save() was called once
         verify(productRepository, times(1)).save(any(Product.class));
     }
+
 
 
     // ✅ Test: Update Product (Failure - Product Not Found)
