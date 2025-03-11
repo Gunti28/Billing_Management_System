@@ -42,6 +42,8 @@ public class UserController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
 	}
 
+
+
 	
 	@PutMapping(value="/Updateuser/{userId}") 
 	public ResponseEntity<UserResponseDTO> updateUser (@Valid @RequestBody UpdateUserRequestDTO updateUserRequestDTO,@PathVariable String userId)
@@ -50,6 +52,7 @@ public class UserController {
 		return new ResponseEntity<UserResponseDTO>(userResponseDTO,HttpStatus.OK);
 		
 	}
+
 
 
 	@DeleteMapping(value = "/{userId}")
