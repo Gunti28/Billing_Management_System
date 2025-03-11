@@ -37,7 +37,7 @@ class ProductDaoImplTest {
         MockitoAnnotations.openMocks(this);
     }
 
-    // ✅ Test: Save Product (Success)
+    // Test: Save Product (Success)
     @Test
     void testSaveProduct_Success() {
         String categoryId = "category001";
@@ -47,6 +47,7 @@ class ProductDaoImplTest {
         Product product = new Product();
         product.setProductId("prod_001");
         product.setProductName("Laptop");
+        product.setProductQuantity(3);
 
         when(categoryRepository.existsById(categoryId)).thenReturn(true);
         when(categoryRepository.getReferenceById(categoryId)).thenReturn(category);
@@ -55,9 +56,11 @@ class ProductDaoImplTest {
         Optional<Product> result = productDao.saveProduct(product, categoryId);
         assertTrue(result.isPresent());
         assertEquals("Laptop", result.get().getProductName());
+        assertEquals("prod_001", result.get().getProductId());
+        
     }
 
-    // ✅ Test: Save Product (Failure - Category Not Found)
+    // Test: Save Product (Failure - Category Not Found)
     @Test
     void testSaveProduct_CategoryNotFound() {
         String categoryId = "invalid_category";
@@ -69,7 +72,7 @@ class ProductDaoImplTest {
         assertThrows(CategoryNotFoundException.class, () -> productDao.saveProduct(product, categoryId));
     }
 
-    // ✅ Test: Fetch Product By Availability (Success)
+    // Test: Fetch Product By Availability (Success)
     @Test
     void testFetchProductByAvailability_Success() {
         Product product1 = new Product();
@@ -87,7 +90,7 @@ class ProductDaoImplTest {
         assertEquals(2, result.get().size());
     }
 
-    // ✅ Test: Fetch Product By Availability (Failure - No Products)
+    // Test: Fetch Product By Availability (Failure - No Products)
     @Test
     void testFetchProductByAvailability_Failure() {
         when(productRepository.findByInStock(false)).thenReturn(Arrays.asList());
@@ -96,7 +99,7 @@ class ProductDaoImplTest {
         assertFalse(result.isPresent());
     }
 
-    // ✅ Test: Delete Product By ID (Success)
+    // Test: Delete Product By ID (Success)
     @Test
     void testDeleteProductById_Success() {
         String productId = "prod_001";
@@ -113,7 +116,7 @@ class ProductDaoImplTest {
         assertEquals("Product successfully deleted with Id:prod_001", result.get());
     }
 
-    // ✅ Test: Delete Product By ID (Failure - Product Not Found)
+    // Test: Delete Product By ID (Failure - Product Not Found)
     @Test
     void testDeleteProductById_Failure() {
         String productId = "invalid_id";
@@ -178,7 +181,7 @@ class ProductDaoImplTest {
 
 
 
-    // ✅ Test: Update Product (Failure - Product Not Found)
+    // Test: Update Product (Failure - Product Not Found)
     @Test
     void testUpdateProduct_Failure() {
         Product updatedProduct = new Product();
@@ -190,7 +193,7 @@ class ProductDaoImplTest {
         assertFalse(result.isPresent());
     }
 
-    // ✅ Test: Search Product By Name (Success)
+    // Test: Search Product By Name (Success)
     @Test
     void testSearchProductByName_Success() {
         Product product1 = new Product();
@@ -209,7 +212,7 @@ class ProductDaoImplTest {
         assertEquals(2, result.get().size());
     }
 
-    // ✅ Test: Search Product By Name (Failure - No Match)
+    // Test: Search Product By Name (Failure - No Match)
     @Test
     void testSearchProductByName_Failure() {
         when(productRepository.findByProductNameContainingIgnoreCase("Unknown")).thenReturn(Arrays.asList());
