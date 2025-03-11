@@ -28,28 +28,28 @@ public class User {
 	@Column(name = "UserId",length = 20)
 	private String userId;
 
-	@Column(name = "UserName")
+	@Column(name = "NAME",length = 30)
 	private String userName;
 	
-	@Column(name="DateOfRegistration")
+	@Column(name="DATEOFREGISTRATION")
 	private LocalDateTime dateOfRegistration;
 
-	@Column(name = "IsActive")
+	@Column(name = "ISACTIVE")
 	private Boolean active;
 
-	@Column(name = "UserEmail")
+	@Column(name = "EMAIL",length = 30)
 	private String userEmail;
 
-	@Column(name = "UserPassword")
+	@Column(name = "PASSWORD",length = 30)
 	private String userPassword;
 
-	@Column(name = "UserProfileImage")
+	@Column(name = "PROFILEIMAGE",length = 30)
 	private String userProfileImage;
 
-	@Column(name = "Usergender")
+	@Column(name = "GENDER",length = 6)
 	private String userGender;
 
-	@Column(name = "UserPhone")
+	@Column(name = "PHONE",length = 10)
 	private Long userPhone;
 
 	@Column(name = "TermsAndConditions")

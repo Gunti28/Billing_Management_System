@@ -29,7 +29,7 @@ public class UpdateUserRequestDTO implements Serializable{
 
   @NotBlank(message="E-mail Can't Be Blank")
   @NotNull(message="E-mail Can't be Null")
-  @Pattern(regexp = "^[a-zA-Z][A-Za-z0-9._%+-]+@gmail\\\\.com$",message="Invalid email")
+  @Pattern(regexp = "^[a-zA-Z][A-Za-z0-9._%+-]+@gmail\\.com$",message="Invalid email")
   private String userEmail;
   
   @Positive(message = "Mobile no must be positive")
