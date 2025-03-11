@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.srnrit.BMS.dto.CategoryRequestDTO;
 import com.srnrit.BMS.dto.CategoryResponseDTO;
 import com.srnrit.BMS.dto.UpdateCategoryRequestDTO;
-import com.srnrit.BMS.exception.categoryexceptions.CategoryNameAlreadyExistsException;
 import com.srnrit.BMS.service.ICategoryService;
 
 import jakarta.validation.Valid;
