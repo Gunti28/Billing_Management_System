@@ -26,7 +26,8 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
 		Map<String, String> errors = new HashMap<>();
 
-		for (FieldError error : ex.getBindingResult().getFieldErrors()) {
+		for (FieldError error : ex.getBindingResult().getFieldErrors()) 
+		{
 			errors.put(error.getField(), error.getDefaultMessage());
 		}
 
@@ -67,7 +68,7 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(exception = IllegalArgumentException.class)
 	public ResponseEntity<?> illegalArgumentException(IllegalArgumentException e)
 	{
-		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Message(e.getMessage()));
 	}
 	
 	
