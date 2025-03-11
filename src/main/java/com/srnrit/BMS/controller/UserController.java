@@ -55,7 +55,7 @@ public class UserController {
 	@DeleteMapping(value = "/{userId}")
 	public ResponseEntity<?> deleteUserById(@PathVariable String userId) {
 		String msg = this.userService.deleteUserById(userId);
-		return ResponseEntity.status(HttpStatus.OK).body(msg);
+		return ResponseEntity.status(HttpStatus.OK).body(new Message(msg));
 	}
 
 	@PutMapping(value = "/editProfileImage/{userid}")
