@@ -14,6 +14,7 @@ import com.srnrit.BMS.dto.CategoryResponseDTO;
 import com.srnrit.BMS.dto.ProductResponseDTO;
 import com.srnrit.BMS.entity.Category;
 import com.srnrit.BMS.entity.Product;
+import com.srnrit.BMS.exception.categoryexceptions.CategoryNameAlreadyExistsException;
 import com.srnrit.BMS.exception.categoryexceptions.CategoryNotCreatedException;
 import com.srnrit.BMS.exception.categoryexceptions.CategoryNotFoundException;
 import com.srnrit.BMS.mapper.EntityToDTO;
@@ -33,7 +34,7 @@ public class CategoryServiceImpl implements ICategoryService
 	@Override
 	public CategoryResponseDTO addCategoryWithProducts(CategoryRequestDTO categoryRequestDTO) {
 		Category category=new Category();
-		category.setCategoryname(categoryRequestDTO.getCategoryName());
+		category.setCategoryName(categoryRequestDTO.getCategoryName());
 
 		if(categoryRequestDTO.getProducts()!=null) {
 			List<Product> products = categoryRequestDTO.getProducts().stream()
@@ -70,7 +71,7 @@ public class CategoryServiceImpl implements ICategoryService
 		}
 	}
 
-	//Get All Category method in the Service Layer
+	//Get All Category details 
 	@Override
 	public List<CategoryResponseDTO> getAllCategory() {
 		Optional<List<Category>> allCategory = categoryDAO.getAllCategory();
@@ -99,23 +100,25 @@ public class CategoryServiceImpl implements ICategoryService
 	}
 
 
-
+    //Here we written logic for updating CategoryName with CategoryId
 	@Override
 	public String updateCategory(String categoryId, String categoryName) {
 
-		if(categoryId == null) {
-			throw new RuntimeException("CategoryId must not be null");
-		}
-		else if (categoryName == null || categoryName.length() < 3) {
-			throw new RuntimeException("CategoryName must not be null and it should be a valid categoryName");
-		}
-		else {
-			Optional<String> updateCategory = this.categoryDAO.updateCategory(categoryId, categoryName);
-			return updateCategory.orElseThrow(()->new CategoryNotFoundException("Category not exist with id : "+categoryId));
-		}
-
+	    if (categoryId == null || categoryId.trim().isEmpty()) {
+	        throw new IllegalArgumentException("CategoryId must not be null or empty");
+	    }
+	    if (categoryName == null || categoryName.trim().isEmpty()) {
+	        throw new IllegalArgumentException("CategoryName must not be null or empty");
+	    }
+	    if (categoryName.length() < 3) {
+	        throw new IllegalArgumentException("CategoryName must be at least 3 characters long");
+	    }
+	    Optional<String> updateCategory = this.categoryDAO.updateCategory(categoryId, categoryName);
+	    return updateCategory.orElseThrow(() -> new CategoryNotFoundException("Category not found with id: " + categoryId));
 	}
 
+	
+    //Here we written logic for fetching Category details by CategoryId
 	@Override
 	public CategoryResponseDTO findCategoryByCategoryId(String categoryId) 
 	{
@@ -140,5 +143,6 @@ public class CategoryServiceImpl implements ICategoryService
 		}
 
 	}
+
 
 }

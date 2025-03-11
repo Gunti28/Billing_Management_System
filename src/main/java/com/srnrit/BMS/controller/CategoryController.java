@@ -10,11 +10,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.srnrit.BMS.dto.CategoryRequestDTO;
 import com.srnrit.BMS.dto.CategoryResponseDTO;
+import com.srnrit.BMS.dto.UpdateCategoryRequestDTO;
 import com.srnrit.BMS.service.ICategoryService;
 
 import jakarta.validation.Valid;
@@ -47,13 +47,14 @@ public class CategoryController {
         return new ResponseEntity<>(categories,HttpStatus.OK);
     }
 
-
-
     //API to update a Category by using CategoryId
-    @PutMapping("/updateCategory/{CategoryId}/{CategoryName}")
-    public ResponseEntity<?>  updateCategory(@PathVariable String CategoryId,@PathVariable String CategoryName){
-       String updateCategory =categoryService.updateCategory(CategoryId,CategoryName);
-       return new ResponseEntity<>(updateCategory,HttpStatus.OK);
+    @PutMapping("/updateCategoryById")
+    public ResponseEntity<?> updateCategory(@RequestBody UpdateCategoryRequestDTO categoryRequest) {
+        String categoryId = categoryRequest.getCategoryId();
+        String categoryName = categoryRequest.getCategoryName();
+
+        String updateCategory = categoryService.updateCategory(categoryId, categoryName);
+        return new ResponseEntity<>(updateCategory, HttpStatus.OK);
     }
 
     //API to Get Category by using CategoryId

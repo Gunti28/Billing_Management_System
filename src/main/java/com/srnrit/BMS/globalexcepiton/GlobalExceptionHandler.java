@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import com.srnrit.BMS.dto.Message;
+import com.srnrit.BMS.exception.categoryexceptions.CategoryNameAlreadyExistsException;
 import com.srnrit.BMS.exception.categoryexceptions.CategoryNotCreatedException;
 import com.srnrit.BMS.exception.categoryexceptions.CategoryNotFoundException;
 import org.springframework.validation.FieldError;
@@ -56,5 +57,15 @@ public class GlobalExceptionHandler {
 	  errors.put(error.getField(), error.getDefaultMessage()); } return new
 	  ResponseEntity<Map<String, String>>(errors, HttpStatus.BAD_REQUEST); 
 	  }
+
+	  @ExceptionHandler(IllegalArgumentException.class)
+	    public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException ex) {
+	        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+	    }
+	  @ExceptionHandler(CategoryNameAlreadyExistsException.class)
+	    public ResponseEntity<Message> handleCategoryAlreadyExistsException(CategoryNameAlreadyExistsException e) {
+	        return new ResponseEntity<>(new Message(e.getMessage()), HttpStatus.BAD_REQUEST);
+	    }
+
 	
 }
