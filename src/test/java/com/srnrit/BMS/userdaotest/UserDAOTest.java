@@ -43,7 +43,6 @@ public class UserDAOTest {
 
     private User user;
     
-    
 	
     //USERSAVE() METHOD IN USERDAO LAYER
     @BeforeEach
@@ -90,9 +89,7 @@ public class UserDAOTest {
     void testSaveUser_NullUser() {
         assertThrows(UserNotFoundException.class, () -> userDao.saveuser(null));
     }
-    
-    
-    
+      
     
     	//FINDBYUSERID() USERDAO CLASS METHOD
     @Test
@@ -140,7 +137,7 @@ public class UserDAOTest {
     
     
     
-    //CHANGE__PASSWORD() IN USERDAO LAYER
+    		//CHANGE__PASSWORD() IN USERDAO LAYER
     
 
 

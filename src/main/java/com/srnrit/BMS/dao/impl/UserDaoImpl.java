@@ -117,7 +117,7 @@ public class UserDaoImpl implements UserDao {
 								
 								oldUser.setUserEmail(user.getUserEmail());
 								oldUser.setUserName(user.getUserName());
-								oldUser.setUserPassword(user.getUserPassword());
+								
 								oldUser.setUserPhone(user.getUserPhone());
 								
 								oldUser = userRepository.save(oldUser);
