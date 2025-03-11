@@ -107,7 +107,7 @@ public class UserController {
 		return new ResponseEntity<Message>(verifyOTP,HttpStatus.OK);
 		
 	}
-	
+
 	@PostMapping(value="/UpdatePassword")
 	public ResponseEntity<UserResponseDTO> updatePassword(@Valid @RequestBody ChangePasswordRequestDTO changePasswordRequestDTO) 
 	{

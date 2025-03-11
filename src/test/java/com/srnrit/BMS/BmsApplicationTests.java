@@ -12,7 +12,7 @@ class BmsApplicationTests {
 	@Test
 	void test()
 	{
-		
+	 	
 	}
 }
 	
