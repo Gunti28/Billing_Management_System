@@ -41,25 +41,16 @@ public class UserController {
 		UserResponseDTO responseDTO = this.userService.saveUser(dto);
 		return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
 	}
-<<<<<<< HEAD
+
 	
-	@PutMapping(value="Updateuser/{userId}") 
+	@PutMapping(value="/Updateuser/{userId}") 
 	public ResponseEntity<UserResponseDTO> updateUser (@Valid @RequestBody UpdateUserRequestDTO updateUserRequestDTO,@PathVariable String userId)
 	{
 		UserResponseDTO userResponseDTO = this.userService.updateUserById(updateUserRequestDTO, userId);
 		return new ResponseEntity<UserResponseDTO>(userResponseDTO,HttpStatus.OK);
 		
 	}
-=======
->>>>>>> 80adb6a1307aad812a0a23c60e738227bb15c969
 
-	@PutMapping(value = "Updateuser/{userId}")
-	public ResponseEntity<UserResponseDTO> updateUser(@RequestBody UpdateUserRequestDTO updateUserRequestDTO,
-			@PathVariable String userId) {
-		UserResponseDTO userResponseDTO = this.userService.updateUserById(updateUserRequestDTO, userId);
-		return new ResponseEntity<UserResponseDTO>(userResponseDTO, HttpStatus.OK);
-
-	}
 
 	@DeleteMapping(value = "/{userId}")
 	public ResponseEntity<?> deleteUserById(@PathVariable String userId) {
