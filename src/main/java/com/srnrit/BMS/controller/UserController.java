@@ -98,7 +98,7 @@ public class UserController {
 		
 
 	}
-	
+
 	@PostMapping(value="/UpdatePassword")
 	public ResponseEntity<UserResponseDTO> updatePassword(@Valid @RequestBody ChangePasswordRequestDTO changePasswordRequestDTO) 
 	{

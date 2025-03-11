@@ -137,7 +137,7 @@ public class UserServiceImpl implements UserService{
 		{
 			if(email.matches("^[a-zA-Z][A-Za-z0-9._%+-]+@gmail\\.com$"))
 			{
-				if(password.length()>6)
+				if(password.length()>=6)
 				{
 					Optional<User> userFetchedByEmailAndPassword = this.userDao.loginByEmailAndPassword(email,password);
 					if(userFetchedByEmailAndPassword.isPresent())
