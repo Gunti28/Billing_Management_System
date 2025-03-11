@@ -27,18 +27,26 @@ public class ProductDaoImpl implements ProductDao {
 
 	@Override
 	public Optional<Product> saveProduct(Product product, String categoryId) {
-		Boolean existsById = this.categoryRepository.existsById(categoryId);
+	    Boolean existsById = this.categoryRepository.existsById(categoryId);
 
-		if (existsById) {
-			Category category = this.categoryRepository.getReferenceById(categoryId);
-			category.addProduct(product);
-			product.setCategory(category);
-			Product savedProduct = this.productRepository.save(product);
-			return savedProduct != null ? Optional.of(savedProduct) : Optional.empty();
-		} else {
-			throw new CategoryNotFoundException("Category Not Found with Id:" + categoryId);
-		}
+	    if (!existsById) {
+	        throw new CategoryNotFoundException("Category Not Found with Id:" + categoryId);
+	    }
+
+	    // Check for duplicate product name (case-insensitive)
+	    boolean productExists = this.productRepository.existsByProductNameIgnoreCase(product.getProductName());
+	    if (productExists) {
+	        throw new IllegalArgumentException("Product with name '" + product.getProductName() + "' already exists.");
+	    }
+
+	    Category category = this.categoryRepository.getReferenceById(categoryId);
+	    category.addProduct(product);
+	    product.setCategory(category);
+
+	    Product savedProduct = this.productRepository.save(product);
+	    return savedProduct != null ? Optional.of(savedProduct) : Optional.empty();
 	}
+
 	
 	@Override
 	public Optional<List<Product>> fetchProductByAvailability(Boolean availability) {
