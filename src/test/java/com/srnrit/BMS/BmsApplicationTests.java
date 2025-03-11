@@ -29,7 +29,7 @@ class BmsApplicationTests
 	  @Test void categorySavetest() 
 	  { 
 	  Category category=new Category();
-	  category.setCategoryname("Watches"); 
+	  category.setCategoryName("Watches"); 
 	  Optional<Category>categoryRegister=iCategoryDao.insertCategory(category);
 	  assertTrue(categoryRegister.isPresent());
 	  System.out.println(categoryRegister.get()); 

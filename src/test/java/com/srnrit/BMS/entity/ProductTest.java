@@ -29,7 +29,7 @@ public class ProductTest {
     void productWithCategoryTest() {
         // Create a category
         Category category = new Category();
-        category.setCategoryname("Food");
+        category.setCategoryName("Food");
 
         // Create a product and assign it to the category
         Product product = new Product("Bongu Biryani", "biryani.jpg", 10, 299.99, true);
@@ -37,7 +37,7 @@ public class ProductTest {
 
         // Assertions
         assertNotNull(product.getCategory());
-        assertEquals("Food", product.getCategory().getCategoryname());
+        assertEquals("Food", product.getCategory().getCategoryName());
 
         System.out.println("Product with Category: " + product);
     }
