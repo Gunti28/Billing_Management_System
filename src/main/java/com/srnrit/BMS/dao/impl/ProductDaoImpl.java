@@ -27,18 +27,26 @@ public class ProductDaoImpl implements ProductDao {
 
 	@Override
 	public Optional<Product> saveProduct(Product product, String categoryId) {
-		Boolean existsById = this.categoryRepository.existsById(categoryId);
+	    Boolean existsById = this.categoryRepository.existsById(categoryId);
 
-		if (existsById) {
-			Category category = this.categoryRepository.getReferenceById(categoryId);
-			category.addProduct(product);
-			product.setCategory(category);
-			Product savedProduct = this.productRepository.save(product);
-			return savedProduct != null ? Optional.of(savedProduct) : Optional.empty();
-		} else {
-			throw new CategoryNotFoundException("Category Not Found with Id:" + categoryId);
-		}
+	    if (!existsById) {
+	        throw new CategoryNotFoundException("Category Not Found with Id:" + categoryId);
+	    }
+
+	    // Check for duplicate product name (case-insensitive)
+	    boolean productExists = this.productRepository.existsByProductNameIgnoreCase(product.getProductName());
+	    if (productExists) {
+	        throw new IllegalArgumentException("Product with name '" + product.getProductName() + "' already exists.");
+	    }
+
+	    Category category = this.categoryRepository.getReferenceById(categoryId);
+	    category.addProduct(product);
+	    product.setCategory(category);
+
+	    Product savedProduct = this.productRepository.save(product);
+	    return savedProduct != null ? Optional.of(savedProduct) : Optional.empty();
 	}
+
 	
 	@Override
 	public Optional<List<Product>> fetchProductByAvailability(Boolean availability) {
@@ -62,53 +70,30 @@ public class ProductDaoImpl implements ProductDao {
 
 	@Override
 	public Optional<Product> updateProduct(Product product) {
-		
-		boolean existsById = this.productRepository.existsById(product.getProductId());
-	    if(existsById)
-	    {
-	    	Product oldProduct = this.productRepository.getReferenceById(product.getProductId());
-	        Category category = oldProduct.getCategory();
-	        oldProduct.setInStock(product.getInStock());
-	        oldProduct.setProductQuantity(product.getProductQuantity());
-	        oldProduct.setProductImage(product.getProductImage());
-	        oldProduct.setProductPrice(product.getProductPrice());
-	        oldProduct.setProductName(product.getProductName());
-	        Product updatedProduct = this.productRepository.save(oldProduct);
-	        List<Product> products = category.getProducts();
-	        boolean flag=false;
-	        for(Product prod : products)
-	        {
-	        	if(prod.getProductId().equals(product.getProductId()))
-	        	{
-	        		
-	        		prod.setProductImage(product.getProductImage());
-	        		prod.setProductName(product.getProductName());
-	        		prod.setProductPrice(product.getProductPrice());
-	        		prod.setProductQuantity(product.getProductQuantity());
-	        		prod.setInStock(product.getInStock());
-	        		
-	        		System.out.println("Category updated with product id : "+product.getProductId());
-	        		flag=true;
-	        		break;
-	        	}
-	        }
-	        if(flag && updatedProduct!=null)
-	        {
-	        	return Optional.of(updatedProduct);
-	        }
-	        else
-	        {
-	        	return Optional.empty();
-	        }
-	        
+	    boolean existsById = this.productRepository.existsById(product.getProductId());
+
+	    if (!existsById) {
+	        return Optional.empty();
 	    }
-	    else 
-	    {
-			return Optional.empty();
-		}
+
+	    Product oldProduct = this.productRepository.getReferenceById(product.getProductId());
+
+	    // Preserve category assignment
+	    Category category = oldProduct.getCategory();
+	    product.setCategory(category);
+
+	    // Update the product details
+	    oldProduct.setProductName(product.getProductName());
+	    oldProduct.setProductImage(product.getProductImage());
+	    oldProduct.setProductQuantity(product.getProductQuantity());
+	    oldProduct.setProductPrice(product.getProductPrice());
+	    oldProduct.setInStock(product.getInStock());
+
+	    // Save the updated product
+	    Product updatedProduct = this.productRepository.save(oldProduct);
+	    return Optional.of(updatedProduct);
+	}
 	
-	
-	}	
 
 	@Override
 	public Optional<List<Product>> searchProductByName(String name) {
