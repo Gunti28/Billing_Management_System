@@ -45,7 +45,7 @@ public class CategoryServiceTest  {
 
         // Mock Category Entity
         category = new Category();
-        category.setCategoryname("Electronics");
+        category.setCategoryName("Electronics");
         category.setProducts(new ArrayList<>());  
 
         // Mock Request DTO
@@ -64,7 +64,7 @@ public class CategoryServiceTest  {
     void testAddCategoryWithProducts_Success() {
         // Create a mock category object
         Category category = new Category();
-        category.setCategoryname("Electronics");
+        category.setCategoryName("Electronics");
 
         when(categoryDAO.insertCategory(any(Category.class))).thenReturn(Optional.of(category));
 
@@ -95,7 +95,7 @@ public class CategoryServiceTest  {
 
         // ✅ Manually create expected response instead of relying on EntityToDTO
         CategoryResponseDTO expectedResponse = new CategoryResponseDTO();
-        expectedResponse.setCategoryName(category.getCategoryname()); 
+        expectedResponse.setCategoryName(category.getCategoryName()); 
 
         List<CategoryResponseDTO> response = categoryService.getAllCategory();
 
