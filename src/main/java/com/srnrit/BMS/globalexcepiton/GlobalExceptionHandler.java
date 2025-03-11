@@ -1,8 +1,8 @@
 package com.srnrit.BMS.globalexcepiton;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.stream.Collectors;
 
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -18,39 +18,51 @@ import com.srnrit.BMS.exception.productexceptions.ProductNotFoundException;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-	// Handle Validation Errors and Return Only Messages
-	@ExceptionHandler(MethodArgumentNotValidException.class)
-	public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
-		Map<String, String> errors = new HashMap<>();
+    // Handle Validation Errors (Return single combined error message)
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Message> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        String errorMessages = ex.getBindingResult().getFieldErrors()
+                .stream()
+                .map(error -> error.getDefaultMessage())
+                .collect(Collectors.joining(", "));
+        return new ResponseEntity<>(new Message(errorMessages), HttpStatus.BAD_REQUEST);
+    }
 
-		// Extract only the field and its corresponding error message
-		ex.getBindingResult().getFieldErrors().forEach(error -> {
-			errors.put(error.getField(), error.getDefaultMessage());
-		});
+    @ExceptionHandler(ProductNotCreatedException.class)
+    public ResponseEntity<Message> productNotCreatedException(ProductNotCreatedException e) {
+        return new ResponseEntity<>(new Message(e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 
-		return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+    @ExceptionHandler(ProductNotFoundException.class)
+    public ResponseEntity<Message> productNotFoundException(ProductNotFoundException e) {
+        return new ResponseEntity<>(new Message(e.getMessage()), HttpStatus.NOT_FOUND);
+    }
 
-	}
+    @ExceptionHandler(CategoryNotCreatedException.class)
+    public ResponseEntity<Message> categoryNotCreatedException(CategoryNotCreatedException e) {
+        return new ResponseEntity<>(new Message(e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 
-	@ExceptionHandler(exception = ProductNotCreatedException.class)
-	public ResponseEntity<Message> productNotCreatedException(ProductNotCreatedException e) {
-		return new ResponseEntity<Message>(new Message(e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
-	}
+    @ExceptionHandler(CategoryNotFoundException.class)
+    public ResponseEntity<Message> handleCategoryNotFoundException(CategoryNotFoundException ex) {
+        return new ResponseEntity<>(new Message(ex.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 
-	@ExceptionHandler(exception = ProductNotFoundException.class)
-	public ResponseEntity<Message> productNotFoundException(ProductNotFoundException e) {
-		return new ResponseEntity<Message>(new Message(e.getMessage()), HttpStatus.NOT_FOUND);
-	}
+    // Handle IllegalArgumentException (e.g., duplicate products)
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Message> handleIllegalArgumentException(IllegalArgumentException ex) {
+        return new ResponseEntity<>(new Message(ex.getMessage()), HttpStatus.CONFLICT);
+    }
 
-	@ExceptionHandler(CategoryNotCreatedException.class)
-	public ResponseEntity<?> categoryNotCreatedException(CategoryNotCreatedException e) {
-		return new ResponseEntity<Message>(new Message(e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
-	}
-
-	@ExceptionHandler(CategoryNotFoundException.class)
-	public ResponseEntity<String> handleCategoryNotFoundException(CategoryNotFoundException ex) {
-		String errorMessage = ex.getMessage();
-		return new ResponseEntity<>(errorMessage, HttpStatus.INTERNAL_SERVER_ERROR); // Return only the message
-	}
-
+    // Handle Unknown Exceptions (Fallback for all unhandled cases)
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Message> handleGlobalException(Exception ex) {
+        return new ResponseEntity<>(new Message("An unexpected error occurred: " + ex.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+    
+    
+    @ExceptionHandler(InvalidDataAccessApiUsageException.class)
+    public ResponseEntity<String> handleInvalidDataAccessApiUsageException(InvalidDataAccessApiUsageException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
+    }
 }
