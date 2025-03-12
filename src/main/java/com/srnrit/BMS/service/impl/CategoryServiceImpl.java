@@ -143,6 +143,10 @@ public class CategoryServiceImpl implements ICategoryService
 		}
 
 	}
+	
+	//Here we written logic for fetching Category details by CategoryName
+	
+	
 
 
 }
