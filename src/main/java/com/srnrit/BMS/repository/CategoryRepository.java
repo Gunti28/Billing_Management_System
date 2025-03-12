@@ -1,10 +1,12 @@
 package com.srnrit.BMS.repository;
 
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.srnrit.BMS.entity.Category;
 
 public interface CategoryRepository extends JpaRepository<Category,String>{
-	Category findByCategoryName(String categoryName);
+	Optional<Category> findByCategoryName(String categoryName);
 	boolean existsByCategoryName(String categoryName);
 }
