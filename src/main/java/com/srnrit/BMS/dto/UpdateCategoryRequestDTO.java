@@ -19,7 +19,7 @@ import lombok.ToString;
 public class UpdateCategoryRequestDTO 
 {
 	@NotNull(message = "Id cannot be null")
-	@Positive(message = "Id must be positive")
+//	@Positive(message = "Id must be positive")
 	private String categoryId;
 
 	@NotNull(message = "Category Name must not be null")

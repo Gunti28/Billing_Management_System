@@ -140,6 +140,105 @@ public class CategoryDAOTest
 
 	        assertTrue(result.isEmpty());
 	    }
+	    
+	    
+	    
+	    @Test
+	    void testGetCategoryByCategoryName_Success() {
+	        when(categoryRepository.findByCategoryNameIgnoreCase("Electronics")).thenReturn(category);
+
+	        Optional<Category> result = categoryDaoImpl.getCategoryByCategoryName("Electronics");
+
+	        assertTrue(result.isPresent());
+	        assertEquals("Electronics", result.get().getCategoryName());
+	    }
+
+	    @Test
+	    void testGetCategoryByCategoryName_NotFound() {
+	        when(categoryRepository.findByCategoryNameIgnoreCase("NonExistentCategory")).thenReturn(null);
+
+	        Optional<Category> result = categoryDaoImpl.getCategoryByCategoryName("NonExistentCategory");
+
+	        assertTrue(result.isEmpty());
+	    }
+
+	    
+	    @Test
+	    void testGetCategoryByCategoryName_NullInput() {
+	        Optional<Category> result = categoryDaoImpl.getCategoryByCategoryName(null);
+
+	        assertTrue(result.isEmpty(), "Expected empty Optional when category name is null");
+	    }
+
+	    @Test
+	    void testGetCategoryByCategoryName_EmptyString() {
+	        when(categoryRepository.findByCategoryNameIgnoreCase("")).thenReturn(null);
+
+	        Optional<Category> result = categoryDaoImpl.getCategoryByCategoryName("");
+
+	        assertTrue(result.isEmpty(), "Expected empty Optional when category name is an empty string");
+	    }
+
+	    @Test
+	    void testGetCategoryByCategoryName_WhitespaceString() {
+	        when(categoryRepository.findByCategoryNameIgnoreCase("   ")).thenReturn(null);
+
+	        Optional<Category> result = categoryDaoImpl.getCategoryByCategoryName("   ");
+
+	        assertTrue(result.isEmpty(), "Expected empty Optional when category name is only whitespace");
+	    }
+
+	    
+	    @Test
+	    void testInsertCategory_NullCategory() {
+	        assertThrows(NullPointerException.class, () -> categoryDaoImpl.insertCategory(null));
+	    }
+
+	   
+
+	    @Test
+	    void testUpdateCategory_BlankName() {
+	        when(categoryRepository.findById("1")).thenReturn(Optional.of(category));
+
+	        Optional<String> result = categoryDaoImpl.updateCategory("1", "");
+
+	        assertTrue(result.isPresent(), "Expected successful update even if name is blank");
+	    }
+
+	    
+	    
+	    @Test
+	    void testGetCategoryByCategoryId_NullId() {
+	        Optional<Category> result = categoryDaoImpl.getCategoryByCategoryId(null);
+
+	        assertTrue(result.isEmpty(), "Expected empty Optional when ID is null");
+	    }
+
+	    @Test
+	    void testGetCategoryByCategoryId_EmptyId() {
+	        Optional<Category> result = categoryDaoImpl.getCategoryByCategoryId("");
+
+	        assertTrue(result.isEmpty(), "Expected empty Optional when ID is empty");
+	    }
+
+
+	    @Test
+	    void testDeleteCategory_NullId() {
+	        Optional<String> result = categoryDaoImpl.deleteCategory(null);
+
+	        assertTrue(result.isEmpty(), "Expected empty Optional when deleting a null ID");
+	    }
+
+	    @Test
+	    void testDeleteCategory_EmptyId() {
+	        Optional<String> result = categoryDaoImpl.deleteCategory("");
+
+	        assertTrue(result.isEmpty(), "Expected empty Optional when deleting an empty ID");
+	    }
+	    
+	    
+
+
 	}
 	    
 
