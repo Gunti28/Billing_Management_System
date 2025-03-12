@@ -14,7 +14,6 @@ import com.srnrit.BMS.dto.CategoryResponseDTO;
 import com.srnrit.BMS.dto.ProductResponseDTO;
 import com.srnrit.BMS.entity.Category;
 import com.srnrit.BMS.entity.Product;
-import com.srnrit.BMS.exception.categoryexceptions.CategoryNameAlreadyExistsException;
 import com.srnrit.BMS.exception.categoryexceptions.CategoryNotCreatedException;
 import com.srnrit.BMS.exception.categoryexceptions.CategoryNotFoundException;
 import com.srnrit.BMS.mapper.EntityToDTO;

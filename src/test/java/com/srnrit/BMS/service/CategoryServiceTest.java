@@ -93,7 +93,7 @@ public class CategoryServiceTest  {
         List<Category> categoryList = Arrays.asList(category);
         when(categoryDAO.getAllCategory()).thenReturn(Optional.of(categoryList));
 
-        // ✅ Manually create expected response instead of relying on EntityToDTO
+        //  Manually create expected response instead of relying on EntityToDTO
         CategoryResponseDTO expectedResponse = new CategoryResponseDTO();
         expectedResponse.setCategoryName(category.getCategoryName()); 
 
@@ -156,6 +156,42 @@ public class CategoryServiceTest  {
         assertThrows(CategoryNotFoundException.class, () -> categoryService.findCategoryByCategoryId("123"));
     }
 
+ //  Test for Finding Category by Name (Success)
+    @Test
+    void testFindCategoryByCategoryName_Success() {
+        when(categoryDAO.getCategoryByCategoryName("Electronics")).thenReturn(Optional.of(category));
+
+        CategoryResponseDTO response = categoryService.findCategoryByCategoryName("Electronics");
+
+        assertNotNull(response);
+        assertEquals("Electronics", response.getCategoryName());
+    }
+
+    //  Test for Finding Category by Name (Failure - Category Not Found)
+    @Test
+    void testFindCategoryByCategoryName_Failure() {
+        when(categoryDAO.getCategoryByCategoryName("NonExistentCategory")).thenReturn(Optional.empty());
+
+        assertThrows(CategoryNotFoundException.class, () -> categoryService.findCategoryByCategoryName("NonExistentCategory"));
+    }
+
+    //  Test for Finding Category by Name (Failure - Null Input)
+    @Test
+    void testFindCategoryByCategoryName_NullInput() {
+        assertThrows(IllegalArgumentException.class, () -> categoryService.findCategoryByCategoryName(null));
+    }
+
+    //  Test for Finding Category by Name (Failure - Empty String)
+    @Test
+    void testFindCategoryByCategoryName_EmptyInput() {
+        assertThrows(IllegalArgumentException.class, () -> categoryService.findCategoryByCategoryName(""));
+    }
+
+    // ❌ Test for Finding Category by Name (Failure - Blank Spaces)
+    @Test
+    void testFindCategoryByCategoryName_BlankInput() {
+        assertThrows(IllegalArgumentException.class, () -> categoryService.findCategoryByCategoryName("   "));
+    }
     // Test for Updating Category with Null ID
     @Test
     void testUpdateCategory_NullId() {
