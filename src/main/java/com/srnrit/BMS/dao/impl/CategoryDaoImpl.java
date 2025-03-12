@@ -24,18 +24,17 @@ public class CategoryDaoImpl implements ICategoryDao
 	}
 
 	//for category insertion
-	@Override
-	public Optional<Category> insertCategory(Category category) {
-		Optional<Category> existingCategory = this.categoryRepository.findByCategoryName(category.getCategoryName());
-		if(existingCategory == null) {
-			Category savedCategory = this.categoryRepository.save(category);
-			return savedCategory!=null?Optional.of(savedCategory):Optional.empty();
+		@Override
+		public Optional<Category> insertCategory(Category category) {
+			Category existingCategory = this.categoryRepository.findByCategoryNameIgnoreCase(category.getCategoryName());
+			if(existingCategory == null) {
+				Category savedCategory = this.categoryRepository.save(category);
+				return savedCategory!=null?Optional.of(savedCategory):Optional.empty();
+			}
+			else {
+				throw new CategoryNotCreatedException("Category already available with name : "+category.getCategoryName());
+			}
 		}
-		else {
-			throw new CategoryNotCreatedException("Category already available with name : "+category.getCategoryName());
-		} 
-	}
-
 
 	//for fetching category
 	@Override
@@ -81,6 +80,12 @@ public class CategoryDaoImpl implements ICategoryDao
 		return Optional.empty();
 	}
 	
+	//for fetching category by Name
+	@Override
+	public Optional<Category> getCategoryByCategoryName(String categoryName) {
+	    Category category = this.categoryRepository.findByCategoryNameIgnoreCase(categoryName);
+	    return Optional.ofNullable(category); 
+	}
 
 	//Delete by id
 	@Override
@@ -94,24 +99,6 @@ public class CategoryDaoImpl implements ICategoryDao
 			return Optional.empty();
 		}
 	}
-
-	//fetching the category by Name
-	@Override
-	public Optional<Category> getCategoryByCategoryName(String categoryName) 
-	{
-
-		if(this.categoryRepository.existsByCategoryName(categoryName))
-		{
-		  return this.categoryRepository.findByCategoryName(categoryName);
-		}
-		return Optional.empty();
-	}
-	
-	
-	
-	
-	
-
 
 
 }

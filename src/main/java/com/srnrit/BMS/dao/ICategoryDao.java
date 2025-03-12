@@ -11,6 +11,6 @@ public interface ICategoryDao
     Optional<List<Category>> getAllCategory();
 	Optional<String> updateCategory(String categoryId,String categoryName);
 	Optional<Category> getCategoryByCategoryId(String categoryId) ;
+	Optional<Category> getCategoryByCategoryName(String categoryId) ;
 	Optional<String> deleteCategory(String categoryId); 	
-	Optional<Category> getCategoryByCategoryName(String categoryName) ;
 }

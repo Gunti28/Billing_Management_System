@@ -143,6 +143,22 @@ public class CategoryServiceImpl implements ICategoryService
 		}
 
 	}
+	
+	//Here we written logic for fetching Category details by CategoryName
+	
+	@Override
+	public CategoryResponseDTO findCategoryByCategoryName(String categoryName) {
+	    if (categoryName == null || categoryName.trim().isEmpty()) {
+	        throw new IllegalArgumentException("Category name must not be null or empty");
+	    }
+
+	    Category category = this.categoryDAO.getCategoryByCategoryName(categoryName)
+	        .orElseThrow(() -> new CategoryNotFoundException("Category not exist with name: " + categoryName));
+
+	    return EntityToDTO.toCategoryResponse(category);
+	}
+
+	
 
 
 }

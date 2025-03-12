@@ -41,7 +41,7 @@ public class CategoryDAOTest
 	    // Test for insertCategory
 	    @Test
 	    void testInsertCategory_Success() {
-	        when(categoryRepository.findByCategoryName(category.getCategoryName())).thenReturn(null);
+	        when(categoryRepository.findByCategoryNameIgnoreCase(category.getCategoryName())).thenReturn(null);
 	        when(categoryRepository.save(category)).thenReturn(category);
 
 	        Optional<Category> result = categoryDaoImpl.insertCategory(category);
@@ -52,7 +52,7 @@ public class CategoryDAOTest
 	    
 	    @Test
 	    void testInsertCategory_AlreadyExists() {
-	        when(categoryRepository.findByCategoryName(category.getCategoryName())).thenReturn(category);
+	        when(categoryRepository.findByCategoryNameIgnoreCase(category.getCategoryName())).thenReturn(category);
 
 	        assertThrows(CategoryNotCreatedException.class, () -> categoryDaoImpl.insertCategory(category));
 	    }
