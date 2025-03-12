@@ -11,4 +11,5 @@ public interface ICategoryService
     List<CategoryResponseDTO> getAllCategory();
     String updateCategory(String categoryId,String categoryName);
     CategoryResponseDTO findCategoryByCategoryId(String categoryId);
+    CategoryResponseDTO findCategoryByCategoryName(String categoryName);
 }

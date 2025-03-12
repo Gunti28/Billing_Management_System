@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.srnrit.BMS.dto.CategoryRequestDTO;
@@ -58,9 +59,15 @@ public class CategoryController {
     }
 
     //API to Get Category by using CategoryId
-    @GetMapping("categoryById/{categoryId}")
-    public ResponseEntity<?> findCategoryById(@PathVariable String categoryId){
+    @GetMapping("/categoryById")
+    public ResponseEntity<?> findCategoryById(@RequestParam String categoryId){
         CategoryResponseDTO foundCategory =categoryService.findCategoryByCategoryId(categoryId);
+        return  new ResponseEntity<>(foundCategory,HttpStatus.OK) ;
+    }
+  //API to Get Category by using CategoryId
+    @GetMapping("/categoryByName")
+    public ResponseEntity<?> findCategoryByCategoryName(@RequestParam String categoryName){
+        CategoryResponseDTO foundCategory =categoryService.findCategoryByCategoryName(categoryName);
         return  new ResponseEntity<>(foundCategory,HttpStatus.OK) ;
     }
 

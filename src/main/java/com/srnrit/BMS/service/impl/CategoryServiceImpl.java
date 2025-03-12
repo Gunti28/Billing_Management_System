@@ -40,7 +40,7 @@ public class CategoryServiceImpl implements ICategoryService
 			List<Product> products = categoryRequestDTO.getProducts().stream()
 					.map(productRequest -> new Product(
 							productRequest.getProductName(),
-							productRequest.getProductImage(),							
+							productRequest.getProductImage().toString(),							
 							productRequest.getProductQuantity(),
 							productRequest.getProductPrice(),
 							productRequest.getInStock()
@@ -146,6 +146,18 @@ public class CategoryServiceImpl implements ICategoryService
 	
 	//Here we written logic for fetching Category details by CategoryName
 	
+	@Override
+	public CategoryResponseDTO findCategoryByCategoryName(String categoryName) {
+	    if (categoryName == null || categoryName.trim().isEmpty()) {
+	        throw new IllegalArgumentException("Category name must not be null or empty");
+	    }
+
+	    Category category = this.categoryDAO.getCategoryByCategoryName(categoryName)
+	        .orElseThrow(() -> new CategoryNotFoundException("Category not exist with name: " + categoryName));
+
+	    return EntityToDTO.toCategoryResponse(category);
+	}
+
 	
 
 
