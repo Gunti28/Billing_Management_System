@@ -12,20 +12,20 @@ import com.srnrit.BMS.entity.Product;
 
 public class DTOToEntity 
 {
-	
+
 	public static Category categoryRequestDTOToCategory(CategoryRequestDTO dto)
 	{
 		Category category = new Category();
-		 category.setCategoryName(dto.getCategoryName());
+		category.setCategoryName(dto.getCategoryName());
 
-		    if (dto.getProducts() != null && !dto.getProducts().isEmpty()) {
-		        List<Product> products = dto.getProducts().stream()
-		                .map(DTOToEntity::toProduct)
-		                .collect(Collectors.toList());
-		        category.setProducts(products);
-		    } else {
-		        category.setProducts(new ArrayList<>()); 
-		    }
+		if (dto.getProducts() != null && !dto.getProducts().isEmpty()) {
+			List<Product> products = dto.getProducts().stream()
+					.map(DTOToEntity::toProduct)
+					.collect(Collectors.toList());
+			category.setProducts(products);
+		} else {
+			category.setProducts(new ArrayList<>()); 
+		}
 		return category;		
 	}
 
@@ -38,6 +38,6 @@ public class DTOToEntity
 				productRequestDTO.getInStock()
 				);
 	}
-	
+
 
 }

@@ -100,14 +100,25 @@ public class CategoryServiceTest {
 		verify(categoryDAO, never()).insertCategory(any());
 	}
 
+
 	//  Test: DTO to Entity conversion
 	@Test
 	void testDtoToEntityConversionAddCategory() {
+		categoryRequest.setCategoryName("Electronics");
+		ProductRequestDTO productRequest = new ProductRequestDTO();
+		productRequest.setProductName("Laptop");
+
+		List<ProductRequestDTO> products = new ArrayList<>();
+		products.add(productRequest);
+		categoryRequest.setProducts(products);
+
 		Category convertedCategory = DTOToEntity.categoryRequestDTOToCategory(categoryRequest);
 
 		assertNotNull(convertedCategory);
 		assertEquals("Electronics", convertedCategory.getCategoryName());
+		assertNotNull(convertedCategory.getProducts());
 		assertEquals(1, convertedCategory.getProducts().size());
+		assertEquals("Laptop", convertedCategory.getProducts().get(0).getProductName());
 	}
 
 	//  Test: Entity to DTO conversion
@@ -394,6 +405,6 @@ public class CategoryServiceTest {
 
 		assertEquals("CategoryName must be at least 3 characters long", exception.getMessage());
 		verify(categoryDAO, never()).updateCategory(anyString(), anyString());
-	}
+	}   
 
 }

@@ -68,8 +68,6 @@ public class CategoryDaoImpl implements ICategoryDao
 		return Optional.of("Category updated successfully with id: " + categoryId);
 	}
 
-
-
 	//for fetching category by Id
 	@Override
 	public Optional<Category> getCategoryByCategoryId(String categoryId) 
@@ -99,6 +97,4 @@ public class CategoryDaoImpl implements ICategoryDao
 			return Optional.empty();
 		}
 	}
-
-
 }

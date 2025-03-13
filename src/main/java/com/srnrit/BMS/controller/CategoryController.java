@@ -62,13 +62,10 @@ public class CategoryController {
 		return new ResponseEntity<>(foundCategory, HttpStatus.OK);
 	}
 
-
-
 	//API to Get Category by using CategoryId
 	@GetMapping("/categoryByName")
 	public ResponseEntity<?> findCategoryByCategoryName(@RequestParam String categoryName){
 		CategoryResponseDTO foundCategory =categoryService.findCategoryByCategoryName(categoryName);
 		return  new ResponseEntity<>(foundCategory,HttpStatus.OK) ;
 	}
-
 }

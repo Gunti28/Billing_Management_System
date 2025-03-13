@@ -32,6 +32,7 @@ public class CategoryServiceImpl implements ICategoryService
 		this.categoryDAO = categoryDAO;
 	}
 
+	//service for to add category with products
 	@Override
 	public CategoryResponseDTO addCategoryWithProducts(CategoryRequestDTO categoryRequestDTO) {
 		if (categoryRequestDTO == null || categoryRequestDTO.getCategoryName() == null || categoryRequestDTO.getCategoryName().trim().isEmpty() || categoryRequestDTO.getCategoryName().equalsIgnoreCase("null")) {
@@ -75,7 +76,7 @@ public class CategoryServiceImpl implements ICategoryService
 		}
 	}
 
-	//Get All Category details 
+	//service for Get All Category details 
 	@Override
 	public List<CategoryResponseDTO> getAllCategory() {
 		Optional<List<Category>> allCategory = categoryDAO.getAllCategory();
@@ -105,7 +106,7 @@ public class CategoryServiceImpl implements ICategoryService
 	}
 
 
-	//Here we written logic for updating CategoryName with CategoryId
+	//Service for updating CategoryName with CategoryId
 	@Override
 	public String updateCategory(String categoryId, String categoryName) {
 
@@ -133,7 +134,7 @@ public class CategoryServiceImpl implements ICategoryService
 	}
 
 
-	//Here we written logic for fetching Category details by CategoryId
+	//Service for fetching Category details by CategoryId
 	@Override
 	public CategoryResponseDTO findCategoryByCategoryId(String categoryId) 
 	{
@@ -158,8 +159,7 @@ public class CategoryServiceImpl implements ICategoryService
 
 	}
 
-	//Here we written logic for fetching Category details by CategoryName
-
+	//Service for fetching Category details by CategoryName
 	@Override
 	public CategoryResponseDTO findCategoryByCategoryName(String categoryName) {
 		if (categoryName == null || categoryName.trim().isEmpty()) {
