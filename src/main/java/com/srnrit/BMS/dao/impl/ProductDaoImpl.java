@@ -27,80 +27,96 @@ public class ProductDaoImpl implements ProductDao {
 
 	@Override
 	public Optional<Product> saveProduct(Product product, String categoryId) {
-	    Boolean existsById = this.categoryRepository.existsById(categoryId);
-
-	    if (!existsById) {
-	        throw new CategoryNotFoundException("Category Not Found with Id:" + categoryId);
-	    }
-
-	    // Check for duplicate product name (case-insensitive)
-	    boolean productExists = this.productRepository.existsByProductNameIgnoreCase(product.getProductName());
-	    if (productExists) {
-	        throw new IllegalArgumentException("Product with name '" + product.getProductName() + "' already exists.");
-	    }
-
-	    Category category = this.categoryRepository.getReferenceById(categoryId);
-	    category.addProduct(product);
-	    product.setCategory(category);
-
-	    Product savedProduct = this.productRepository.save(product);
-	    return savedProduct != null ? Optional.of(savedProduct) : Optional.empty();
+		if (product == null || product.getProductName() == null || product.getProductName().trim().isEmpty()) {
+			throw new IllegalArgumentException("Product name cannot be empty or null");
+		}
+		Boolean existsById = this.categoryRepository.existsById(categoryId);
+		if (!existsById) {
+			throw new CategoryNotFoundException("Category Not Found with Id:" + categoryId);
+		}
+		boolean productExists = this.productRepository.existsByProductNameIgnoreCase(product.getProductName());
+		if (productExists) {
+			throw new IllegalArgumentException("Product with name '" + product.getProductName() + "' already exists.");
+		}
+		Category category = this.categoryRepository.getReferenceById(categoryId);
+		category.addProduct(product);
+		product.setCategory(category);
+		Product savedProduct = this.productRepository.save(product);
+		return savedProduct != null ? Optional.of(savedProduct) : Optional.empty();
 	}
 
-	
 	@Override
 	public Optional<List<Product>> fetchProductByAvailability(Boolean availability) {
+	    if (availability == null) {
+	        throw new NullPointerException("Availability status cannot be null");
+	    }
 	    List<Product> products = this.productRepository.findByInStock(availability);
 	    return products.isEmpty() ? Optional.empty() : Optional.of(products);
 	}
 
 
-
 	@Override
 	public Optional<String> deleteProductById(String productId) {
-		Boolean existsById = this.productRepository.existsById(productId);
-		if (existsById) {
-			Product product = this.productRepository.getReferenceById(productId);
-			product.getCategory().removeProduct(product);
-			this.productRepository.delete(product);
-			return Optional.of("Product successfully deleted with Id:" + productId);
-		}
-		return Optional.empty();
+	    if (productId == null) {
+	        throw new NullPointerException("Product ID cannot be null");
+	    }
+	    Boolean existsById = this.productRepository.existsById(productId);
+	    if (existsById) {
+	        Product product = this.productRepository.getReferenceById(productId);
+	        
+	        // Remove product from all categories
+	        if (product.getCategory() != null) {
+	            product.getCategory().removeProduct(product);
+	        }
+	        
+	        this.productRepository.delete(product);
+	        return Optional.of("Product successfully deleted with Id:" + productId);
+	    }
+	    return Optional.empty();
 	}
+
 
 	@Override
 	public Optional<Product> updateProduct(Product product) {
-	    boolean existsById = this.productRepository.existsById(product.getProductId());
+	    if (product == null || product.getProductId() == null) {
+	        throw new NullPointerException("Product or Product ID cannot be null");
+	    }
 
+	    boolean existsById = this.productRepository.existsById(product.getProductId());
 	    if (!existsById) {
 	        return Optional.empty();
 	    }
 
 	    Product oldProduct = this.productRepository.getReferenceById(product.getProductId());
 
-	    // Preserve category assignment
-	    Category category = oldProduct.getCategory();
-	    product.setCategory(category);
+	    // Check if any actual updates are needed
+	    if (oldProduct.getProductName().equals(product.getProductName()) &&
+	        oldProduct.getProductImage().equals(product.getProductImage()) &&
+	        oldProduct.getProductQuantity() == product.getProductQuantity() &&
+	        oldProduct.getProductPrice() == product.getProductPrice() &&
+	        oldProduct.getInStock().equals(product.getInStock())) {
+	        return Optional.of(oldProduct); // Return existing product if no changes
+	    }
 
-	    // Update the product details
 	    oldProduct.setProductName(product.getProductName());
 	    oldProduct.setProductImage(product.getProductImage());
 	    oldProduct.setProductQuantity(product.getProductQuantity());
 	    oldProduct.setProductPrice(product.getProductPrice());
 	    oldProduct.setInStock(product.getInStock());
 
-	    // Save the updated product
 	    Product updatedProduct = this.productRepository.save(oldProduct);
 	    return Optional.of(updatedProduct);
 	}
-	
+
 
 	@Override
 	public Optional<List<Product>> searchProductByName(String name) {
-	    List<Product> products = this.productRepository.findByProductNameContainingIgnoreCase(name);
-	    return products.isEmpty() ? Optional.empty() : Optional.of(products);
+		if (name == null) {
+			throw new NullPointerException("Product name cannot be null");
+		}
+		List<Product> products = this.productRepository.findByProductNameContainingIgnoreCase(name);
+		return products.isEmpty() ? Optional.empty() : Optional.of(products);
 	}
-
 
 	@Override
 	public Optional<List<Product>> fetchAllProduct() {
