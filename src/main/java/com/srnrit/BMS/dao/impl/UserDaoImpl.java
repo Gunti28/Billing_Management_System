@@ -134,7 +134,7 @@ public class UserDaoImpl implements UserDao
                                				
 						 }
 						 else throw new RuntimeException("user name must be null or blank!.");
-						 oldUser = userRepository.save(user);
+						 oldUser = userRepository.save(oldUser);
 						 return oldUser != null ? Optional.of(oldUser) : Optional.empty();
 					}
 					else throw new RuntimeException("user is not active");			
