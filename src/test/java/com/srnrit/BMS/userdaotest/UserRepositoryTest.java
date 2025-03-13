@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.time.LocalDateTime;
 import java.util.Optional;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -19,13 +18,10 @@ import com.srnrit.BMS.repository.UserRepository;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class UserRepositoryTest {
 
-    @SuppressWarnings("unused")
-	@Autowired
+    @Autowired
     private UserRepository userRepository;
-
-    // Create a method to generate a test user
-    @SuppressWarnings("unused")
-	private User createTestUser(String email) {
+    //Create user  a method to generate a test user
+    private User createTestUser(String email) {
         User user = new User();
         user.setUserName("Test User");
         user.setUserEmail(email);
@@ -138,7 +134,6 @@ class UserRepositoryTest {
 
     @Test
     void findByUserPassword_NullPassword_ReturnsNull() {
-        // Act
         User foundUser = userRepository.findByUserPassword(null);
         assertNull(foundUser);
     }
@@ -147,7 +142,6 @@ class UserRepositoryTest {
     // Positive Test Case
     @Test
     void findByUserPhone_ExistingUser_ReturnsUser() {
-        // Arrange
         Long testPhoneNumber = 1234567890L;
         User user = createTestUser("test@example.com");
         user.setUserPhone(testPhoneNumber);
