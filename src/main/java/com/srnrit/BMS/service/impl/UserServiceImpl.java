@@ -59,28 +59,18 @@ public class UserServiceImpl implements UserService{
 					{
 						return userResponseDTO;
 					}
-					else
-					{
-						throw new UserNotcreatedException("UserResponseDTO must not be null");
-					}
+					else throw new UserNotcreatedException("UserResponseDTO must not be null");
 				}
-				else
-				{
-					throw new UserNotcreatedException("User Not created");
-				}
+				else throw new UserNotcreatedException("User Not created");
 			}
-			else {
-				throw new RuntimeException("Something went wrong by converting DTO To User");
-			}
+			else throw new RuntimeException("Something went wrong by converting DTO To User");	
 		}
-		else {
-			throw new RuntimeException("UserRequestDTO must not be null");
-		}
-		
+		else throw new RuntimeException("UserRequestDTO must not be null");
 	}
 
 	@Override
-	public String deleteUserById(String userId) {
+	public String deleteUserById(String userId) 
+	{
 		Optional<String> deleteUser = userDao.deleteUserById(userId);
 		return deleteUser.orElseThrow(()-> new RuntimeException("Something went wrong"));
 	}
@@ -156,7 +146,9 @@ public class UserServiceImpl implements UserService{
 	}
 
 	@Override
-	public UserResponseDTO editUserImage(MultipartFile file, String userId) {
+	public UserResponseDTO editUserImage(MultipartFile file, String userId) 
+	{
+		//System.out.println(file+" "+userId);
 		if(userId!=null && !userId.isBlank())
 		{
 			if(file!=null)
@@ -195,9 +187,7 @@ public class UserServiceImpl implements UserService{
 	{
 		int dotIndex=fileName.lastIndexOf(".");
 		if(dotIndex==-1)
-		{
-			throw new UnSupportedFileTypeException("Invalid File");
-		}
+		     throw new UnSupportedFileTypeException("Invalid File");
 	    return fileName.substring(dotIndex+1);
 	}
 
@@ -245,9 +235,7 @@ public class UserServiceImpl implements UserService{
 							{
 								UserResponseDTO userResponseDTO = EntityToDTO.userEntityToUserResponseDTO(optionalUser.get());
 								if(userResponseDTO!=null)
-								{
-									return userResponseDTO;
-								}
+								     return userResponseDTO;
 								else throw new RuntimeException("Something went wrong ! try again"); 
 							}
 							else throw new UserNotFoundException("User password not updated !");
@@ -266,12 +254,11 @@ public class UserServiceImpl implements UserService{
 	}
 
 	@Override
-	public Message verifyUserByEmail(EmailRequestDTO emailRequestDTO) {
+	public Message verifyUserByEmail(EmailRequestDTO emailRequestDTO)
+	{
 		
-		System.out.println("UserServiceImpl.verifyUserByEmail()");
 		if(emailRequestDTO!=null)
 		{
-			
 			Optional<User> optionalUser = this.userDao.findByUserEmail(emailRequestDTO.getEmail());
 			System.out.println(optionalUser.get()+emailRequestDTO.getEmail());
 			if(optionalUser.isPresent())
@@ -287,17 +274,14 @@ public class UserServiceImpl implements UserService{
 			   	}
 			   	else throw new RuntimeException("something went wrong! try again after some time.");
 			}
-			else
-			{
-				System.err.println("inavlid operation");
-				throw new RuntimeException("something went wrong! try again after some time.");
-			}
+			else throw new RuntimeException("something went wrong! try again after some time.");	
 		}
 		else throw new RuntimeException("Email can't be null");
 	}
 
 	@Override
-	public Message verifyOTP(VerifyOTPRequestDTO verifyOTPRequestDTO) {
+	public Message verifyOTP(VerifyOTPRequestDTO verifyOTPRequestDTO)
+	{
 		if(verifyOTPRequestDTO!=null)
 		{
 			Optional<User> optionalUser = this.userDao.findByUserEmail(verifyOTPRequestDTO.getEmail());
@@ -305,9 +289,7 @@ public class UserServiceImpl implements UserService{
 			{
 			   Optional<String> validateOTP = this.otpOperation.validateOTP(verifyOTPRequestDTO.getEmail(), verifyOTPRequestDTO.getOtp());
 			   if(validateOTP.isPresent())
-			   {
-				   return new Message(validateOTP.get());
-			   }
+			         return new Message(validateOTP.get());
 			   else throw new InvalideOTPException("Invalid OTP!");
 			}
 			else throw new RuntimeException("something went wrong! try again after some time.");
@@ -315,4 +297,6 @@ public class UserServiceImpl implements UserService{
 		else throw new RuntimeException("something went wrong! try again after some time.");
 	}
 	
+
+    
 }
