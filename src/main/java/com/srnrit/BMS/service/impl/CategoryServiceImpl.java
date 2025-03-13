@@ -2,8 +2,10 @@ package com.srnrit.BMS.service.impl;
 
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -22,6 +24,7 @@ import com.srnrit.BMS.service.ICategoryService;
 @Service
 public class CategoryServiceImpl implements ICategoryService 
 {
+	private final Set<String> updatedCategories = new HashSet<>();
 	private ICategoryDao categoryDAO;
 
 	public CategoryServiceImpl(ICategoryDao categoryDAO) {
@@ -29,9 +32,11 @@ public class CategoryServiceImpl implements ICategoryService
 		this.categoryDAO = categoryDAO;
 	}
 
-	//Add Category Method for the Service Layer
 	@Override
 	public CategoryResponseDTO addCategoryWithProducts(CategoryRequestDTO categoryRequestDTO) {
+		if (categoryRequestDTO == null || categoryRequestDTO.getCategoryName() == null || categoryRequestDTO.getCategoryName().trim().isEmpty() || categoryRequestDTO.getCategoryName().equalsIgnoreCase("null")) {
+			throw new IllegalArgumentException("Category name cannot be blank and name mustn't be null");
+		}
 		Category category=new Category();
 		category.setCategoryName(categoryRequestDTO.getCategoryName());
 
@@ -75,13 +80,14 @@ public class CategoryServiceImpl implements ICategoryService
 	public List<CategoryResponseDTO> getAllCategory() {
 		Optional<List<Category>> allCategory = categoryDAO.getAllCategory();
 
-		if(allCategory.isPresent()) {
+		if(allCategory.isPresent() && !allCategory.get().isEmpty()) {
 			List<CategoryResponseDTO> allCategoryResponse=new ArrayList<>();
 			List<Category> categories=allCategory.get();
 
 			for(Category category:categories) {
 				List<Product> products=category.getProducts();
 				List<ProductResponseDTO> productResponse=new ArrayList<>();
+
 				for(Product product:products) {
 					ProductResponseDTO productResponseDTO=EntityToDTO.toProductResponseDTO(product);
 					productResponse.add(productResponseDTO);
@@ -99,30 +105,43 @@ public class CategoryServiceImpl implements ICategoryService
 	}
 
 
-    //Here we written logic for updating CategoryName with CategoryId
+	//Here we written logic for updating CategoryName with CategoryId
 	@Override
 	public String updateCategory(String categoryId, String categoryName) {
 
-	    if (categoryId == null || categoryId.trim().isEmpty()) {
-	        throw new IllegalArgumentException("CategoryId must not be null or empty");
-	    }
-	    if (categoryName == null || categoryName.trim().isEmpty()) {
-	        throw new IllegalArgumentException("CategoryName must not be null or empty");
-	    }
-	    if (categoryName.length() < 3) {
-	        throw new IllegalArgumentException("CategoryName must be at least 3 characters long");
-	    }
-	    Optional<String> updateCategory = this.categoryDAO.updateCategory(categoryId, categoryName);
-	    return updateCategory.orElseThrow(() -> new CategoryNotFoundException("Category not found with id: " + categoryId));
+		if (categoryId == null || categoryId.isBlank()) {
+			throw new IllegalArgumentException("CategoryId must not be null or empty");
+		}
+		if (categoryName == null || categoryName.isBlank()  || categoryName.equalsIgnoreCase("Null")) {
+			throw new IllegalArgumentException("CategoryName must not be null or empty");
+		}
+		if (categoryName.length() < 3) {
+			throw new IllegalArgumentException("CategoryName must be at least 3 characters long");
+		}
+
+		Optional<String> updatedCategory = this.categoryDAO.updateCategory(categoryId, categoryName);
+		if (updatedCategory.isPresent()) 
+		{
+			if (updatedCategories.contains(categoryId)) {
+				return "Category already updated once with id: " + categoryId;
+			}
+			updatedCategories.add(categoryId);
+			return updatedCategory.get();
+		} else {
+			throw new CategoryNotFoundException("Category not found with id: " + categoryId);
+		}	
 	}
 
-	
-    //Here we written logic for fetching Category details by CategoryId
+
+	//Here we written logic for fetching Category details by CategoryId
 	@Override
 	public CategoryResponseDTO findCategoryByCategoryId(String categoryId) 
 	{
-
-		if(categoryId != null)
+		if(categoryId == null || categoryId.trim().isEmpty())
+		{
+			throw new RuntimeException("Category must not be null or blank");			
+		}
+		else 
 		{
 			Optional<Category> optionalcategory = this.categoryDAO.getCategoryByCategoryId(categoryId);
 			if(optionalcategory.isPresent())
@@ -136,28 +155,21 @@ public class CategoryServiceImpl implements ICategoryService
 				throw new CategoryNotFoundException("Category not exist with id : "+categoryId);
 			}
 		}
-		else 
-		{
-			throw new RuntimeException("Category must not be null");
-		}
 
 	}
-	
+
 	//Here we written logic for fetching Category details by CategoryName
-	
+
 	@Override
 	public CategoryResponseDTO findCategoryByCategoryName(String categoryName) {
-	    if (categoryName == null || categoryName.trim().isEmpty()) {
-	        throw new IllegalArgumentException("Category name must not be null or empty");
-	    }
+		if (categoryName == null || categoryName.trim().isEmpty()) {
+			throw new IllegalArgumentException("Category name must not be null or empty");
+		}
 
-	    Category category = this.categoryDAO.getCategoryByCategoryName(categoryName)
-	        .orElseThrow(() -> new CategoryNotFoundException("Category not exist with name: " + categoryName));
+		Category category = this.categoryDAO.getCategoryByCategoryName(categoryName)
+				.orElseThrow(() -> new CategoryNotFoundException("Category not exist with name: " + categoryName));
 
-	    return EntityToDTO.toCategoryResponse(category);
+		return EntityToDTO.toCategoryResponse(category);
 	}
-
-	
-
 
 }

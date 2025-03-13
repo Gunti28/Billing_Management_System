@@ -25,16 +25,22 @@ public class EntityToDTO {
 
 	public static CategoryResponseDTO toCategoryResponse(Category category) 
 	{
-		if(category.getProducts()!=null) 
+		if (category == null) {
+			return null; 
+		}
+
+		List<ProductResponseDTO> categoryResponses = null;
+
+		if(category.getProducts()!=null && !category.getProducts().isEmpty()) 
 		{ 
-			List<ProductResponseDTO> categoryResponses= category
+			categoryResponses= category
 					.getProducts()
 					.stream()
 					.map(EntityToDTO :: toProductResponseDTO) 
 					.collect(Collectors.toList());
-			return new CategoryResponseDTO(category.getCategoryId(),category.getCategoryName(),categoryResponses); 
-		} 
-		return new CategoryResponseDTO(category.getCategoryId(),category.getCategoryName(),null); 
-	}
+		}
+		return new CategoryResponseDTO(category.getCategoryId(),category.getCategoryName(),categoryResponses); 
+	} 
+
 
 }

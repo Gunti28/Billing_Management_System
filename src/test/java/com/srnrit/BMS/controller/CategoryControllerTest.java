@@ -1,11 +1,9 @@
 package com.srnrit.BMS.controller;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -80,6 +78,7 @@ public class CategoryControllerTest {
                 .content(objectMapper.writeValueAsString(categoryRequestDTO)))
                 .andExpect(status().isBadRequest());
     }
+    
 
     // Positive Test: Get All Categories
     @Test
