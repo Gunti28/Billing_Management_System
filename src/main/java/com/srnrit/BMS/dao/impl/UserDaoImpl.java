@@ -20,8 +20,8 @@ import com.srnrit.BMS.util.FileStorageProperties;
 import com.srnrit.BMS.util.idgenerator.ImageFileNameGenerator;
 
 @Component
-public class UserDaoImpl implements UserDao {
-
+public class UserDaoImpl implements UserDao 
+{
 	 @Autowired
      private UserRepository userRepository;
 	
@@ -45,28 +45,19 @@ public class UserDaoImpl implements UserDao {
 		
 					return  saveUser!=null? Optional.of(saveUser) :Optional.empty();
 				}
-				else 
-				{
-					throw new UserNotcreatedException("User Already Existing with this PhoneNumber "+user.getUserPhone());
-				}
+				else throw new UserNotcreatedException("User Already Existing with this PhoneNumber "+user.getUserPhone());			
 			}
-			else {
-				throw new UserNotcreatedException("User Already Existing with this Email "+user.getUserEmail());
-			}
+			else throw new UserNotcreatedException("User Already Existing with this Email "+user.getUserEmail());	
 		}
-		else {
-			throw new UserNotFoundException("User can not be null.");
-		}
+		else throw new UserNotFoundException("User can not be null.");	
 	}
 	
 	@Override
-	public Optional<String> deleteUserById(String userId) {
-    	
-        // Validate the User by userId
-        if (userId != null && !userId.isBlank()) {
-        	
-        	Optional<User> byId = userRepository.findById(userId);
-	        
+	public Optional<String> deleteUserById(String userId) 
+	{
+    	       // Validate the User by userId
+        if (userId != null && !userId.isBlank()) {	
+        	Optional<User> byId = userRepository.findById(userId);	        
 	        if (byId.isPresent()) 
 	        {
 	            User user = byId.get();
@@ -93,7 +84,6 @@ public class UserDaoImpl implements UserDao {
 		}
 		throw new RuntimeException("UserId must not be null or blank");
 	}
-
 	
 	@Override
 	public Optional<User> updateByUserId(User user,String userId) {
@@ -108,27 +98,44 @@ public class UserDaoImpl implements UserDao {
 					User oldUser = byId.get();
 					if(oldUser.getActive())
 					{
-						if(userRepository.findByUserEmail(user.getUserEmail()) == null ) 
-						{
-							
-							if(userRepository.findByUserPhone(user.getUserPhone()) == null)
+						 if(user.getUserEmail()!=null && !user.getUserEmail().isBlank())
+						 {
+							if(!user.getUserEmail().equals(oldUser.getUserEmail()))
 							{
 								
-								
-								oldUser.setUserEmail(user.getUserEmail());
-								oldUser.setUserName(user.getUserName());
-								
-								oldUser.setUserPhone(user.getUserPhone());
-								
-								oldUser = userRepository.save(oldUser);
-								
-								return oldUser!=null?Optional.of(oldUser):Optional.empty();
-								
+							    if (userRepository.findByUserEmail(user.getUserEmail())!=null) 
+							   {
+							        throw new UserAleadyExistException("User already exists with email: " + user.getUserEmail());
+							   }
+							    oldUser.setUserEmail(user.getUserEmail());
+
 							}
-							else throw new UserAleadyExistException("User already exist with phoneNumber"+user.getUserPhone());
-							
-						}
-						else throw new UserAleadyExistException("User already exist with email : "+user.getUserEmail());	
+						 }
+						 else throw new RuntimeException("user email must not be null or blank!.");
+						 
+						 String newPhonNo=String.valueOf(user.getUserPhone());
+				
+						 if(user.getUserPhone()!=null && (newPhonNo.length()==10 && !newPhonNo.startsWith("0")) )
+						 {
+							 if(!user.getUserPhone().equals(oldUser.getUserPhone())) 
+							 {
+								 if(userRepository.findByUserPhone(user.getUserPhone())!=null)
+								 {
+									 throw new UserAleadyExistException("User already exists with email: " + user.getUserEmail());
+								 }
+								 oldUser.setUserPhone(user.getUserPhone());
+							 }
+						 }
+						 else throw new RuntimeException("user phoneNo must not be null and not start with '0' and length must be 10 digits.");
+						 if(user.getUserName()!=null && !user.getUserName().isBlank())
+						 {
+							 if(!user.getUserName().equals(oldUser.getUserName()))
+							      oldUser.setUserName(user.getUserName());
+                               				
+						 }
+						 else throw new RuntimeException("user name must be null or blank!.");
+						 oldUser = userRepository.save(user);
+						 return oldUser != null ? Optional.of(oldUser) : Optional.empty();
 					}
 					else throw new RuntimeException("user is not active");			
 				}
@@ -160,7 +167,7 @@ public class UserDaoImpl implements UserDao {
 	}
 
 	@Override
-	public Optional<User> findByUserPhoneNumber(long userPhoneNumber) 
+	public Optional<User> findByUserPhoneNumber(Long userPhoneNumber) 
 	{
 		User byUserPhone = userRepository.findByUserPhone(userPhoneNumber);
 		return byUserPhone!=null?Optional.of(byUserPhone):Optional.empty();
@@ -183,57 +190,38 @@ public class UserDaoImpl implements UserDao {
 		else throw new RuntimeException("user not exists with email :"+userEmail);			
 	}
 
-
 	@Override
 	public Optional<User> editImage(MultipartFile file, String userId) 
 	{
-
 	    // Validate user existence
 	    Optional<User> userOptional = userRepository.findById(userId);
-	    
-	    
 	    if (!userOptional.isPresent() ) 
 	    	throw new UserNotFoundException("User does not exist with ID: " + userId);
-	    
-
 	    // Get the user
 	    User user = userOptional.get();
-	    
 	    if(!user.getActive())
 	    	throw new RuntimeException("User is not active ");
-	    
 	    //getting old profile image name
 	    String oldImageFileName=user.getUserProfileImage();
-	    
 	    // Generate a new file name
-	    String fileName = ImageFileNameGenerator.getNewFileName(file.getOriginalFilename());
-
-	    
+	    String fileName = ImageFileNameGenerator.getNewFileName(file.getOriginalFilename());	    
 	    // Update user profile image in db
 	    user.setUserProfileImage(fileName);
-	    User updatedUser = userRepository.save(user); //update image in db
-	    
+	    User updatedUser = userRepository.save(user); //update image in db    
 	  try 
 	  { 
 		    if(updatedUser != null)
 		    {
-		    	//now update image in local driver
-		    	
-		    	String  targetDirectory=this.fileStorageProperties.getImageStoragePath();
-		 	  
+		    	//now update image in local driver		    	
+		    	String  targetDirectory=this.fileStorageProperties.getImageStoragePath();		 	  
 		    	//create directories if not exist
-		 		Path path = Paths.get(targetDirectory);
-		 		
+		 		Path path = Paths.get(targetDirectory);		 		
 		 		if(!Files.exists(path))
 				{
 					Files.createDirectories(path);
-				}
-				
-		 		
+				}		 		
 		 		//save the file with new image file name
 		 		Path targetLocation= path.resolve(fileName);
-		 		
-		 		
 		 		//for deleting purpose
 		 		//start
 		 		File oldFile = new File(targetDirectory.concat(oldImageFileName));
@@ -241,17 +229,13 @@ public class UserDaoImpl implements UserDao {
 		 		 if(oldFile.exists() && !oldImageFileName.equals("default.png"))
 				     oldFile.delete();
 				 //end
-		 		  
+	  
 		 		//storing new image in the local driver 
 		 		long copied = Files.copy(file.getInputStream(), targetLocation);
 		 		
-		 		return copied > 0 ? Optional.of(updatedUser) : Optional.empty();
-		 		
+		 		return copied > 0 ? Optional.of(updatedUser) : Optional.empty();	
 		    }
-		    else 
-		    {
-				throw new RuntimeException("User not updated successfully !");
-			}
+		    else 	throw new RuntimeException("User not updated successfully !");
 	  } 
 	  catch (Exception e) 
 	  {
@@ -267,10 +251,9 @@ public class UserDaoImpl implements UserDao {
 		return allUsers!=null && allUsers.size() > 0 ?Optional.of(allUsers):Optional.empty();
 	}
 
-	
 	@Override
-	public Optional<User> changePassword(String userEmail, String newPassword) {
-		
+	public Optional<User> changePassword(String userEmail, String newPassword) 
+	{
 			  Optional<User> byUserEmail = this.findByUserEmail(userEmail);
 			  if(byUserEmail.isPresent())
 			  {
@@ -281,12 +264,9 @@ public class UserDaoImpl implements UserDao {
 					  User updatePassword = userRepository.save(user);
 					  return updatePassword!=null?Optional.of(updatePassword):Optional.empty();
 				  }
-				  else throw new RuntimeException("User is not active");
-				  
+				  else throw new RuntimeException("User is not active");  
 			  }
-			  else throw new RuntimeException("User not exist with email "+userEmail);
-	
-		
+			  else throw new RuntimeException("User not exist with email "+userEmail);	
 	}
 }	
 

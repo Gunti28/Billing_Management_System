@@ -14,7 +14,7 @@ public interface UserDao {
 	Optional<User> findByUserId(String userId);
 	Optional<User> updateByUserId(User user, String userId);
 	Optional<User> findByUserEmail(String userEmail);
-	Optional<User> findByUserPhoneNumber(long userPhoneNumber);
+	Optional<User> findByUserPhoneNumber(Long userPhoneNumber);
 	Optional<User> loginByEmailAndPassword(String userEmail,String userPassword);
 	Optional<User> editImage(MultipartFile file,String userId);
 	Optional<List<User>> fetchAlluser();
