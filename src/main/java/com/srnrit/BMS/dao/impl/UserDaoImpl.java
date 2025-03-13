@@ -85,8 +85,10 @@ public class UserDaoImpl implements UserDao
 		throw new RuntimeException("UserId must not be null or blank");
 	}
 	
+	
 	@Override
 	public Optional<User> updateByUserId(User user,String userId) {
+		boolean flag=false;
 		if(user!=null)
 		{
 			if(userId!=null && !userId.isBlank()) 
@@ -102,7 +104,7 @@ public class UserDaoImpl implements UserDao
 						 {
 							if(!user.getUserEmail().equals(oldUser.getUserEmail()))
 							{
-								
+								flag=true;
 							    if (userRepository.findByUserEmail(user.getUserEmail())!=null) 
 							   {
 							        throw new UserAleadyExistException("User already exists with email: " + user.getUserEmail());
@@ -119,6 +121,7 @@ public class UserDaoImpl implements UserDao
 						 {
 							 if(!user.getUserPhone().equals(oldUser.getUserPhone())) 
 							 {
+								 flag=true;
 								 if(userRepository.findByUserPhone(user.getUserPhone())!=null)
 								 {
 									 throw new UserAleadyExistException("User already exists with email: " + user.getUserEmail());
@@ -130,12 +133,18 @@ public class UserDaoImpl implements UserDao
 						 if(user.getUserName()!=null && !user.getUserName().isBlank())
 						 {
 							 if(!user.getUserName().equals(oldUser.getUserName()))
+							 {
+								 flag=true;
 							      oldUser.setUserName(user.getUserName());
+							 }
                                				
 						 }
 						 else throw new RuntimeException("user name must be null or blank!.");
-						 oldUser = userRepository.save(oldUser);
-						 return oldUser != null ? Optional.of(oldUser) : Optional.empty();
+						 
+						 if(flag)
+						       oldUser = userRepository.save(oldUser);
+						return oldUser != null ? Optional.of(oldUser) : Optional.empty();
+						
 					}
 					else throw new RuntimeException("user is not active");			
 				}
