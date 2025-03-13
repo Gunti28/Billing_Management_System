@@ -102,7 +102,7 @@ public class CategoryServiceTest  {
         assertNotNull(response);
         assertEquals(1, response.size());
         assertEquals(expectedResponse.getCategoryName(), response.get(0).getCategoryName());
-    }
+    } 
 
 
     //  Test for Fetching All Categories (Failure)
@@ -203,6 +203,12 @@ public class CategoryServiceTest  {
     void testUpdateCategory_InvalidName() {
         assertThrows(RuntimeException.class, () -> categoryService.updateCategory("123", ""));
     }
+    
+    
+    
+    
+    
+    
 }
 
 
