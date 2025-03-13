@@ -35,28 +35,28 @@ public class Category implements Serializable
 	@GeneratedValue(generator = "category_id_generator", strategy = GenerationType.SEQUENCE)
 	@Column(name = "CATEGORY_ID")
 	private String categoryId;
-	
+
 	@Column(name = "CATEGORY_NAME")
 	private String categoryName;
-	
+
 	@OneToMany(cascade = CascadeType.ALL,mappedBy = "category",fetch = FetchType.LAZY,orphanRemoval = true)
 	private List<Product> products;
-	
+
 	//helper method to add product
 	public void addProduct(Product product)
 	{
 		if (this.products == null) {  
-            this.products = new ArrayList<>();
-        }
-        this.products.add(product);
-        product.setCategory(this);
+			this.products = new ArrayList<>();
+		}
+		this.products.add(product);
+		product.setCategory(this);
 	}
-	
+
 	//helper method to remove product
 	public void removeProduct(Product product)
 	{
 		this.products.remove(product);  //Here this.products.remove(product);
 		product.setCategory(null);
 	}
-		
+
 }

@@ -1,13 +1,9 @@
 package com.srnrit.BMS.service;
 
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,198 +14,397 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.srnrit.BMS.dao.ICategoryDao;
-import com.srnrit.BMS.dto.CategoryRequestDTO;
-import com.srnrit.BMS.dto.CategoryResponseDTO;
-import com.srnrit.BMS.entity.Category;
-import com.srnrit.BMS.exception.categoryexceptions.CategoryNotCreatedException;
-import com.srnrit.BMS.exception.categoryexceptions.CategoryNotFoundException;
-import com.srnrit.BMS.mapper.EntityToDTO;
+import com.srnrit.BMS.dto.*;
+import com.srnrit.BMS.entity.*;
+import com.srnrit.BMS.exception.categoryexceptions.*;
+import com.srnrit.BMS.mapper.*;
 import com.srnrit.BMS.service.impl.CategoryServiceImpl;
 
 @ExtendWith(MockitoExtension.class)
-public class CategoryServiceTest  {
+public class CategoryServiceTest {
 
-    @Mock
-    private ICategoryDao categoryDAO;
+	@InjectMocks
+	private CategoryServiceImpl categoryService;
 
-    @InjectMocks
-    private CategoryServiceImpl categoryService;
+	@Mock
+	private ICategoryDao categoryDAO;
 
-    private Category category;
-    private CategoryRequestDTO categoryRequestDTO;
-    private CategoryResponseDTO categoryResponseDTO;
+	private Category category;
+	private Product product;
+	private CategoryRequestDTO categoryRequest;
+	private CategoryResponseDTO categoryResponse;
 
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
+	@BeforeEach
+	void setup() {
+		MockitoAnnotations.openMocks(this);
 
-        // Mock Category Entity
-        category = new Category();
-        category.setCategoryName("Electronics");
-        category.setProducts(new ArrayList<>());  
+		categoryRequest = new CategoryRequestDTO();
+		categoryRequest.setCategoryName("Electronics");
 
-        // Mock Request DTO
-        categoryRequestDTO = new CategoryRequestDTO();
-        categoryRequestDTO.setCategoryName("Electronics");
+		ProductRequestDTO productRequest = new ProductRequestDTO();
+		productRequest.setProductName("Laptop");
+		productRequest.setProductImage("laptop.jpg");
+		productRequest.setProductQuantity(10);
+		productRequest.setProductPrice(1000.0);
+		productRequest.setInStock(true);
 
-        // Mock Response DTO
-        categoryResponseDTO = new CategoryResponseDTO();
-        categoryResponseDTO.setCategoryName("Electronics");
-    }
-    
+		categoryRequest.setProducts(Collections.singletonList(productRequest));
 
+		category = new Category();
+		category.setCategoryId("C_01");
+		category.setCategoryName("Electronics");
 
- //  Test for Adding a Category Successfully
-    @Test
-    void testAddCategoryWithProducts_Success() {
-        // Create a mock category object
-        Category category = new Category();
-        category.setCategoryName("Electronics");
+		product = new Product("Laptop", "laptop.jpg", 10, 1000.0, true);
+		category.addProduct(product);
+	}
 
-        when(categoryDAO.insertCategory(any(Category.class))).thenReturn(Optional.of(category));
+	// Success: Add Category**
+	@Test
+	void testAddCategory_Success() {
+		when(categoryDAO.insertCategory(any(Category.class))).thenReturn(Optional.of(category));
 
-        //  Manually create the expected response instead of relying on EntityToDTO
-        CategoryResponseDTO expectedResponse = new CategoryResponseDTO();
-        expectedResponse.setCategoryName("Electronics");  
+		categoryResponse = categoryService.addCategoryWithProducts(categoryRequest);
 
-        CategoryResponseDTO response = categoryService.addCategoryWithProducts(categoryRequestDTO);
+		assertNotNull(categoryResponse);
+		assertEquals("Electronics", categoryResponse.getCategoryName());
+		assertFalse(categoryResponse.getProducts().isEmpty());
+	}
 
-        assertNotNull(response);
-        assertEquals(expectedResponse.getCategoryName(), response.getCategoryName());
-    }
+	// Failure: Category Not Created**
+	@Test
+	void testAddCategory_Failure() {
+		when(categoryDAO.insertCategory(any(Category.class))).thenReturn(Optional.empty());
+		assertThrows(CategoryNotCreatedException.class, () -> categoryService.addCategoryWithProducts(categoryRequest));
+	}
 
+	//  Test: Failure when category request is null
+	@Test
+	void testAddCategory_NullRequest() {
+		Exception exception = assertThrows(IllegalArgumentException.class,
+				() -> categoryService.addCategoryWithProducts(null));
 
-    //  Test for Adding a Category Failure
-    @Test
-    void testAddCategoryWithProducts_Failure() {
-        when(categoryDAO.insertCategory(any(Category.class))).thenReturn(Optional.empty());
+		assertEquals("Category name cannot be blank and name mustn't be null", exception.getMessage());
 
-        assertThrows(CategoryNotCreatedException.class, () -> categoryService.addCategoryWithProducts(categoryRequestDTO));
-    }
+		verify(categoryDAO, never()).insertCategory(any());
+	}
 
- // Test for Fetching All Categories (Success)
-    @Test
-    void testGetAllCategory_Success() {
-        List<Category> categoryList = Arrays.asList(category);
-        when(categoryDAO.getAllCategory()).thenReturn(Optional.of(categoryList));
+	//  Failure: Blank Category Name**
+	@Test
+	void testAddCategory_BlankName() {
+		categoryRequest.setCategoryName(" "); 
+		Exception exception = assertThrows(IllegalArgumentException.class, 
+				() -> categoryService.addCategoryWithProducts(categoryRequest));
 
-        //  Manually create expected response instead of relying on EntityToDTO
-        CategoryResponseDTO expectedResponse = new CategoryResponseDTO();
-        expectedResponse.setCategoryName(category.getCategoryName()); 
+		assertEquals("Category name cannot be blank and name mustn't be null", exception.getMessage());
 
-        List<CategoryResponseDTO> response = categoryService.getAllCategory();
-
-        assertNotNull(response);
-        assertEquals(1, response.size());
-        assertEquals(expectedResponse.getCategoryName(), response.get(0).getCategoryName());
-    } 
-
-
-    //  Test for Fetching All Categories (Failure)
-    @Test
-    void testGetAllCategory_Failure() {
-        when(categoryDAO.getAllCategory()).thenReturn(Optional.empty());
-
-        assertThrows(CategoryNotFoundException.class, () -> categoryService.getAllCategory());
-    }
-
-    //  Test for Fetching Category by ID (Success)
-    @Test
-    void testFindCategoryByCategoryId_Success() {
-        when(categoryDAO.getCategoryByCategoryId("123")).thenReturn(Optional.of(category));
-
-        // Convert manually instead of mocking
-        CategoryResponseDTO expectedResponse = EntityToDTO.toCategoryResponse(category);
-
-        CategoryResponseDTO response = categoryService.findCategoryByCategoryId("123");
-
-        assertNotNull(response);
-        assertEquals(expectedResponse.getCategoryName(), response.getCategoryName());
-    }
+		verify(categoryDAO, never()).insertCategory(any());
+	}
 
 
-    // Test for Updating Category (Success)
-    @Test
-    void testUpdateCategory_Success() {
-        when(categoryDAO.updateCategory(anyString(), anyString())).thenReturn(Optional.of("Updated Successfully"));
+	//  Test: DTO to Entity conversion
+	@Test
+	void testDtoToEntityConversionAddCategory() {
+		categoryRequest.setCategoryName("Electronics");
+		ProductRequestDTO productRequest = new ProductRequestDTO();
+		productRequest.setProductName("Laptop");
 
-        String response = categoryService.updateCategory("123", "Updated Category");
+		List<ProductRequestDTO> products = new ArrayList<>();
+		products.add(productRequest);
+		categoryRequest.setProducts(products);
 
-        assertEquals("Updated Successfully", response);
-    }
+		Category convertedCategory = DTOToEntity.categoryRequestDTOToCategory(categoryRequest);
 
-    // Test for Updating Category (Failure - Category Not Found)
-    @Test
-    void testUpdateCategory_Failure() {
-        when(categoryDAO.updateCategory(anyString(), anyString())).thenReturn(Optional.empty());
+		assertNotNull(convertedCategory);
+		assertEquals("Electronics", convertedCategory.getCategoryName());
+		assertNotNull(convertedCategory.getProducts());
+		assertEquals(1, convertedCategory.getProducts().size());
+		assertEquals("Laptop", convertedCategory.getProducts().get(0).getProductName());
+	}
 
-        assertThrows(CategoryNotFoundException.class, () -> categoryService.updateCategory("123", "Updated Category"));
-    }
+	//  Test: Entity to DTO conversion
+	@Test
+	void testEntityToDTOConversionAddCategory() {
+		CategoryResponseDTO convertedDTO = EntityToDTO.toCategoryResponse(category);
 
-    
+		assertNotNull(convertedDTO);
+		assertEquals("Electronics", convertedDTO.getCategoryName());
+		assertEquals(1, convertedDTO.getProducts().size());
+	}
 
-    // Test for Fetching Category by ID (Failure)
-    @Test
-    void testFindCategoryByCategoryId_Failure() {
-        when(categoryDAO.getCategoryByCategoryId("123")).thenReturn(Optional.empty());
+	//  Fetching all categories success case
+	@Test
+	void testGetAllCategories_Success() {
+		List<Category> categoryList = Collections.singletonList(category);
+		when(categoryDAO.getAllCategory()).thenReturn(Optional.of(categoryList));
 
-        assertThrows(CategoryNotFoundException.class, () -> categoryService.findCategoryByCategoryId("123"));
-    }
+		List<CategoryResponseDTO> response = categoryService.getAllCategory();
 
- //  Test for Finding Category by Name (Success)
-    @Test
-    void testFindCategoryByCategoryName_Success() {
-        when(categoryDAO.getCategoryByCategoryName("Electronics")).thenReturn(Optional.of(category));
+		assertNotNull(response);
+		assertEquals(1, response.size());
+		assertEquals("Electronics", response.get(0).getCategoryName());
+	}
 
-        CategoryResponseDTO response = categoryService.findCategoryByCategoryName("Electronics");
+	// Fetching all categories for failure case
+	@Test
+	void testGetAllCategories_NoCategories() {
+		when(categoryDAO.getAllCategory()).thenReturn(Optional.of(new ArrayList<>()));
 
-        assertNotNull(response);
-        assertEquals("Electronics", response.getCategoryName());
-    }
+		Exception exception = assertThrows(CategoryNotFoundException.class, () -> categoryService.getAllCategory());
+		assertEquals("No Category available", exception.getMessage());
+	}
 
-    //  Test for Finding Category by Name (Failure - Category Not Found)
-    @Test
-    void testFindCategoryByCategoryName_Failure() {
-        when(categoryDAO.getCategoryByCategoryName("NonExistentCategory")).thenReturn(Optional.empty());
+	//  Test: Categories are returned as an empty list 
+	@Test
+	void testGetAllCategories_EmptyList() {
+		when(categoryDAO.getAllCategory()).thenReturn(Optional.of(Collections.emptyList()));
 
-        assertThrows(CategoryNotFoundException.class, () -> categoryService.findCategoryByCategoryName("NonExistentCategory"));
-    }
+		Exception exception = assertThrows(CategoryNotFoundException.class,
+				() -> categoryService.getAllCategory());
 
-    //  Test for Finding Category by Name (Failure - Null Input)
-    @Test
-    void testFindCategoryByCategoryName_NullInput() {
-        assertThrows(IllegalArgumentException.class, () -> categoryService.findCategoryByCategoryName(null));
-    }
+		assertEquals("No Category available", exception.getMessage());
 
-    //  Test for Finding Category by Name (Failure - Empty String)
-    @Test
-    void testFindCategoryByCategoryName_EmptyInput() {
-        assertThrows(IllegalArgumentException.class, () -> categoryService.findCategoryByCategoryName(""));
-    }
+		verify(categoryDAO, times(1)).getAllCategory();
+	}
 
-    // ❌ Test for Finding Category by Name (Failure - Blank Spaces)
-    @Test
-    void testFindCategoryByCategoryName_BlankInput() {
-        assertThrows(IllegalArgumentException.class, () -> categoryService.findCategoryByCategoryName("   "));
-    }
-    // Test for Updating Category with Null ID
-    @Test
-    void testUpdateCategory_NullId() {
-        assertThrows(RuntimeException.class, () -> categoryService.updateCategory(null, "Updated Category"));
-    }
+	//  Test: DTO to Entity conversion
+	@Test
+	void testDtoToEntityConversionAllCategories() {
+		CategoryRequestDTO categoryRequestDTO = new CategoryRequestDTO();
+		categoryRequestDTO.setCategoryName("Electronics");
 
-    // Test for Updating Category with Invalid Name
-    @Test
-    void testUpdateCategory_InvalidName() {
-        assertThrows(RuntimeException.class, () -> categoryService.updateCategory("123", ""));
-    }
-    
-    
-    
-    
-    
-    
+		ProductRequestDTO productRequestDTO = new ProductRequestDTO();
+		productRequestDTO.setProductName("Laptop");
+		productRequestDTO.setProductImage("laptop.jpg");
+		productRequestDTO.setProductQuantity(10);
+		productRequestDTO.setProductPrice(1000.0);
+		productRequestDTO.setInStock(true);
+
+		categoryRequestDTO.setProducts(Collections.singletonList(productRequestDTO));
+
+		Category convertedCategory = DTOToEntity.categoryRequestDTOToCategory(categoryRequestDTO);
+
+		assertNotNull(convertedCategory);
+		assertEquals("Electronics", convertedCategory.getCategoryName());
+		assertEquals(1, convertedCategory.getProducts().size());
+	}
+
+	//  Test: Entity to DTO conversion
+	@Test
+	void testEntityToDTOConversionAllCategories() {
+		CategoryResponseDTO convertedDTO = EntityToDTO.toCategoryResponse(category);
+
+		assertNotNull(convertedDTO);
+		assertEquals("Electronics", convertedDTO.getCategoryName());
+		assertEquals(1, convertedDTO.getProducts().size());
+	}
+
+	//  Fetching category by ID (Success)**
+	@Test
+	void testFindCategoryById_Success() {
+		when(categoryDAO.getCategoryByCategoryId("C_01")).thenReturn(Optional.of(category));
+		categoryResponse = categoryService.findCategoryByCategoryId("C_01");
+
+		assertNotNull(categoryResponse);
+		assertEquals("Electronics", categoryResponse.getCategoryName());
+	}
+
+	//  Fetching category by ID Failure
+	@Test
+	void testFindCategoryById_Failure() {
+		when(categoryDAO.getCategoryByCategoryId("C_99")).thenReturn(Optional.empty());
+		assertThrows(CategoryNotFoundException.class, () -> categoryService.findCategoryByCategoryId("C_99"));
+	}
+	//  Test: Category ID does not exist 
+	@Test
+	void testFindCategoryByCategoryId_NotFound() {
+		String categoryId = "C_99";
+		when(categoryDAO.getCategoryByCategoryId(categoryId)).thenReturn(Optional.empty());
+
+		Exception exception = assertThrows(CategoryNotFoundException.class,
+				() -> categoryService.findCategoryByCategoryId(categoryId));
+
+		assertEquals("Category not exist with id : C_99", exception.getMessage());
+
+		verify(categoryDAO, times(1)).getCategoryByCategoryId(categoryId);
+	}
+
+	//  Test: Category ID is null 
+	@Test
+	void testFindCategoryByCategoryId_NullId() {
+		RuntimeException exception = assertThrows(RuntimeException.class, 
+				() -> categoryService.findCategoryByCategoryId(null)
+				);
+
+		assertEquals("Category must not be null or blank", exception.getMessage());
+
+		verify(categoryDAO, never()).getCategoryByCategoryId(anyString());
+	}
+
+	//  Test: Category ID is blank 
+	@Test
+	void testFindCategoryByCategoryId_BlankId() {
+		String categoryId = "  ";  
+		Exception exception = assertThrows(RuntimeException.class,
+				() -> categoryService.findCategoryByCategoryId(categoryId));
+		System.out.println("Actual exception message: " + exception.getMessage());  
+		assertEquals("Category must not be null or blank", exception.getMessage());
+		verify(categoryDAO, never()).getCategoryByCategoryId(anyString());
+	}
+	//  Fetching category by Name Success
+	@Test
+	void testFindCategoryByName_Success() {
+		when(categoryDAO.getCategoryByCategoryName("Electronics")).thenReturn(Optional.of(category));
+		categoryResponse = categoryService.findCategoryByCategoryName("Electronics");
+
+		assertNotNull(categoryResponse);
+		assertEquals("Electronics", categoryResponse.getCategoryName());
+	}
+
+	//  Fetching category by Name Failure
+	@Test
+	void testFindCategoryByName_Failure() {
+		when(categoryDAO.getCategoryByCategoryName("InvalidCategory")).thenReturn(Optional.empty());
+		assertThrows(CategoryNotFoundException.class, () -> categoryService.findCategoryByCategoryName("InvalidCategory"));
+	}
+
+	//  Test case for null checking
+	@Test
+	void testFindCategoryByCategoryName_NullName() {
+		Exception exception = assertThrows(IllegalArgumentException.class, 
+				() -> categoryService.findCategoryByCategoryName(null));
+
+		assertEquals("Category name must not be null or empty", exception.getMessage());
+		verify(categoryDAO, never()).getCategoryByCategoryName(anyString());
+	}
+
+	//  Test case for Blank checking
+	@Test
+	void testFindCategoryByCategoryName_BlankName() {
+		String categoryName = "   ";  
+
+		Exception exception = assertThrows(IllegalArgumentException.class, 
+				() -> categoryService.findCategoryByCategoryName(categoryName));
+
+		assertEquals("Category name must not be null or empty", exception.getMessage());
+
+		verify(categoryDAO, never()).getCategoryByCategoryName(anyString());
+	}
+
+	//  Update category with invalid ID
+	@Test
+	void testUpdateCategory_InvalidId() {
+		assertThrows(IllegalArgumentException.class, () -> categoryService.updateCategory(null, "Updated Name"));
+	}
+
+	//  Update category with invalid Name**
+	@Test
+	void testUpdateCategory_InvalidName() {
+		assertThrows(IllegalArgumentException.class, () -> categoryService.updateCategory("C_01", ""));
+	}
+
+	//  Update category with short Name**
+	@Test
+	void testUpdateCategory_ShortName() {
+		assertThrows(IllegalArgumentException.class, () -> categoryService.updateCategory("C_01", "AB"));
+	}
+
+	// DTO to Entity Conversion**
+	@Test
+	void testDtoToEntityConversion() {
+		Category convertedCategory = DTOToEntity.categoryRequestDTOToCategory(categoryRequest);
+		assertNotNull(convertedCategory);
+		assertEquals("Electronics", convertedCategory.getCategoryName());
+	}
+
+	// Entity to DTO Conversion**
+	@Test
+	void testEntityToDTOConversion() {
+		CategoryResponseDTO convertedDTO = EntityToDTO.toCategoryResponse(category);
+		assertNotNull(convertedDTO);
+		assertEquals("Electronics", convertedDTO.getCategoryName());
+	}
+	//  Null Check: Throws IllegalArgumentException when categoryId is null
+	@Test
+	void testUpdateCategory_NullCategoryId() {
+		String categoryId = null;
+		String categoryName = "Electronics";
+
+		Exception exception = assertThrows(IllegalArgumentException.class, 
+				() -> categoryService.updateCategory(categoryId, categoryName));
+
+		assertEquals("CategoryId must not be null or empty", exception.getMessage());
+
+		// Ensure DAO was never called
+		verify(categoryDAO, never()).updateCategory(anyString(), anyString());
+	}
+
+	// Blank Check: Throws IllegalArgumentException when categoryId is blank
+	@Test
+	void testUpdateCategory_BlankCategoryId() {
+		String categoryId = "   ";  // Blank spaces
+		String categoryName = "Electronics";
+
+		Exception exception = assertThrows(IllegalArgumentException.class, 
+				() -> categoryService.updateCategory(categoryId, categoryName));
+
+		assertEquals("CategoryId must not be null or empty", exception.getMessage());
+
+		// Ensure DAO was never called
+		verify(categoryDAO, never()).updateCategory(anyString(), anyString());
+	}
+
+	// Null Check: Throws IllegalArgumentException when categoryName is null
+	@Test
+	void testUpdateCategory_NullCategoryName() {
+		String categoryId = "123";
+		String categoryName = null;
+
+		Exception exception = assertThrows(IllegalArgumentException.class, 
+				() -> categoryService.updateCategory(categoryId, categoryName));
+
+		assertEquals("CategoryName must not be null or empty", exception.getMessage());
+		verify(categoryDAO, never()).updateCategory(anyString(), anyString());
+	}
+
+	// Blank Check: Throws IllegalArgumentException when categoryName is blank
+	@Test
+	void testUpdateCategory_BlankCategoryName() {
+		String categoryId = "123";
+		String categoryName = "   ";  
+
+		Exception exception = assertThrows(IllegalArgumentException.class, 
+				() -> categoryService.updateCategory(categoryId, categoryName));
+
+		assertEquals("CategoryName must not be null or empty", exception.getMessage());
+		verify(categoryDAO, never()).updateCategory(anyString(), anyString());
+	}
+
+	//  CategoryName = "Null" Check: Throws IllegalArgumentException
+	@Test
+	void testUpdateCategory_CategoryNameIsStringNull() {
+		String categoryId = "123";
+		String categoryName = "Null";  // String "Null"
+
+		Exception exception = assertThrows(IllegalArgumentException.class, 
+				() -> categoryService.updateCategory(categoryId, categoryName));
+
+		assertEquals("CategoryName must not be null or empty", exception.getMessage());
+
+		// Ensure DAO was never called
+		verify(categoryDAO, never()).updateCategory(anyString(), anyString());
+	}
+
+	//  CategoryName Length Check: Less than 3 characters
+	@Test
+	void testUpdateCategory_CategoryNameTooShort() {
+		String categoryId = "123";
+		String categoryName = "AB";  
+
+		Exception exception = assertThrows(IllegalArgumentException.class, 
+				() -> categoryService.updateCategory(categoryId, categoryName));
+
+		assertEquals("CategoryName must be at least 3 characters long", exception.getMessage());
+		verify(categoryDAO, never()).updateCategory(anyString(), anyString());
+	}   
+
 }
-
-
-

@@ -24,17 +24,17 @@ public class CategoryDaoImpl implements ICategoryDao
 	}
 
 	//for category insertion
-		@Override
-		public Optional<Category> insertCategory(Category category) {
-			Category existingCategory = this.categoryRepository.findByCategoryNameIgnoreCase(category.getCategoryName());
-			if(existingCategory == null) {
-				Category savedCategory = this.categoryRepository.save(category);
-				return savedCategory!=null?Optional.of(savedCategory):Optional.empty();
-			}
-			else {
-				throw new CategoryNotCreatedException("Category already available with name : "+category.getCategoryName());
-			}
+	@Override
+	public Optional<Category> insertCategory(Category category) {
+		Category existingCategory = this.categoryRepository.findByCategoryNameIgnoreCase(category.getCategoryName());
+		if(existingCategory == null) {
+			Category savedCategory = this.categoryRepository.save(category);
+			return savedCategory!=null?Optional.of(savedCategory):Optional.empty();
 		}
+		else {
+			throw new CategoryNotCreatedException("Category already available with name : "+category.getCategoryName());
+		}
+	}
 
 	//for fetching category
 	@Override
@@ -54,21 +54,19 @@ public class CategoryDaoImpl implements ICategoryDao
 	@Override
 	public Optional<String> updateCategory(String categoryId, String categoryName)
 	{
-	    Category category = categoryRepository.findById(categoryId)
-	        .orElseThrow(() -> new CategoryNotFoundException("Category not found with id: " + categoryId));
+		Category category = categoryRepository.findById(categoryId)
+				.orElseThrow(() -> new CategoryNotFoundException("Category not found with id: " + categoryId));
 
-	    boolean isCategoryExists = categoryRepository.existsByCategoryName(categoryName);
+		boolean isCategoryExists = categoryRepository.existsByCategoryName(categoryName);
 
-	    if (isCategoryExists && !category.getCategoryName().equalsIgnoreCase(categoryName))
-	    {
-	        throw new CategoryNameAlreadyExistsException("Category name already exists: " + categoryName);
-	    }
-	    category.setCategoryName(categoryName);
-	    categoryRepository.save(category);
-	    return Optional.of("Category updated successfully with id: " + categoryId);
+		if (isCategoryExists && !category.getCategoryName().equalsIgnoreCase(categoryName))
+		{
+			throw new CategoryNameAlreadyExistsException("Category name already exists: " + categoryName);
+		}
+		category.setCategoryName(categoryName);
+		categoryRepository.save(category);
+		return Optional.of("Category updated successfully with id: " + categoryId);
 	}
-
-	
 
 	//for fetching category by Id
 	@Override
@@ -79,12 +77,12 @@ public class CategoryDaoImpl implements ICategoryDao
 		}
 		return Optional.empty();
 	}
-	
+
 	//for fetching category by Name
 	@Override
 	public Optional<Category> getCategoryByCategoryName(String categoryName) {
-	    Category category = this.categoryRepository.findByCategoryNameIgnoreCase(categoryName);
-	    return Optional.ofNullable(category); 
+		Category category = this.categoryRepository.findByCategoryNameIgnoreCase(categoryName);
+		return Optional.ofNullable(category); 
 	}
 
 	//Delete by id
@@ -99,8 +97,4 @@ public class CategoryDaoImpl implements ICategoryDao
 			return Optional.empty();
 		}
 	}
-
-	
-	
-
 }

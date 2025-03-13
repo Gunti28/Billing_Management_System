@@ -24,12 +24,9 @@ import jakarta.validation.Valid;
 public class CategoryController {
 	private  ICategoryService categoryService;
 
-
 	public CategoryController(ICategoryService categoryService){
 		this.categoryService=categoryService;
 	}
-
-
 
 	//API to create a Category with Products in it
 	@PostMapping(value="/addCategoryWithProducts")
@@ -37,8 +34,6 @@ public class CategoryController {
 		CategoryResponseDTO createdCategory= categoryService.addCategoryWithProducts(categoryRequest);
 		return new ResponseEntity<>(createdCategory,HttpStatus.CREATED);
 	}
-
-
 
 	//API to get all the categories present in the DB
 	@GetMapping(value="/allCategories")
@@ -67,13 +62,10 @@ public class CategoryController {
 		return new ResponseEntity<>(foundCategory, HttpStatus.OK);
 	}
 
-
-
 	//API to Get Category by using CategoryId
 	@GetMapping("/categoryByName")
 	public ResponseEntity<?> findCategoryByCategoryName(@RequestParam String categoryName){
 		CategoryResponseDTO foundCategory =categoryService.findCategoryByCategoryName(categoryName);
 		return  new ResponseEntity<>(foundCategory,HttpStatus.OK) ;
 	}
-
 }

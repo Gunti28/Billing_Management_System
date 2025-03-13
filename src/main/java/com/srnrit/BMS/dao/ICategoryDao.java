@@ -7,8 +7,8 @@ import com.srnrit.BMS.entity.Category;
 
 public interface ICategoryDao 
 {
-    Optional<Category> insertCategory(Category category);
-    Optional<List<Category>> getAllCategory();
+	Optional<Category> insertCategory(Category category);
+	Optional<List<Category>> getAllCategory();
 	Optional<String> updateCategory(String categoryId,String categoryName);
 	Optional<Category> getCategoryByCategoryId(String categoryId) ;
 	Optional<Category> getCategoryByCategoryName(String categoryId) ;

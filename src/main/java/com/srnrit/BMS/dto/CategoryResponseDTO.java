@@ -15,8 +15,8 @@ import lombok.ToString;
 @ToString
 public class CategoryResponseDTO 
 {
-    private String categoryId;
-    private String categoryName;
-    
-    private List<ProductResponseDTO> products;
+	private String categoryId;
+	private String categoryName;
+
+	private List<ProductResponseDTO> products;
 }

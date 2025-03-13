@@ -3,7 +3,6 @@ package com.srnrit.BMS.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -19,7 +18,6 @@ import lombok.ToString;
 public class UpdateCategoryRequestDTO 
 {
 	@NotNull(message = "Id cannot be null")
-//	@Positive(message = "Id must be positive")
 	private String categoryId;
 
 	@NotNull(message = "Category Name must not be null")
