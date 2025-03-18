@@ -33,6 +33,7 @@ public class ImageFileNameGenerator
 		} 
 		catch (Exception e) 
 		{
+			
 			throw new RuntimeException("Something went wrong");
 		}
 		

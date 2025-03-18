@@ -4,14 +4,19 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+
+import javax.sql.DataSource;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,6 +25,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.multipart.MultipartFile;
+
 import com.srnrit.BMS.dao.impl.UserDaoImpl;
 import com.srnrit.BMS.entity.User;
 import com.srnrit.BMS.exception.userexceptions.UserAleadyExistException;
@@ -27,6 +33,7 @@ import com.srnrit.BMS.exception.userexceptions.UserNotFoundException;
 import com.srnrit.BMS.exception.userexceptions.UserNotcreatedException;
 import com.srnrit.BMS.repository.UserRepository;
 import com.srnrit.BMS.util.FileStorageProperties;
+import com.srnrit.BMS.util.idgenerator.ImageFileNameGenerator;
 
 @ExtendWith(MockitoExtension.class)
 public class UserDAOTest {
@@ -284,12 +291,12 @@ public class UserDAOTest {
         updatedUser.setUserPhone(9876543210L);
         updatedUser.setUserName("kavya");
 
-        when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
-        when(userRepository.findByUserEmail(updatedUser.getUserEmail())).thenReturn(null);
-        when(userRepository.findByUserPhone(updatedUser.getUserPhone())).thenReturn(null);
-        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
-        when(userRepository.save(userCaptor.capture())).thenAnswer(invocation -> invocation.getArgument(0));
-        Optional<User> result = userDao.updateByUserId(updatedUser, userId);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));        
+        when(userRepository.findByUserEmail(updatedUser.getUserEmail())).thenReturn(null);       
+        when(userRepository.findByUserPhone(updatedUser.getUserPhone())).thenReturn(null);        
+        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);        
+        when(userRepository.save(userCaptor.capture())).thenAnswer(invocation -> invocation.getArgument(0));       
+        Optional<User> result = userDao.updateByUserId(updatedUser, userId);       
         assertTrue(result.isPresent());
         User savedUser = userCaptor.getValue();
         assertEquals("kavya02@gmail.com", savedUser.getUserEmail());
@@ -307,7 +314,7 @@ public class UserDAOTest {
     }
     
     @Test
-    public void testUpdateByUserId_NullUserId() {
+    public void testUpdateByUserById_NulluserId() {
         User user = new User();
         UserNotFoundException exception = assertThrows(UserNotFoundException.class, () -> {
             userDao.updateByUserId(user, null);
@@ -348,39 +355,47 @@ public class UserDAOTest {
     }
     
     @Test
-    public void testUpdateByUserId_EmailAlreadyExists() {
+    public void testUpdateByUserId_EmailAlreadyExists() 
+    {
         String userId = "123";
         User existingUser = new User();
         existingUser.setUserId(userId);
         existingUser.setActive(true);
+        
         User updatedUser = new User();
-        updatedUser.setUserEmail("duplicate@example.com");
-        when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
-        when(userRepository.findByUserEmail(updatedUser.getUserEmail())).thenReturn(new User());
+        updatedUser.setUserEmail("duplicate@example.com");       
+        when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));       
+        when(userRepository.findByUserEmail(updatedUser.getUserEmail())).thenReturn(updatedUser); // Simulate existing email        
         UserAleadyExistException exception = assertThrows(UserAleadyExistException.class, () -> {
             userDao.updateByUserId(updatedUser, userId);
         });
-        assertEquals("User already exist with email : "+updatedUser.getUserEmail(), exception.getMessage());
+        assertEquals("User already exists with email: " + updatedUser.getUserEmail(), exception.getMessage());
     }
+    
     
     @Test
     public void testUpdateByUserId_PhoneNumberAlreadyExists() {
+        // Arrange
         String userId = "123";
+        
         User existingUser = new User();
         existingUser.setUserId(userId);
         existingUser.setActive(true);
-
-        User updatedUser = new User();
-        updatedUser.setUserPhone(9876543210L);
-        when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
-        when(userRepository.findByUserEmail(updatedUser.getUserEmail())).thenReturn(null);
-        when(userRepository.findByUserPhone(updatedUser.getUserPhone())).thenReturn(new User());
+        User updatedUser = new User();        
+        updatedUser.setUserPhone(9876543210L); // Phone number to update
+        updatedUser.setUserEmail("duplicate@example.com"); 
+        
+        
+        when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));	        
+        when(userRepository.findByUserEmail(updatedUser.getUserEmail())).thenReturn(null); // No existing email        
+        when(userRepository.findByUserPhone(updatedUser.getUserPhone())).thenReturn(updatedUser); // Simulate existing phone number        
         UserAleadyExistException exception = assertThrows(UserAleadyExistException.class, () -> {
             userDao.updateByUserId(updatedUser, userId);
         });
-        assertEquals("User already exist with phoneNumber" + updatedUser.getUserPhone(), exception.getMessage());
+        assertEquals("User already exists with phonenumber: " + updatedUser.getUserPhone(), exception.getMessage());
     }
     
+   
     	//7.FETCHALLUSERS() METHOD IN USERDAO LAYER
     @Test
     public void testFetchAllUser_Success() {
@@ -451,10 +466,46 @@ public class UserDAOTest {
         assertEquals("user is not active.", exception.getMessage());
     }
     
-    		//EDITIMAGEBYID() IN USERDAO LAYER
     
+    		//EDITIMAGEBYID() IN USERDAO LAYER
+    @Test
+    public void testEditImage_NullUserId() {
+        MultipartFile file = mock(MultipartFile.class);
+        assertThrows(UserNotFoundException.class, () -> {
+            userDao.editImage(file, null);
+        }, "User ID must not be null or empty.");
+    }
+    
+    @Test
+    public void testEditImage_UserNotActive() 
+    {
+        String userId = "inactiveUserId";
+        MultipartFile file = mock(MultipartFile.class);
+        User inactiveUser = new User();
+        inactiveUser.setUserId(userId);
+        inactiveUser.setActive(false);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(inactiveUser));
+        assertThrows(RuntimeException.class, () -> {
+            userDao.editImage(file, userId);
+        }, "User is not active");
+    }
 
     	
+    @Test
+    public void testEditImage_UserNotUpdatedSuccessfully() 
+    {
+        String userId = "validUserId";
+        MultipartFile file = mock(MultipartFile.class);
+        when(file.getOriginalFilename()).thenReturn("newImage.png");
+        User user = new User();
+        user.setUserId(userId);
+        user.setActive(true);
+        user.setUserProfileImage("oldImage.png");
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        assertThrows(RuntimeException.class, () -> {
+            userDao.editImage(file, userId);
+        },"User not updated successfully !");
+        
+    }
     
-   
 }   

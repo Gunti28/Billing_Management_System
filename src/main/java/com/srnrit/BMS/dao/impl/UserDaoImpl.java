@@ -124,12 +124,13 @@ public class UserDaoImpl implements UserDao
 								 flag=true;
 								 if(userRepository.findByUserPhone(user.getUserPhone())!=null)
 								 {
-									 throw new UserAleadyExistException("User already exists with email: " + user.getUserEmail());
+									 throw new UserAleadyExistException("User already exists with phonenumber: " + user.getUserPhone());
 								 }
 								 oldUser.setUserPhone(user.getUserPhone());
 							 }
 						 }
 						 else throw new RuntimeException("user phoneNo must not be null and not start with '0' and length must be 10 digits.");
+						 
 						 if(user.getUserName()!=null && !user.getUserName().isBlank())
 						 {
 							 if(!user.getUserName().equals(oldUser.getUserName()))
@@ -244,7 +245,7 @@ public class UserDaoImpl implements UserDao
 		 		
 		 		return copied > 0 ? Optional.of(updatedUser) : Optional.empty();	
 		    }
-		    else 	throw new RuntimeException("User not updated successfully !");
+		    else throw new RuntimeException("User not updated successfully !");
 	  } 
 	  catch (Exception e) 
 	  {
