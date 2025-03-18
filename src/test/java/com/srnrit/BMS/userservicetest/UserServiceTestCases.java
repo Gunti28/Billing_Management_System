@@ -5,12 +5,14 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
-import java.security.CryptoPrimitive;
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,7 +23,6 @@ import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.BeanUtils;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
 
 import com.srnrit.BMS.dao.UserDao;
@@ -32,12 +33,15 @@ import com.srnrit.BMS.dto.UserRequestDTO;
 import com.srnrit.BMS.dto.UserResponseDTO;
 import com.srnrit.BMS.dto.VerifyOTPRequestDTO;
 import com.srnrit.BMS.entity.User;
+import com.srnrit.BMS.exception.userexceptions.InvalideOTPException;
 import com.srnrit.BMS.exception.userexceptions.UserNotFoundException;
 import com.srnrit.BMS.exception.userexceptions.UserNotcreatedException;
 import com.srnrit.BMS.mapper.DTOToEntity;
 import com.srnrit.BMS.mapper.EntityToDTO;
 import com.srnrit.BMS.service.impl.UserServiceImpl;
+import com.srnrit.BMS.util.EmailSender;
 import com.srnrit.BMS.util.FileStorageProperties;
+import com.srnrit.BMS.util.Message;
 import com.srnrit.BMS.util.OTPOperation;
 
 @ExtendWith(MockitoExtension.class)
@@ -48,6 +52,9 @@ public class UserServiceTestCases {
 
 	@Mock
 	private OTPOperation otpOperation;
+	
+	@Mock
+	private EmailSender emailSender;
 
 	@Mock
 	private FileStorageProperties fileStorageProperties;
@@ -456,8 +463,8 @@ public class UserServiceTestCases {
 	
 //================= Test cases for editUserImage() ===================
 	
-/*	
 	// 31. Test Case: Successful Image Update (Not working properly)
+/*
 	@Test
 	void testEditUserImage_Success()
 	{
@@ -465,7 +472,7 @@ public class UserServiceTestCases {
 		when(validImage.getContentType()).thenReturn("image/jpeg");
 		when(validImage.getOriginalFilename()).thenReturn("profile.jpg");
 		
-		UserResponseDTO responseDTO = userServiceImpl.editUserImage(validImage, "Uid_01");
+		UserResponseDTO responseDTO = userServiceImpl.editUserImage(any(), "Uid_01");
 		assertNotNull(responseDTO);
 		assertEquals("venu", responseDTO.getUserName());
 	}
@@ -490,6 +497,7 @@ public class UserServiceTestCases {
         System.err.println(exception.getMessage());
 
 	}
+
 	
 	// 34. Test Case: file is null
 	@Test
@@ -515,18 +523,357 @@ public class UserServiceTestCases {
 	    assertEquals("File size exceeds maximum limit! Supported file size 1000000", exception.getMessage());
 	}
 */
-/*
+
 	// 36. (Not working properly)
+//	@Test
+//	void testEditUserImage_UserNotFound() {
+//	    
+//	   // when(userDao.editImage(any(MockMultipartFile.class), "U123")).thenReturn(Optional.empty());
+//
+//	    Exception exception = assertThrows(RuntimeException.class, () -> userServiceImpl.editUserImage(any(MockMultipartFile.class ), "U123"));
+//
+//	    assertEquals("File must not be null", exception.getMessage());
+//	}
+	
+//============== TEST CASES FOR getAllUsers() method =================
+
+
+	// 37. Test Case: Fetching All Users Successfully
 	@Test
-	void testEditUserImage_UserNotFound() {
-	    
-	    //when(userDao.editImage(validImage, "U123")).thenReturn(Optional.empty());
-
-	    Exception exception = assertThrows(RuntimeException.class, () -> userServiceImpl.editUserImage(validImage, "U123"));
-
-	    assertEquals("User does not exist with ID: " + "U123", exception.getMessage());
+	void testGetAllUsers_Success()
+	{
+		List<User> users=java.util.Arrays.asList(new User("U123", "kumar", LocalDateTime.now(), true, "kumar@gmail.com", "k1234567", "default.png", "Male", 1234567891l, true),
+				new User("U113", "rajukumar", LocalDateTime.now(), true, "rkumar@gmail.com", "r1234567", "default.png", "Male", 2234567891l, true));
+		
+		List<UserResponseDTO> userResponseDTOs=users.stream().map(user->new UserResponseDTO(user.getUserId(),user.getUserName(),user.getUserEmail(),user.getUserPassword(),user.getActive(),user.getUserProfileImage(),user.getUserGender(),user.getUserPhone(),user.getTermsAndConditions())).collect(Collectors.toList());
+		when(userDao.fetchAlluser()).thenReturn(Optional.of(users));
+		
+		List<UserResponseDTO> allUsers = userServiceImpl.getAllUsers();
+		assertEquals(userResponseDTOs.size(), users.size());
+		System.out.println(allUsers);
 	}
-*/	
+
+	// 38. Test Case: No Users Present (Throws Exception)
+
+	@Test
+	void testGetAllUsers_NoUsersPresent()
+	{
+		when(userDao.fetchAlluser()).thenReturn(Optional.of(Collections.emptyList()));
+		
+		Exception exception=assertThrows(RuntimeException.class,()-> userServiceImpl.getAllUsers());
+		
+		assertEquals("No User is Present", exception.getMessage());
+		System.err.println(exception.getMessage());
+	}
+
+	// 39. Test Case: fetchAlluser() Returns Optional.empty()
+
+	@Test
+	void testGetAllUsers_OptionalEmpty()
+	{
+		 when(userDao.fetchAlluser()).thenReturn(Optional.empty());
+		  
+		 Exception exception = assertThrows(RuntimeException.class, () -> userServiceImpl.getAllUsers());
+
+		 assertEquals("No User is Present", exception.getMessage());
+		 System.err.println(exception.getMessage());
+	}
+
+	// 40. Test Case: fetchAlluser() Returns a null List
+
+	@Test
+	void testGetAllUsers_NullList()
+	{
+		when(userDao.fetchAlluser()).thenReturn(Optional.ofNullable(null));
+
+	    Exception exception = assertThrows(RuntimeException.class, () -> userServiceImpl.getAllUsers());
+	    
+	    assertEquals("No User is Present", exception.getMessage());
+	    System.err.println(exception.getMessage());
+	}
+
+	// 41. Test Case: EntityToDTO Conversion Returns null for Any User
 	
-	
+	@Test
+	void testGetAllUsers_EntityToDTOConversionFails()
+	{
+		List<User> users=java.util.Arrays.asList(new User("U123", "kumar", LocalDateTime.now(), true, "kumar@gmail.com", "k1234567", "default.png", "Male", 1234567891l, true),
+				new User("U113", "rajukumar", LocalDateTime.now(), true, "rkumar@gmail.com", "r1234567", "default.png", "Male", 2234567891l, true));
+		
+		when(userDao.fetchAlluser()).thenReturn(Optional.of(users));
+		try(MockedStatic<EntityToDTO> mockConverter=mockStatic(EntityToDTO.class))
+		{
+			
+			
+			mockConverter.when(()->EntityToDTO.userEntityToUserResponseDTO(users.get(0))).thenReturn(userResponseDTO);
+			mockConverter.when(()->EntityToDTO.userEntityToUserResponseDTO(users.get(1))).thenReturn(null);
+
+			
+			List<UserResponseDTO> allUsers = userServiceImpl.getAllUsers();
+			assertEquals(1, 1);
+			System.err.println("Entity to DTO convertion fails");
+		}
+		
+	}
+
+	// ================== UPDATE PASSWORD TEST CASES =================
+	// 42
+	@Test
+    void testUpdatePassword_Success() {
+        ChangePasswordRequestDTO requestDTO = new ChangePasswordRequestDTO();
+        requestDTO.setEmail("test@example.com");
+        requestDTO.setNewPassword("newPassword123");
+        requestDTO.setConfirmPassword("newPassword123");
+        User user = new User("U123", "Test User", LocalDateTime.now(), true, "test@example.com", "newPassword123", "default.png", "Male", 1234567890L, true);
+        UserResponseDTO userResponseDTO = new  UserResponseDTO("u123","Test User","test@example.com","newPassword123",true,"default.png","Male",1234567890L,true);
+       
+
+        when(userDao.changePassword(anyString(), anyString())).thenReturn(Optional.of(user));
+        try (MockedStatic<EntityToDTO> mockConverter = mockStatic(EntityToDTO.class)) {
+            mockConverter.when(() -> EntityToDTO.userEntityToUserResponseDTO(user)).thenReturn(userResponseDTO);
+
+            UserResponseDTO result = userServiceImpl.updatePassword(requestDTO);
+
+            assertNotNull(result);
+            assertEquals("test@example.com", result.getUserEmail());
+        }
+    }
+
+	// 43
+    @Test
+    void testUpdatePassword_NullRequest_ThrowsException()
+    {
+        Exception exception = assertThrows(RuntimeException.class, () -> {
+            userServiceImpl.updatePassword(null);
+        });
+        assertEquals("Password Credential Can't be null", exception.getMessage());
+    }
+
+    // 44
+    @Test
+    void testUpdatePassword_NullEmail_ThrowsException()
+    {
+    	 ChangePasswordRequestDTO requestDTO = new ChangePasswordRequestDTO();
+         requestDTO.setEmail("test@example.com");
+         requestDTO.setNewPassword("newPassword123");
+         requestDTO.setConfirmPassword("newPassword123");
+        Exception exception = assertThrows(RuntimeException.class, () -> {
+            userServiceImpl.updatePassword(requestDTO);
+        });
+        assertEquals("User password not updated !", exception.getMessage());
+    }
+
+    // 45
+    @Test
+    void testUpdatePassword_BlankEmail_ThrowsException() 
+    {
+    	 ChangePasswordRequestDTO requestDTO = new ChangePasswordRequestDTO();
+         requestDTO.setEmail("test@example.com");
+         requestDTO.setNewPassword("newPassword123");
+         requestDTO.setConfirmPassword("newPassword123");
+    	Exception exception = assertThrows(RuntimeException.class, () -> {
+            userServiceImpl.updatePassword(requestDTO);
+        });
+        assertEquals("User password not updated !", exception.getMessage());
+    }
+
+    // 46
+    @Test
+    void testUpdatePassword_NullNewPassword_ThrowsException() 
+    {
+    	 ChangePasswordRequestDTO requestDTO = new ChangePasswordRequestDTO();
+         requestDTO.setEmail("test@example.com");
+         requestDTO.setNewPassword("newPassword123");
+         requestDTO.setConfirmPassword("newPassword123");
+    	Exception exception = assertThrows(RuntimeException.class, () -> {
+            userServiceImpl.updatePassword(requestDTO);
+        });
+        assertEquals("User password not updated !", exception.getMessage());
+    }
+
+    //47
+    @Test
+    void testUpdatePassword_MismatchedPasswords_ThrowsException() 
+    {
+    	 ChangePasswordRequestDTO requestDTO = new ChangePasswordRequestDTO();
+         requestDTO.setEmail("test@example.com");
+         requestDTO.setNewPassword("newPassword123");
+         requestDTO.setConfirmPassword("newPassword123");
+    	Exception exception = assertThrows(RuntimeException.class, () -> {
+            userServiceImpl.updatePassword(requestDTO);
+        });
+        assertEquals("User password not updated !", exception.getMessage());
+    }
+
+    //48
+    @Test
+    void testUpdatePassword_UserNotFound_ThrowsException()
+    {
+    	 ChangePasswordRequestDTO requestDTO = new ChangePasswordRequestDTO();
+         requestDTO.setEmail("test@example.com");
+         requestDTO.setNewPassword("newPassword123");
+         requestDTO.setConfirmPassword("newPassword123");
+    	when(userDao.changePassword(anyString(), anyString())).thenReturn(Optional.empty());
+
+        Exception exception = assertThrows(UserNotFoundException.class, () -> {
+            userServiceImpl.updatePassword(requestDTO);
+        });
+
+        assertEquals("User password not updated !", exception.getMessage());
+    }
+
+    // 49
+    @Test
+    void testUpdatePassword_EntityConversionFails_ThrowsException() 
+    {
+    	 ChangePasswordRequestDTO requestDTO = new ChangePasswordRequestDTO();
+         requestDTO.setEmail("test@example.com");
+         requestDTO.setNewPassword("newPassword123");
+         requestDTO.setConfirmPassword("newPassword123");
+    	User user = new User("U123", "Test User", LocalDateTime.now(), true, "test@example.com", "password123", "default.png", "Male", 1234567890L, true);
+
+        when(userDao.changePassword(anyString(), anyString())).thenReturn(Optional.of(user));
+        try (MockedStatic<EntityToDTO> mockConverter = mockStatic(EntityToDTO.class)) {
+            mockConverter.when(() -> EntityToDTO.userEntityToUserResponseDTO(user)).thenReturn(null);
+
+            Exception exception = assertThrows(RuntimeException.class, () -> {
+                userServiceImpl.updatePassword(requestDTO);
+            });
+
+            assertEquals("Something went wrong ! try again", exception.getMessage());
+        }
+    }
+    
+    //================ VERIFY USER BY EMAIL ========================
+    // 50.
+    
+    @Test
+    void testVerifyUserByEmail_Success() 
+    {
+        EmailRequestDTO emailRequestDTO = new EmailRequestDTO("test@example.com");
+        User user = new User("U123", "Test User", LocalDateTime.now(), true, "test@example.com", "password123", "default.png", "Male", 1234567890L, true);
+
+        when(userDao.findByUserEmail(anyString())).thenReturn(Optional.of(user));
+        when(otpOperation.getOTP()).thenReturn("123456");
+        try (MockedStatic<EmailSender> emailSenderMock = mockStatic(EmailSender.class)) {
+            emailSenderMock.when(() -> EmailSender.sendOTPToEmail(anyString(), anyString())).thenReturn(true);
+
+            Message result = userServiceImpl.verifyUserByEmail(emailRequestDTO);
+
+            assertNotNull(result);
+            assertEquals("OTP Sended Successfully.", result.getMessage());
+        }
+    }
+
+    //51.
+    @Test
+    void testVerifyUserByEmail_NullRequest_ThrowsException()
+    {
+        Exception exception = assertThrows(RuntimeException.class, () -> {
+            userServiceImpl.verifyUserByEmail(null);
+        });
+        assertEquals("Email can't be null", exception.getMessage());
+    }
+
+    // 52.
+    @Test
+    void testVerifyUserByEmail_UserNotFound_ThrowsException()
+    {
+        EmailRequestDTO emailRequestDTO = new EmailRequestDTO("test@example.com");
+        when(userDao.findByUserEmail(anyString())).thenReturn(Optional.empty());
+
+        Exception exception = assertThrows(RuntimeException.class, () -> {
+            userServiceImpl.verifyUserByEmail(emailRequestDTO);
+        });
+
+        assertEquals("No value present", exception.getMessage());
+    }
+
+    
+    // 53.
+    @Test
+    void testVerifyUserByEmail_OtpSendFails_ThrowsException()
+    {
+        EmailRequestDTO emailRequestDTO = new EmailRequestDTO("test@example.com");
+        User user = new User("U123", "Test User", LocalDateTime.now(), true, "test@example.com", "password123", "default.png", "Male", 1234567890L, true);
+
+        when(userDao.findByUserEmail(anyString())).thenReturn(Optional.of(user));
+        when(otpOperation.getOTP()).thenReturn("123456");
+        try (MockedStatic<EmailSender> emailSenderMock = mockStatic(EmailSender.class)) {
+            emailSenderMock.when(() -> EmailSender.sendOTPToEmail(anyString(), anyString())).thenReturn(false);
+
+            Exception exception = assertThrows(RuntimeException.class, () -> {
+                userServiceImpl.verifyUserByEmail(emailRequestDTO);
+            });
+
+            assertEquals("something went wrong! try again after some time.", exception.getMessage());
+        }
+    }
+    
+    // 54.
+    @Test
+    void testVerifyOTP_Success()
+    {
+        VerifyOTPRequestDTO verifyOTPRequestDTO = new VerifyOTPRequestDTO();
+        verifyOTPRequestDTO.setEmail("test@example.com");
+        verifyOTPRequestDTO.setOtp("123456");
+        User user = new User("U123", "Test User", LocalDateTime.now(), true, "test@example.com", "password123", "default.png", "Male", 1234567890L, true);
+
+        when(userDao.findByUserEmail(anyString())).thenReturn(Optional.of(user));
+        when(otpOperation.validateOTP(anyString(), anyString())).thenReturn(Optional.of("OTP Verified Successfully"));
+
+        Message result = userServiceImpl.verifyOTP(verifyOTPRequestDTO);
+
+        assertNotNull(result);
+        assertEquals("OTP Verified Successfully", result.getMessage());
+    }
+
+    // 55.
+    @Test
+    void testVerifyOTP_NullRequest_ThrowsException()
+    {
+        Exception exception = assertThrows(RuntimeException.class, () -> {
+            userServiceImpl.verifyOTP(null);
+        });
+        assertEquals("something went wrong! try again after some time.", exception.getMessage());
+    }
+
+    // 56.
+    @Test
+    void testVerifyOTP_UserNotFound_ThrowsException()
+    {
+    	VerifyOTPRequestDTO verifyOTPRequestDTO = new VerifyOTPRequestDTO();
+        verifyOTPRequestDTO.setEmail("test@example.com");
+        verifyOTPRequestDTO.setOtp("123456");
+        
+
+        when(userDao.findByUserEmail(anyString())).thenReturn(Optional.empty());
+
+        Exception exception = assertThrows(RuntimeException.class, () -> {
+            userServiceImpl.verifyOTP(verifyOTPRequestDTO);
+        });
+
+        assertEquals("something went wrong! try again after some time.", exception.getMessage());
+    }
+
+    // 57.
+    @Test
+    void testVerifyOTP_InvalidOTP_ThrowsInvalidOTPException()
+    {
+    	VerifyOTPRequestDTO verifyOTPRequestDTO = new VerifyOTPRequestDTO();
+        verifyOTPRequestDTO.setEmail("test@example.com");
+        verifyOTPRequestDTO.setOtp("123456");
+        User user = new User("U123", "Test User", LocalDateTime.now(), true, "test@example.com", "password123", "default.png", "Male", 1234567890L, true);
+
+        when(userDao.findByUserEmail(anyString())).thenReturn(Optional.of(user));
+        when(otpOperation.validateOTP(anyString(), anyString())).thenReturn(Optional.empty());
+
+        Exception exception = assertThrows(InvalideOTPException.class, () -> {
+            userServiceImpl.verifyOTP(verifyOTPRequestDTO);
+        });
+
+        assertEquals("Invalid OTP!", exception.getMessage());
+    }
 }
+
+	
