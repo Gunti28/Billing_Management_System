@@ -21,12 +21,15 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.srnrit.BMS.controller.UserController;
 import com.srnrit.BMS.dto.ChangePasswordRequestDTO;
+import com.srnrit.BMS.dto.EmailRequestDTO;
 import com.srnrit.BMS.dto.UserResponseDTO;
 import com.srnrit.BMS.service.UserService;
+import com.srnrit.BMS.util.Message;
 
 @WebMvcTest(UserController.class)
 class UserControllerTest {
@@ -68,6 +71,7 @@ class UserControllerTest {
     }
 
    //Test case for getAllUsers() in Negative Scenario
+    
     @Test
     void testGetAllUsers_Negative() throws Exception {
         when(userService.getAllUsers()).thenThrow(new RuntimeException("Error retrieving users"));
@@ -163,6 +167,43 @@ class UserControllerTest {
      
         verify(userService, times(1)).updatePassword(any(ChangePasswordRequestDTO.class));
     }
-  
 
+    @Test
+    void testVerifyEmail_Success() throws Exception {
+        EmailRequestDTO requestDTO = new EmailRequestDTO("Ushasri@gmail.com");
+        Message responseMessage = new Message("Email verified successfully");
+
+        when(userService.verifyUserByEmail(any(EmailRequestDTO.class))).thenReturn(responseMessage);
+
+        mockMvc.perform(post("/user/VerifyEmail")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(requestDTO)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Email verified successfully"));
+    }
+    @Test
+    void testVerifyEmail_InvalidEmailFormat() throws Exception {
+        EmailRequestDTO requestDTO = new EmailRequestDTO("invalid-email");
+
+        mockMvc.perform(post("/user/VerifyEmail")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(requestDTO)))
+                .andExpect(status().isBadRequest()) // Expecting 400 Bad Request
+                .andExpect(jsonPath("$.email").value("Invalid email")) 
+                .andDo(print()); 
+    }
+    // Test case for service failure
+    @Test
+    void testVerifyEmail_ServiceFailure() throws Exception {
+        EmailRequestDTO requestDTO = new EmailRequestDTO("Ushasri@gmail.com");
+
+        when(userService.verifyUserByEmail(any(EmailRequestDTO.class)))
+                .thenThrow(new RuntimeException("Service failure occurred"));
+
+        mockMvc.perform(post("/user/VerifyEmail")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(requestDTO)))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.message").value("Service failure occurred"));
+    }
 }
