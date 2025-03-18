@@ -183,10 +183,17 @@ public class CategoryServiceImpl implements ICategoryService
 			throw new CategoryNotCreatedException("Category name must not be null or empty");
 		}
 
-		Category category = this.categoryDAO.getCategoryByCategoryName(categoryName)
-				.orElseThrow(() -> new CategoryNotFoundException("Category not exist with name: " + categoryName));
+		List<Category> allCategories = this.categoryDAO.getAllCategory().orElse(Collections.emptyList());
 
-		return EntityToDTO.toCategoryResponse(category);
+
+		Optional<Category> similarCategory = allCategories.stream()
+				.filter(category -> StringUtils.calculateSimilarCategoryCheck(category.getCategoryName().toLowerCase(), categoryName.toLowerCase()) <= 2)
+				.findFirst();
+
+		return similarCategory
+				.map(EntityToDTO::toCategoryResponse) 
+				.orElseThrow(() -> new CategoryNotFoundException("No category found with name: " + categoryName));
 	}
-
 }
+
+
