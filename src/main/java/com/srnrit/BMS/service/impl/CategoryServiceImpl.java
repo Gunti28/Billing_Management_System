@@ -2,6 +2,7 @@ package com.srnrit.BMS.service.impl;
 
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -16,10 +17,12 @@ import com.srnrit.BMS.dto.CategoryResponseDTO;
 import com.srnrit.BMS.dto.ProductResponseDTO;
 import com.srnrit.BMS.entity.Category;
 import com.srnrit.BMS.entity.Product;
+import com.srnrit.BMS.exception.categoryexceptions.CategoryNameAlreadyExistsException;
 import com.srnrit.BMS.exception.categoryexceptions.CategoryNotCreatedException;
 import com.srnrit.BMS.exception.categoryexceptions.CategoryNotFoundException;
 import com.srnrit.BMS.mapper.EntityToDTO;
 import com.srnrit.BMS.service.ICategoryService;
+import com.srnrit.BMS.util.StringUtils;
 
 @Service
 public class CategoryServiceImpl implements ICategoryService 
@@ -38,6 +41,20 @@ public class CategoryServiceImpl implements ICategoryService
 		if (categoryRequestDTO == null || categoryRequestDTO.getCategoryName() == null || categoryRequestDTO.getCategoryName().trim().isEmpty() || categoryRequestDTO.getCategoryName().equalsIgnoreCase("null")) {
 			throw new IllegalArgumentException("Category name cannot be blank and name mustn't be null");
 		}
+		String newCategoryName = categoryRequestDTO.getCategoryName().trim();
+
+		List<Category> existingCategories = categoryDAO.getAllCategory().orElse(Collections.emptyList());
+
+		existingCategories.stream()
+		.filter(existingCategory -> StringUtils.calculateSimilarCategoryCheck(newCategoryName, existingCategory.getCategoryName()) <= 3)
+		.findFirst()
+		.ifPresent(existingCategory -> {
+			throw new CategoryNameAlreadyExistsException(
+					"A similar category already exists with the name: " + existingCategory.getCategoryName()
+					);
+		});
+
+
 		Category category=new Category();
 		category.setCategoryName(categoryRequestDTO.getCategoryName());
 
@@ -140,7 +157,7 @@ public class CategoryServiceImpl implements ICategoryService
 	{
 		if(categoryId == null || categoryId.trim().isEmpty())
 		{
-			throw new RuntimeException("Category must not be null or blank");			
+			throw new IllegalArgumentException("Category must not be null or blank");			
 		}
 		else 
 		{
@@ -163,7 +180,7 @@ public class CategoryServiceImpl implements ICategoryService
 	@Override
 	public CategoryResponseDTO findCategoryByCategoryName(String categoryName) {
 		if (categoryName == null || categoryName.trim().isEmpty()) {
-			throw new IllegalArgumentException("Category name must not be null or empty");
+			throw new CategoryNotCreatedException("Category name must not be null or empty");
 		}
 
 		Category category = this.categoryDAO.getCategoryByCategoryName(categoryName)
