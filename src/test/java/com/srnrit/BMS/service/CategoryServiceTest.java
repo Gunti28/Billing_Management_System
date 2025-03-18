@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -19,6 +20,7 @@ import com.srnrit.BMS.entity.*;
 import com.srnrit.BMS.exception.categoryexceptions.*;
 import com.srnrit.BMS.mapper.*;
 import com.srnrit.BMS.service.impl.CategoryServiceImpl;
+import com.srnrit.BMS.util.StringUtils;
 
 @ExtendWith(MockitoExtension.class)
 public class CategoryServiceTest {
@@ -28,6 +30,10 @@ public class CategoryServiceTest {
 
 	@Mock
 	private ICategoryDao categoryDAO;
+
+	@Mock
+	private StringUtils stringUtils;
+
 
 	private Category category;
 	private Product product;
@@ -56,6 +62,8 @@ public class CategoryServiceTest {
 
 		product = new Product("Laptop", "laptop.jpg", 10, 1000.0, true);
 		category.addProduct(product);
+
+
 	}
 
 	// Success: Add Category**
@@ -251,43 +259,82 @@ public class CategoryServiceTest {
 		verify(categoryDAO, never()).getCategoryByCategoryId(anyString());
 	}
 	//  Fetching category by Name Success
+
 	@Test
 	void testFindCategoryByName_Success() {
-		when(categoryDAO.getCategoryByCategoryName("Electronics")).thenReturn(Optional.of(category));
-		categoryResponse = categoryService.findCategoryByCategoryName("Electronics");
+		category = new Category();
+		category.setCategoryId("C_01");
+		category.setCategoryName("Electronics");
 
-		assertNotNull(categoryResponse);
-		assertEquals("Electronics", categoryResponse.getCategoryName());
+		when(categoryDAO.getAllCategory()).thenReturn(Optional.of(Collections.singletonList(category)));
+
+		List<Category> categoryList = Collections.singletonList(category);
+		when(categoryDAO.getAllCategory()).thenReturn(Optional.of(categoryList));
+
+		try (MockedStatic<StringUtils> mockedStatic = mockStatic(StringUtils.class)) {
+			mockedStatic.when(() -> StringUtils.calculateSimilarCategoryCheck(anyString(), anyString()))
+			.thenReturn(2);
+
+			categoryResponse = categoryService.findCategoryByCategoryName("Electronics");
+
+			assertNotNull(categoryResponse);
+			assertEquals("Electronics", categoryResponse.getCategoryName());
+		}
 	}
 
-	//  Fetching category by Name Failure
 	@Test
-	void testFindCategoryByName_Failure() {
-		when(categoryDAO.getCategoryByCategoryName("InvalidCategory")).thenReturn(Optional.empty());
-		assertThrows(CategoryNotFoundException.class, () -> categoryService.findCategoryByCategoryName("InvalidCategory"));
+	void testFindCategoryByName_Failure_NoSimilarCategoryFound() {
+		List<Category> categoryList = Collections.singletonList(category); // Only "Electronics" exists
+
+		when(categoryDAO.getAllCategory()).thenReturn(Optional.of(categoryList));
+
+		try (MockedStatic<StringUtils> mockedStatic = mockStatic(StringUtils.class)) {
+			mockedStatic.when(() -> StringUtils.calculateSimilarCategoryCheck(anyString(), anyString()))
+			.thenReturn(5); // No match (should trigger CategoryNotFoundException)
+
+			assertThrows(CategoryNotFoundException.class, () -> categoryService.findCategoryByCategoryName("Toys"));
+		}
 	}
+
+	// Failure: Empty Category List
+	@Test
+	void testFindCategoryByName_Failure_EmptyCategoryList() {
+		when(categoryDAO.getAllCategory()).thenReturn(Optional.empty());
+
+		assertThrows(CategoryNotFoundException.class, () -> categoryService.findCategoryByCategoryName("Electronics"));
+	}
+
+	// Failure: Null or Empty Input
+	@Test
+	void testFindCategoryByName_Failure_NullOrEmptyInput() {
+		assertThrows(CategoryNotCreatedException.class, () -> categoryService.findCategoryByCategoryName(null));
+		assertThrows(CategoryNotCreatedException.class, () -> categoryService.findCategoryByCategoryName("  "));
+	}
+
 
 	//  Test case for null checking
 	@Test
 	void testFindCategoryByCategoryName_NullName() {
-		Exception exception = assertThrows(IllegalArgumentException.class, 
+		Exception exception = assertThrows(CategoryNotCreatedException.class, 
 				() -> categoryService.findCategoryByCategoryName(null));
 
 		assertEquals("Category name must not be null or empty", exception.getMessage());
 		verify(categoryDAO, never()).getCategoryByCategoryName(anyString());
 	}
 
+
+
 	//  Test case for Blank checking
 	@Test
 	void testFindCategoryByCategoryName_BlankName() {
 		String categoryName = "   ";  
 
-		Exception exception = assertThrows(IllegalArgumentException.class, 
+		Exception exception = assertThrows(CategoryNotCreatedException.class, 
 				() -> categoryService.findCategoryByCategoryName(categoryName));
 
 		assertEquals("Category name must not be null or empty", exception.getMessage());
 
-		verify(categoryDAO, never()).getCategoryByCategoryName(anyString());
+		verify(categoryDAO, never()).getAllCategory();
 	}
 
 	//  Update category with invalid ID

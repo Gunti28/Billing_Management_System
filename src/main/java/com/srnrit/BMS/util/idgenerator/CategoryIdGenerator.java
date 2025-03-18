@@ -7,7 +7,6 @@ import java.sql.Statement;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.id.IdentifierGenerator;
 
-// Here we are written auto increment functionality with Custom generator
 @SuppressWarnings("serial")
 public class CategoryIdGenerator implements IdentifierGenerator
 {
