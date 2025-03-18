@@ -64,16 +64,10 @@ public class UserController {
     @DeleteMapping(value = "/{userId}", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<?> deleteUserById(@PathVariable  @NotBlank(message = "User ID can't be blank or null!") String userId) 
 	{
-		if(userId!=null &&  !userId.equalsIgnoreCase("null"))
-		{
-			if(!userId.isBlank() )
-			{
-				String msg = this.userService.deleteUserById(userId);
-				return ResponseEntity.status(HttpStatus.OK).body(new Message(msg));
-			}
-			throw new IllegalArgumentException("UserId can't be blank or empty");
-		}
-		throw new IllegalArgumentException("UserId can't be null !");
+		String msg = this.userService.deleteUserById(userId);
+		return ResponseEntity.status(HttpStatus.OK).body(new Message(msg));
+			
+		
 	}
 
 	@PutMapping(value = "/editProfileImage/{userid}", produces = { MediaType.APPLICATION_JSON_VALUE })
@@ -88,11 +82,8 @@ public class UserController {
 	@GetMapping(value = "/get/{userId}", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<?> getUserByUserId(@PathVariable @NotBlank(message = "User ID can't be blank or null!") String userId) 
 	{
-
-		System.out.println("UserController.getUserByUserId()");
 		UserResponseDTO responseDTO = this.userService.findUserById(userId);
 		return ResponseEntity.status(HttpStatus.FOUND).body(responseDTO);
-
 	}
 
 	@PostMapping(value = "/login", 
