@@ -1,10 +1,13 @@
 package com.srnrit.BMS.controller;
 
+import java.net.URI;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,7 +30,9 @@ import com.srnrit.BMS.service.UserService;
 import com.srnrit.BMS.util.Message;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 
+@Validated // Enables validation for method parameters
 @RestController
 @RequestMapping(value = "/user")
 public class UserController {
@@ -35,79 +40,107 @@ public class UserController {
 	@Autowired
 	private UserService userService;
 
-	@PostMapping(value = "/create", consumes = { "application/json", "application/xml" }, produces = {
-			"application/json" })
-	public ResponseEntity<?> createUser(@Valid @RequestBody UserRequestDTO dto) {
+	@PostMapping(value = "/create", 
+			     consumes = { MediaType.APPLICATION_JSON_VALUE },
+			     produces = { MediaType.APPLICATION_JSON_VALUE }
+	            )
+	public ResponseEntity<?> createUser(@Valid @RequestBody UserRequestDTO dto) 
+	{
 		UserResponseDTO responseDTO = this.userService.saveUser(dto);
-		return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
+		URI uri=URI.create("/user/"+responseDTO.getUserId());
+		return ResponseEntity.created(uri).body(responseDTO);
 	}
 
-
-
-	
-	@PutMapping(value="/Updateuser/{userId}") 
-	public ResponseEntity<UserResponseDTO> updateUser (@Valid @RequestBody UpdateUserRequestDTO updateUserRequestDTO,@PathVariable String userId)
+	@PutMapping(value="/Updateuser/{userId}", 
+		        consumes = { MediaType.APPLICATION_JSON_VALUE },
+		        produces = { MediaType.APPLICATION_JSON_VALUE }
+	           ) 
+	public ResponseEntity<UserResponseDTO> updateUser (@Valid @RequestBody UpdateUserRequestDTO updateUserRequestDTO,@PathVariable @NotBlank(message = "User ID can't be blank or null!") String userId)
 	{
 		UserResponseDTO userResponseDTO = this.userService.updateUserById(updateUserRequestDTO, userId);
 		return new ResponseEntity<UserResponseDTO>(userResponseDTO,HttpStatus.OK);
-		
 	}
 
-
-
-	@DeleteMapping(value = "/{userId}")
-	public ResponseEntity<?> deleteUserById(@PathVariable String userId) {
-		String msg = this.userService.deleteUserById(userId);
-		return ResponseEntity.status(HttpStatus.OK).body(new Message(msg));
+    @DeleteMapping(value = "/{userId}", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<?> deleteUserById(@PathVariable  @NotBlank(message = "User ID can't be blank or null!") String userId) 
+	{
+		if(userId!=null &&  !userId.equalsIgnoreCase("null"))
+		{
+			if(!userId.isBlank() )
+			{
+				String msg = this.userService.deleteUserById(userId);
+				return ResponseEntity.status(HttpStatus.OK).body(new Message(msg));
+			}
+			throw new IllegalArgumentException("UserId can't be blank or empty");
+		}
+		throw new IllegalArgumentException("UserId can't be null !");
 	}
 
-	@PutMapping(value = "/editProfileImage/{userid}")
-	public ResponseEntity<?> editProfileImage(@RequestParam MultipartFile file, @PathVariable("userid") String userId) {
+	@PutMapping(value = "/editProfileImage/{userid}", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<?> editProfileImage
+	                         (@RequestParam MultipartFile file,
+	                          @PathVariable("userid") @NotBlank(message = "User ID can't be blank or null!") String userId) 
+	{
 		UserResponseDTO userResponseDTO = this.userService.editUserImage(file, userId);
 		return new ResponseEntity<UserResponseDTO>(userResponseDTO, HttpStatus.OK);
 	}
 
-	@GetMapping(value = "/get/{userId}")
-	public ResponseEntity<?> getUserByUserId(@PathVariable String userId) {
+	@GetMapping(value = "/get/{userId}", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<?> getUserByUserId(@PathVariable @NotBlank(message = "User ID can't be blank or null!") String userId) 
+	{
+
+		System.out.println("UserController.getUserByUserId()");
 		UserResponseDTO responseDTO = this.userService.findUserById(userId);
 		return ResponseEntity.status(HttpStatus.FOUND).body(responseDTO);
+
 	}
 
-	@PostMapping(value = "/login")
-	public ResponseEntity<?> userLoginByEmailAndPassword(@Valid @RequestBody LoginRequestDTO dto) {
+	@PostMapping(value = "/login", 
+		         consumes = { MediaType.APPLICATION_JSON_VALUE },
+		         produces = { MediaType.APPLICATION_JSON_VALUE }
+	            )
+	public ResponseEntity<?> userLoginByEmailAndPassword(@Valid @RequestBody LoginRequestDTO dto) 
+	{
 		UserResponseDTO responseDTO = this.userService.loginUserByEmailAndPassword(dto.getEmail(), dto.getPassword());
 		return ResponseEntity.status(HttpStatus.FOUND).body(responseDTO);
 	}
-
-	@GetMapping(value = "/allUsers")
-	public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
+    
+	@GetMapping(value = "/allUsers", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<List<UserResponseDTO>> getAllUsers() 
+	{
 		List<UserResponseDTO> allUser = this.userService.getAllUsers();
 		return new ResponseEntity<List<UserResponseDTO>>(allUser, HttpStatus.OK);
 	}
 
 	
-	@PostMapping(value="/VerifyEmail")
+	@PostMapping(value="/VerifyEmail", 
+		         consumes = { MediaType.APPLICATION_JSON_VALUE },
+		         produces = { MediaType.APPLICATION_JSON_VALUE }
+	             )
 	public ResponseEntity<?> verifyEmail(@Valid @RequestBody EmailRequestDTO emailRequestDTO) 
 	{
-	      Message verifyUserByEmail = this.userService.verifyUserByEmail(emailRequestDTO);
+	    Message verifyUserByEmail = this.userService.verifyUserByEmail(emailRequestDTO);
 	    return new ResponseEntity<Message>(verifyUserByEmail,HttpStatus.OK);
 	}
 	
-	@PostMapping(value="/VerifyOTP")
+	@PostMapping(value="/VerifyOTP", 
+                  consumes = { MediaType.APPLICATION_JSON_VALUE},
+		          produces = { MediaType.APPLICATION_JSON_VALUE }
+	            )
 	public ResponseEntity<?> verifyOTP (@Valid @RequestBody VerifyOTPRequestDTO verifyOTPRequestDTO) 
 	{
 	    Message verifyOTP = this.userService.verifyOTP(verifyOTPRequestDTO);	
 		return new ResponseEntity<Message>(verifyOTP,HttpStatus.OK);
-		
-
 	}
 
-	@PostMapping(value="/UpdatePassword")
+	@PostMapping(value="/UpdatePassword", 
+		         consumes = { MediaType.APPLICATION_JSON_VALUE},
+		         produces = { MediaType.APPLICATION_JSON_VALUE }
+	            )
 	public ResponseEntity<UserResponseDTO> updatePassword(@Valid @RequestBody ChangePasswordRequestDTO changePasswordRequestDTO) 
 	{
-		 UserResponseDTO updatePassword = this.userService.updatePassword(changePasswordRequestDTO);
+		UserResponseDTO updatePassword = this.userService.updatePassword(changePasswordRequestDTO);
 		return new ResponseEntity<UserResponseDTO>(updatePassword,HttpStatus.OK);
-		
 	}
 
 }
