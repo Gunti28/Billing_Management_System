@@ -19,14 +19,12 @@ public class DatabaseInitializer implements CommandLineRunner {
 			jdbcTemplate.execute("CREATE SEQUENCE image_id_seq START WITH 1 INCREMENT BY 1");
 			System.out.println("Sequence image_id_seq created successfully.");
 		} 
-		else System.out.println("Sequence image_id_seq already exists.");
 		
 		if(!isSequenceExists("user_id_seq"))
 		{
 			jdbcTemplate.execute("CREATE SEQUENCE user_id_seq START WITH 1 INCREMENT BY 1");
 			System.out.println("Sequence user_id_seq created successfully.");
 		}
-		else System.out.println("Sequence user_id_seq already exists.");
 
 	}
 

@@ -148,7 +148,6 @@ public class UserServiceImpl implements UserService{
 	@Override
 	public UserResponseDTO editUserImage(MultipartFile file, String userId) 
 	{
-		//System.out.println(file+" "+userId);
 		if(userId!=null && !userId.isBlank())
 		{
 			if(file!=null)
@@ -162,7 +161,7 @@ public class UserServiceImpl implements UserService{
 					{
 						String fileNameExtension=getFileExtension(file.getOriginalFilename());
 
-						if(Arrays.asList("jpg","jpeg","png","git","tiff","bmp","svg","webp","heif").contains(fileNameExtension))
+						if(Arrays.asList("jpg","jpeg","png","git","tiff","bmp","svg","webp","heif").contains(fileNameExtension.toLowerCase()))
 						{
 							Optional<User> optionalUser = this.userDao.editImage(file, userId);
 							if(optionalUser.isPresent())
@@ -295,8 +294,5 @@ public class UserServiceImpl implements UserService{
 			else throw new RuntimeException("something went wrong! try again after some time.");
 		}
 		else throw new RuntimeException("something went wrong! try again after some time.");
-	}
-	
-
-    
+	} 
 }
