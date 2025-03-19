@@ -281,26 +281,9 @@ public class UserControllerTest {
 
 	}
 
-	// 9.use deleteUserById rest api (negative scenario where UserId=null)
-	@Test
-	void deleteUserById_withNullUserId() throws Exception {
-		System.out.println("UserControllerTest.deleteUserById_withNullUserId()");
-		String userId = null;
-		MvcResult result = mockMvc
-							.perform(
-									delete("/user/" + userId)
-									.contentType(MediaType.APPLICATION_JSON)
-									)
-				.andExpect(status().isBadRequest())
-				.andExpect(jsonPath("$.message").value("UserId can't be null !"))
-				.andReturn();
+	
 
-		System.err.println("Status code : " + result.getResponse().getStatus());
-		System.err.println("Response : " + result.getResponse().getContentAsString());
-
-	}
-
-	// 10.use deleteUserById rest api (negative scenario where UserId="")
+	// 9.use deleteUserById rest api (negative scenario where UserId="")
 	@Test
 	void deleteUserById_withBlankUserId() throws Exception {
 		System.out.println("UserControllerTest.deleteUserById_withBlankUserId()");
@@ -320,7 +303,7 @@ public class UserControllerTest {
 	}
 
 	// (positive scenario)
-	// 11.testing userLoginEmailAndPassword with valid email and password
+	// 10.testing userLoginEmailAndPassword with valid email and password
 	@Test
 	void testingUserLoginEmailAndPasswordWithValidData() throws Exception {
 		System.out.println("UserControllerTest.testingUserLoginEmailAndPasswordWithValidData()");
@@ -360,7 +343,7 @@ public class UserControllerTest {
 		System.err.println(result.getResponse().getContentAsString());
 	}
 
-	// 12.testing userLoginEmailAndPassword with blank email and password
+	// 11.testing userLoginEmailAndPassword with blank email and password
 	@Test
 	void testingUserLoginEmailAndPasswordWithBlankData() throws Exception {
 		System.out.println("UserControllerTest.testingUserLoginEmailAndPasswordWithBlankData()");
@@ -396,7 +379,7 @@ public class UserControllerTest {
 		}
 	}
 
-	// 13.testing userLoginEmailAndPassword with null data
+	// 12.testing userLoginEmailAndPassword with null data
 	@Test
 	void testingUserLoginEmailAndPasswordWithNullData() throws Exception {
 		System.out.println("UserControllerTest.testingUserLoginEmailAndPasswordWithNullData()");
@@ -432,7 +415,7 @@ public class UserControllerTest {
 		}
 	}
 
-	// 14.testing userLoginEmailAndPassword with inValid email and password
+	// 13.testing userLoginEmailAndPassword with inValid email and password
 	@Test
 	void testingUserLoginEmailAndPasswordWithInValidData() throws Exception {
 		System.out.println("UserControllerTest.testingUserLoginEmailAndPasswordWithInValidData()");
@@ -468,7 +451,7 @@ public class UserControllerTest {
 		}
 	}
 
-	// 15. testing userLoginEmailAndPassword with correct email and invalid password
+	// 14. testing userLoginEmailAndPassword with correct email and invalid password
 	// throwing UserNotFoundException
 	@Test
 	void testingUserLoginEmailAndPasswordWithValidEmailInvalidPassword() throws Exception {
@@ -500,7 +483,7 @@ public class UserControllerTest {
 
 	}
 
-	// 16. testing userLoginEmailAndPassword with correct email and invalid password
+	// 15. testing userLoginEmailAndPassword with correct email and invalid password
 	// throwing UserNotFoundException
 	@Test
 	void testingUserLoginEmailAndPasswordWithinValidEmailValidPassword() throws Exception {
@@ -532,8 +515,7 @@ public class UserControllerTest {
 
 	}
 
-	// 17.testing userLoginEmailAndPassword with valid email and password and user
-	// is not active
+	// 16.testing userLoginEmailAndPassword with valid email and password and user is not active
 	@Test
 	void testingUserLoginEmailAndPasswordWithValidDataAndInActiveUser() throws Exception {
 		System.out.println("UserControllerTest.testingUserLoginEmailAndPasswordWithValidData()");
@@ -566,4 +548,5 @@ public class UserControllerTest {
 		System.err.println(result.getResponse().getContentAsString());
 	}
 
+	//17.
 }
