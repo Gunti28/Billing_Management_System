@@ -2,13 +2,19 @@ package com.srnrit.BMS.userdaotest;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
@@ -24,6 +30,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.srnrit.BMS.dao.impl.UserDaoImpl;
@@ -51,6 +58,10 @@ public class UserDAOTest {
     private UserDaoImpl userDao;
 
     private User user;
+    
+    @Mock
+    DataSource dataSource;
+    
  
     @BeforeEach
     void setUp() {
@@ -374,10 +385,9 @@ public class UserDAOTest {
     
     
     @Test
-    public void testUpdateByUserId_PhoneNumberAlreadyExists() {
-        // Arrange
+    public void testUpdateByUserId_PhoneNumberAlreadyExists() 
+    {
         String userId = "123";
-        
         User existingUser = new User();
         existingUser.setUserId(userId);
         existingUser.setActive(true);
@@ -395,7 +405,73 @@ public class UserDAOTest {
         assertEquals("User already exists with phonenumber: " + updatedUser.getUserPhone(), exception.getMessage());
     }
     
-   
+    @Test
+    public void testUpdateByUserId_EmailNullOrBlank() 
+    {
+        String userId = "validUserId";
+        User user = new User();
+        user.setUserEmail(null); // or use "" for blank email
+
+        User existingUser = new User();
+        existingUser.setUserId(userId);
+        existingUser.setActive(true);
+        existingUser.setUserEmail("old@example.com");
+        // Mock the repository to return an existing user
+        when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            userDao.updateByUserId(user, userId);
+        });
+        assertEquals("user email must not be null or blank!.", exception.getMessage());
+    }
+    
+    @Test
+    public void testUpdateByUserId_InvalidPhoneNumber() 
+    {
+        String userId = "validUserId";
+        User user = new User();
+        user.setUserEmail("new@example.com");
+        user.setUserPhone(123456789L); // Invalid phone number (less than 10 digits)
+
+        User existingUser = new User();
+        existingUser.setUserId(userId);
+        existingUser.setActive(true);
+        existingUser.setUserEmail("old@example.com");
+        existingUser.setUserPhone(9876543210L);
+        // Mock the repository to return an existing user
+        when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
+        when(userRepository.findByUserEmail(user.getUserEmail())).thenReturn(null); // Email is not taken
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            userDao.updateByUserId(user, userId);
+        });
+        assertEquals("user phoneNo must not be null and not start with '0' and length must be 10 digits.", exception.getMessage());
+    }
+    
+    @Test
+    public void testUpdateByUserId_UserNameNullOrBlank() 
+    {
+        String userId = "validUserId";
+        User user = new User();
+        user.setUserEmail("new@example.com");
+        user.setUserPhone(1234567890L);
+        user.setUserName(null); // or use "" for blank name
+
+        User existingUser = new User();
+        existingUser.setUserId(userId);
+        existingUser.setActive(true);
+        existingUser.setUserEmail("old@example.com");
+        existingUser.setUserPhone(9876543210L);
+        existingUser.setUserName("Old Name");
+
+        // Mock the repository to return an existing user
+        when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
+        when(userRepository.findByUserEmail(user.getUserEmail())).thenReturn(null); // Email is not taken
+        when(userRepository.findByUserPhone(user.getUserPhone())).thenReturn(null); // Phone is not taken
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            userDao.updateByUserId(user, userId);
+        });
+        assertEquals("user name must be null or blank!.", exception.getMessage());
+    }
+    
     	//7.FETCHALLUSERS() METHOD IN USERDAO LAYER
     @Test
     public void testFetchAllUser_Success() {
@@ -423,51 +499,73 @@ public class UserDAOTest {
     }
 
     	//8.CHANGE__PASSWORD() IN USERDAO LAYER
-    @SuppressWarnings("unused")
-	@Test
-    public void testChangePassword_Success() {
-        // Arrange
-        String email = "test@example.com";
-        String newPassword = "NewPass123";
-        
+    @Test
+    public void testChangePassword_SuccessfulChange() {
+        String userEmail = "active@example.com";
+        String newPassword = "newSecurePassword";
         User user = new User();
-        user.setUserEmail(email);
-        user.setUserPassword("OldPass");
-        user.setActive(true);  // Set active to avoid NullPointerException
-        when(userRepository.findByUserEmail(email)).thenReturn(user);
-        Optional<User> result = userDao.changePassword(email, newPassword);
-        assertEquals(newPassword, user.getUserPassword());       
-        verify(userRepository).save(user);
+        user.setUserEmail(userEmail);
+        user.setActive(true);
+        user.setUserPassword("oldPassword");
+        when(userRepository.findByUserEmail(userEmail)).thenReturn(user);
+        when(userRepository.save(user)).thenReturn(user);
+        Optional<User> result = userDao.changePassword(userEmail, newPassword);
+        assertTrue(result.isPresent());
+        assertEquals(newPassword, result.get().getUserPassword());
     }
 
     @Test
-    public void testChangePassword_UserNotFound() 
+    public void testChangePassword_UserNotFoundByEmail() 
     {
-        String userEmail = "unknown@example.com";
+        String userEmail = "nonexistent@example.com";
+        String newPassword = "anyPassword";
+
         when(userRepository.findByUserEmail(userEmail)).thenReturn(null);
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            userDao.changePassword(userEmail, "NewPassword123");
+            userDao.changePassword(userEmail, newPassword);
         });
         assertEquals("user not exist with email : "+userEmail, exception.getMessage());
     }
-
+    
     @Test
-    public void testChangePassword_UserNotActive() 
+    public void testChangePassword_UserInactive() 
     {
         String userEmail = "inactive@example.com";
-        User inactiveUser = new User();
-        inactiveUser.setUserEmail(userEmail);
-        inactiveUser.setActive(false);
-        when(userRepository.findByUserEmail(userEmail)).thenReturn(inactiveUser);
+        String newPassword = "newPassword";
+        User user = new User();
+        user.setUserEmail(userEmail);
+        user.setActive(false);
+        when(userRepository.findByUserEmail(userEmail)).thenReturn(user);
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            userDao.changePassword(userEmail, "NewPassword123");
+            userDao.changePassword(userEmail, newPassword);
         });
 
         assertEquals("user is not active.", exception.getMessage());
     }
     
+    @Test
+    public void testChangePassword_UpdateFails() 
+    {
+        String userEmail = "active@example.com";
+        String newPassword = "newSecurePassword";
+        User user = new User();
+        user.setUserEmail(userEmail);
+        user.setActive(true);
+        when(userRepository.findByUserEmail(userEmail)).thenReturn(user);
+        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+        // Mock the save method to simulate a failure (return null)
+        when(userRepository.save(userCaptor.capture())).thenReturn(null);
+        Optional<User> result = userDao.changePassword(userEmail, newPassword);
+        assertFalse(result.isPresent());
+        // Verify that the save method was called with the correct user
+        User capturedUser = userCaptor.getValue();
+        assertNotNull(capturedUser);
+        assertEquals(userEmail, capturedUser.getUserEmail());
+        assertEquals(newPassword, capturedUser.getUserPassword());
+    }
     
-    		//EDITIMAGEBYID() IN USERDAO LAYER
+    
+    		//9.EDITIMAGEBYID() IN USERDAO LAYER
     @Test
     public void testEditImage_NullUserId() {
         MultipartFile file = mock(MultipartFile.class);
@@ -506,6 +604,94 @@ public class UserDAOTest {
             userDao.editImage(file, userId);
         },"User not updated successfully !");
         
+    }
+    
+    @Test
+    public void testGetNewFileName_Success() throws Exception {
+        // Arrange
+        String originalFileName = "image.png";
+
+        // Mock the DataSource and related objects
+        DataSource dataSource = mock(DataSource.class);
+        Connection connection = mock(Connection.class);
+        Statement statement = mock(Statement.class);
+        ResultSet resultSet = mock(ResultSet.class);
+
+        when(dataSource.getConnection()).thenReturn(connection);
+        when(connection.createStatement()).thenReturn(statement);
+        when(statement.executeQuery("select image_id_seq.nextval from dual")).thenReturn(resultSet);
+        when(resultSet.next()).thenReturn(true);
+        when(resultSet.getInt(1)).thenReturn(123);
+
+        // Initialize the ImageFileNameGenerator with the mocked DataSource
+        new ImageFileNameGenerator(dataSource);
+
+        // Act
+        String newFileName = ImageFileNameGenerator.getNewFileName(originalFileName);
+
+        // Assert
+        assertEquals("123image.png", newFileName);
+    }
+    
+    //10.LOGINBYEMAILANDPASSWORD() IN USER DAO LAYER
+    @Test
+    public void testLoginByEmailAndPassword_SuccessfulLogin() 
+    {
+        String userEmail = "test@example.com";
+        String userPassword = "securePassword";
+        User user = new User();
+        user.setUserEmail(userEmail);
+        user.setUserPassword(userPassword);
+        user.setActive(true);
+        when(userRepository.findByUserEmail(userEmail)).thenReturn(user);
+        when(userRepository.findByUserPassword(userPassword)).thenReturn(user);
+        Optional<User> result = userDao.loginByEmailAndPassword(userEmail, userPassword);
+        assertTrue(result.isPresent());
+        assertEquals(userEmail, result.get().getUserEmail());
+    }
+    
+    @Test
+    public void testLoginByEmailAndPassword_UserNotFoundByEmail() 
+    {
+        String userEmail = "nonexistent@example.com";
+        String userPassword = "anyPassword";
+
+        when(userRepository.findByUserEmail(userEmail)).thenReturn(null);
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            userDao.loginByEmailAndPassword(userEmail, userPassword);
+        });
+        assertEquals("user not exists with email :"+userEmail, exception.getMessage());
+    }
+    
+    @Test
+    public void testLoginByEmailAndPassword_UserNotFoundByPassword() 
+    {
+        String userEmail = "test@example.com";
+        String userPassword = "wrongPassword";
+        User user = new User();
+        user.setUserEmail(userEmail);
+        user.setUserPassword("correctPassword");
+        when(userRepository.findByUserEmail(userEmail)).thenReturn(user);
+        when(userRepository.findByUserPassword(userPassword)).thenReturn(null);
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            userDao.loginByEmailAndPassword(userEmail, userPassword);
+        });
+        assertEquals("user not exists with password :" + userPassword, exception.getMessage());
+    }
+    
+    @Test
+    public void testLoginByEmailAndPassword_UserInactive() 
+    {
+        String userEmail = "inactive@example.com";
+        String userPassword = "securePassword";
+        User user = new User();
+        user.setUserEmail(userEmail);
+        user.setUserPassword(userPassword);
+        user.setActive(false);
+        when(userRepository.findByUserEmail(userEmail)).thenReturn(user);
+        when(userRepository.findByUserPassword(userPassword)).thenReturn(user);
+        Optional<User> result = userDao.loginByEmailAndPassword(userEmail, userPassword);
+        assertFalse(result.isPresent());
     }
     
 }   
