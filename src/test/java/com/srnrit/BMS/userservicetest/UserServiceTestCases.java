@@ -71,12 +71,16 @@ import com.srnrit.BMS.util.OTPOperation;
 
 		
 		private UpdateUserRequestDTO updateUserRequestDTO;
+		@SuppressWarnings("unused")
 		private ChangePasswordRequestDTO changePasswordRequestDTO;
+		@SuppressWarnings("unused")
 		private EmailRequestDTO emailRequestDTO;
+		@SuppressWarnings("unused")
 		private VerifyOTPRequestDTO verifyOTPRequestDTO;
 	
 		
-		 private MockMultipartFile validImage;
+		 @SuppressWarnings("unused")
+		private MockMultipartFile validImage;
 		 
 		@BeforeEach
 		void setUp() 
@@ -615,6 +619,7 @@ import com.srnrit.BMS.util.OTPOperation;
 				mockConverter.when(()->EntityToDTO.userEntityToUserResponseDTO(users.get(1))).thenReturn(null);
 
 				
+				@SuppressWarnings("unused")
 				List<UserResponseDTO> allUsers = userServiceImpl.getAllUsers();
 				assertEquals(1, 1);
 				System.err.println("Entity to DTO convertion fails");
