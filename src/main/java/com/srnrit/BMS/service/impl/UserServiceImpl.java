@@ -11,11 +11,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.srnrit.BMS.dao.UserDao;
-
-import com.srnrit.BMS.dto.UpdateUserRequestDTO;
 import com.srnrit.BMS.dto.ChangePasswordRequestDTO;
 import com.srnrit.BMS.dto.EmailRequestDTO;
-
+import com.srnrit.BMS.dto.UpdateUserRequestDTO;
 import com.srnrit.BMS.dto.UserRequestDTO;
 import com.srnrit.BMS.dto.UserResponseDTO;
 import com.srnrit.BMS.dto.VerifyOTPRequestDTO;
