@@ -33,7 +33,7 @@ public class User {
 	@Column(name = "ISACTIVE")
 	private Boolean active;
 
-	@Column(name = "EMAIL",length = 30)
+	@Column(name = "EMAIL",length = 50)
 	private String userEmail;
 
 	@Column(name = "PASSWORD",length = 30)
