@@ -48,7 +48,7 @@ public class Category implements Serializable
 
 	private String generateCustomId()
 	{
-		String prefix="UID";
+		String prefix="CID";
 		String suffix="";
 		long timeStamp = Instant.now().toEpochMilli();
 		int randomPart = ThreadLocalRandom.current().nextInt(100000000, 999999999);
