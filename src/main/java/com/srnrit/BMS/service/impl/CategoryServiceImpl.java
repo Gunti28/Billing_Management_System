@@ -46,7 +46,7 @@ public class CategoryServiceImpl implements ICategoryService
 		List<Category> existingCategories = categoryDAO.getAllCategory().orElse(Collections.emptyList());
 
 		existingCategories.stream()
-		.filter(existingCategory -> StringUtils.calculateSimilarCategoryCheck(newCategoryName, existingCategory.getCategoryName()) <= 3)
+		.filter(existingCategory -> StringUtils.calculateSimilarCategoryCheck(newCategoryName, existingCategory.getCategoryName().trim()) <= 3)
 		.findFirst()
 		.ifPresent(existingCategory -> {
 			throw new CategoryNameAlreadyExistsException(
@@ -161,7 +161,7 @@ public class CategoryServiceImpl implements ICategoryService
 		}
 		else 
 		{
-			Optional<Category> optionalcategory = this.categoryDAO.getCategoryByCategoryId(categoryId);
+			Optional<Category> optionalcategory = this.categoryDAO.getCategoryByCategoryId(categoryId.trim());
 			if(optionalcategory.isPresent())
 			{
 				Category category=optionalcategory.get();
@@ -187,7 +187,7 @@ public class CategoryServiceImpl implements ICategoryService
 
 
 		Optional<Category> similarCategory = allCategories.stream()
-				.filter(category -> StringUtils.calculateSimilarCategoryCheck(category.getCategoryName().toLowerCase(), categoryName.toLowerCase()) <= 2)
+				.filter(category -> StringUtils.calculateSimilarCategoryCheck(category.getCategoryName().toLowerCase(), categoryName.toLowerCase().trim()) <= 2)
 				.findFirst();
 
 		return similarCategory
