@@ -41,17 +41,20 @@ import com.srnrit.BMS.dto.EmailRequestDTO;
 import com.srnrit.BMS.dto.LoginRequestDTO;
 import com.srnrit.BMS.dto.UserRequestDTO;
 import com.srnrit.BMS.dto.UserResponseDTO;
+import com.srnrit.BMS.dto.VerifyOTPRequestDTO;
 import com.srnrit.BMS.entity.User;
 import com.srnrit.BMS.exception.userexceptions.UserNotFoundException;
 import com.srnrit.BMS.globalexcepiton.GlobalExceptionHandler;
 import com.srnrit.BMS.service.UserService;
 import com.srnrit.BMS.util.Message;
+
  
   @WebMvcTest(UserController.class)
   @ExtendWith(MockitoExtension.class)
   @Import(GlobalExceptionHandler.class)
   
   public class UserControllerTest {
+
 
 	@Autowired
 	private MockMvc mockMvc;
@@ -558,6 +561,7 @@ import com.srnrit.BMS.util.Message;
 		System.err.println(result.getResponse().getContentAsString());
 	}
 
+
 	 //Test case for getAllUsers() in positive Scenario
     @Test
     void testGetAllUsers_Positive() throws Exception {
@@ -710,5 +714,32 @@ import com.srnrit.BMS.util.Message;
                 .andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("$.message").value("Service failure occurred"));
     }
+	//17.verifyOTP api (posative scenario)
+	@Test
+	void testVerifyOTP() throws Exception
+	{
+		System.out.println("UserControllerTest.testVerifyOTP()");
+		 VerifyOTPRequestDTO verifyOTPRequestDTO = new VerifyOTPRequestDTO();
+		 verifyOTPRequestDTO.setEmail("sujitmaharana1111@gmail.com");
+		 verifyOTPRequestDTO.setOtp("1234");
+		 when(this.userService.verifyOTP(any(VerifyOTPRequestDTO.class))).thenReturn(new Message("OTP verified successfully"));
+	     
+		 String verifyOTPJSON = this.objectMapper.writeValueAsString(verifyOTPRequestDTO);
+		 
+		 
+	     MvcResult result = mockMvc.perform(
+	    		        post("/user/VerifyOTP")
+	    		        .contentType(MediaType.APPLICATION_JSON)
+	    		        .content(verifyOTPJSON)
+	    		        )
+	                   .andExpect(status().isOk())
+		               .andExpect(jsonPath("$.message").value("OTP verified successfully"))
+			           .andReturn();
+
+	     System.err.println("Status : " + result.getResponse().getStatus());
+		 System.err.println(result.getResponse().getContentAsString());
+	
+	}
+
 }
 

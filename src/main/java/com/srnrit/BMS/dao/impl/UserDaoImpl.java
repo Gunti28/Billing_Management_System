@@ -274,9 +274,9 @@ public class UserDaoImpl implements UserDao
 					  User updatePassword = userRepository.save(user);
 					  return updatePassword!=null?Optional.of(updatePassword):Optional.empty();
 				  }
-				  else throw new RuntimeException("User is not active");  
+				  else throw new RuntimeException("User is not active.");  
 			  }
-			  else throw new RuntimeException("User not exist with email "+userEmail);	
+			  else throw new RuntimeException("User not exist with email : "+userEmail);	
 	}
 }	
 

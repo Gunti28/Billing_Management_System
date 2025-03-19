@@ -66,8 +66,6 @@ public class UserController {
 	{
 		String msg = this.userService.deleteUserById(userId);
 		return ResponseEntity.status(HttpStatus.OK).body(new Message(msg));
-			
-		
 	}
 
 	@PutMapping(value = "/editProfileImage/{userid}", produces = { MediaType.APPLICATION_JSON_VALUE })
