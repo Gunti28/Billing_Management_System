@@ -54,7 +54,7 @@ public class CategoryDaoImpl implements ICategoryDao
 	@Override
 	public Optional<String> updateCategory(String categoryId, String categoryName)
 	{
-		Category category = categoryRepository.findById(categoryId)
+		Category category = categoryRepository.findById(categoryId.trim())
 				.orElseThrow(() -> new CategoryNotFoundException("Category not found with id: " + categoryId));
 
 		boolean isCategoryExists = categoryRepository.existsByCategoryName(categoryName);
@@ -63,7 +63,7 @@ public class CategoryDaoImpl implements ICategoryDao
 		{
 			throw new CategoryNameAlreadyExistsException("Category name already exists: " + categoryName);
 		}
-		category.setCategoryName(categoryName);
+		category.setCategoryName(categoryName.trim());
 		categoryRepository.save(category);
 		return Optional.of("Category updated successfully with id: " + categoryId);
 	}

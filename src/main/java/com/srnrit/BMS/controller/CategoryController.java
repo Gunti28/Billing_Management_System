@@ -1,10 +1,13 @@
 package com.srnrit.BMS.controller;
 
+
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,22 +32,27 @@ public class CategoryController {
 	}
 
 	//API to create a Category with Products in it
-	@PostMapping(value="/addCategoryWithProducts")
+	@PostMapping(value="/addCategoryWithProducts",
+			consumes = MediaType.APPLICATION_JSON_VALUE,
+			produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> addCategory(@Valid @RequestBody CategoryRequestDTO categoryRequest) {
 		CategoryResponseDTO createdCategory= categoryService.addCategoryWithProducts(categoryRequest);
 		return new ResponseEntity<>(createdCategory,HttpStatus.CREATED);
 	}
 
 	//API to get all the categories present in the DB
-	@GetMapping(value="/allCategories")
+	@GetMapping(value="/allCategories",
+			produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<List<CategoryResponseDTO>> getAllCategory() {
 		List<CategoryResponseDTO> categories=categoryService.getAllCategory();
 		return new ResponseEntity<>(categories,HttpStatus.OK);
 	}
 
 	//API to update a Category by using CategoryId
-	@PutMapping("/updateCategoryById")
-	public ResponseEntity<?> updateCategory(@Valid @RequestBody UpdateCategoryRequestDTO categoryRequest) {
+	@PutMapping(value = "/updateCategoryById",
+			consumes = MediaType.APPLICATION_JSON_VALUE,
+			produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<?> updateCategory(@Valid@RequestBody UpdateCategoryRequestDTO categoryRequest) {
 		String categoryId = categoryRequest.getCategoryId();
 		String categoryName = categoryRequest.getCategoryName();
 
@@ -53,7 +61,8 @@ public class CategoryController {
 	}
 
 	//API to Get Category by using CategoryId
-	@GetMapping("/categoryById")
+	@GetMapping(value = "/categoryById",
+			produces = MediaType.APPLICATION_JSON_VALUE )
 	public ResponseEntity<?> findCategoryById(@RequestParam String categoryId) {
 		CategoryResponseDTO foundCategory = categoryService.findCategoryByCategoryId(categoryId);
 		if (foundCategory == null) {
@@ -63,7 +72,8 @@ public class CategoryController {
 	}
 
 	//API to Get Category by using CategoryName
-	@GetMapping("/categoryByName")
+	@GetMapping(value = "/categoryByName",
+			produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> findCategoryByCategoryName(@RequestParam String categoryName){
 		CategoryResponseDTO foundCategory =categoryService.findCategoryByCategoryName(categoryName);
 		return  new ResponseEntity<>(foundCategory,HttpStatus.OK) ;
