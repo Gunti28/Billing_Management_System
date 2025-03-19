@@ -1,5 +1,10 @@
 package com.srnrit.BMS.mapper;
 
+import org.springframework.beans.BeanUtils;
+
+import com.srnrit.BMS.dto.UserResponseDTO;
+import com.srnrit.BMS.entity.User;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -8,7 +13,15 @@ import com.srnrit.BMS.dto.ProductResponseDTO;
 import com.srnrit.BMS.entity.Category;
 import com.srnrit.BMS.entity.Product;
 
+
 public class EntityToDTO {
+	
+	public static UserResponseDTO userEntityToUserResponseDTO(User user)
+	{
+		UserResponseDTO dto = new UserResponseDTO();
+		BeanUtils.copyProperties(user, dto);
+		return dto;
+	}
 
 
 	public static ProductResponseDTO toProductResponseDTO(Product product) {
