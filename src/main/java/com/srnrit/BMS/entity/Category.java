@@ -1,21 +1,19 @@
 package com.srnrit.BMS.entity;
 
 import java.io.Serializable;
+import java.time.Instant;
+import java.util.concurrent.ThreadLocalRandom;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import org.hibernate.annotations.GenericGenerator;
-
-import com.srnrit.BMS.util.idgenerator.CategoryIdGenerator;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -29,10 +27,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "CATEGORY_TABLE")
 public class Category implements Serializable
 {
-	@SuppressWarnings("deprecation")
 	@Id
-	@GenericGenerator(name = "category_id_generator",type = CategoryIdGenerator.class)
-	@GeneratedValue(generator = "category_id_generator", strategy = GenerationType.SEQUENCE)
 	@Column(name = "CATEGORY_ID")
 	private String categoryId;
 
@@ -41,6 +36,25 @@ public class Category implements Serializable
 
 	@OneToMany(cascade = CascadeType.ALL,mappedBy = "category",fetch = FetchType.LAZY,orphanRemoval = true)
 	private List<Product> products;
+
+	@PrePersist
+	public void generateId()
+	{
+		if(this.categoryId==null)
+		{
+			categoryId=this.generateCustomId();
+		}
+	}
+
+	private String generateCustomId()
+	{
+		String prefix="UID";
+		String suffix="";
+		long timeStamp = Instant.now().toEpochMilli();
+		int randomPart = ThreadLocalRandom.current().nextInt(100000000, 999999999);
+		suffix=timeStamp+""+randomPart;		
+		return prefix+suffix;
+	}
 
 	//helper method to add product
 	public void addProduct(Product product)
@@ -55,7 +69,7 @@ public class Category implements Serializable
 	//helper method to remove product
 	public void removeProduct(Product product)
 	{
-		this.products.remove(product);  //Here this.products.remove(product);
+		this.products.remove(product);  
 		product.setCategory(null);
 	}
 
