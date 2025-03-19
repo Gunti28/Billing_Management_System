@@ -211,5 +211,4 @@ class ProductServiceTest {
 		// Verify interaction
 		verify(productDao, times(1)).fetchProductByAvailability(true);
 	}
-
 }
