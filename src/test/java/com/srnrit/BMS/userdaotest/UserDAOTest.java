@@ -5,24 +5,17 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-
+import java.util.regex.Pattern;
 import javax.sql.DataSource;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,9 +23,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.multipart.MultipartFile;
-
 import com.srnrit.BMS.dao.impl.UserDaoImpl;
 import com.srnrit.BMS.entity.User;
 import com.srnrit.BMS.exception.userexceptions.UserAleadyExistException;
@@ -301,7 +292,7 @@ public class UserDAOTest {
         updatedUser.setUserEmail("kavya02@gmail.com");
         updatedUser.setUserPhone(9876543210L);
         updatedUser.setUserName("kavya");
-
+        
         when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));        
         when(userRepository.findByUserEmail(updatedUser.getUserEmail())).thenReturn(null);       
         when(userRepository.findByUserPhone(updatedUser.getUserPhone())).thenReturn(null);        
@@ -394,8 +385,7 @@ public class UserDAOTest {
         User updatedUser = new User();        
         updatedUser.setUserPhone(9876543210L); // Phone number to update
         updatedUser.setUserEmail("duplicate@example.com"); 
-        
-        
+          
         when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));	        
         when(userRepository.findByUserEmail(updatedUser.getUserEmail())).thenReturn(null); // No existing email        
         when(userRepository.findByUserPhone(updatedUser.getUserPhone())).thenReturn(updatedUser); // Simulate existing phone number        
@@ -461,7 +451,6 @@ public class UserDAOTest {
         existingUser.setUserEmail("old@example.com");
         existingUser.setUserPhone(9876543210L);
         existingUser.setUserName("Old Name");
-
         // Mock the repository to return an existing user
         when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
         when(userRepository.findByUserEmail(user.getUserEmail())).thenReturn(null); // Email is not taken
@@ -519,7 +508,6 @@ public class UserDAOTest {
     {
         String userEmail = "nonexistent@example.com";
         String newPassword = "anyPassword";
-
         when(userRepository.findByUserEmail(userEmail)).thenReturn(null);
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
             userDao.changePassword(userEmail, newPassword);
@@ -539,7 +527,6 @@ public class UserDAOTest {
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
             userDao.changePassword(userEmail, newPassword);
         });
-
         assertEquals("user is not active.", exception.getMessage());
     }
     
@@ -607,30 +594,11 @@ public class UserDAOTest {
     }
     
     @Test
-    public void testGetNewFileName_Success() throws Exception {
-        // Arrange
+    public void testGetNewFileName_Success() {
         String originalFileName = "image.png";
-
-        // Mock the DataSource and related objects
-        DataSource dataSource = mock(DataSource.class);
-        Connection connection = mock(Connection.class);
-        Statement statement = mock(Statement.class);
-        ResultSet resultSet = mock(ResultSet.class);
-
-        when(dataSource.getConnection()).thenReturn(connection);
-        when(connection.createStatement()).thenReturn(statement);
-        when(statement.executeQuery("select image_id_seq.nextval from dual")).thenReturn(resultSet);
-        when(resultSet.next()).thenReturn(true);
-        when(resultSet.getInt(1)).thenReturn(123);
-
-        // Initialize the ImageFileNameGenerator with the mocked DataSource
-        new ImageFileNameGenerator(dataSource);
-
-        // Act
         String newFileName = ImageFileNameGenerator.getNewFileName(originalFileName);
-
-        // Assert
-        assertEquals("123image.png", newFileName);
+        String regex = "\\d{13}\\d{9}image\\.png"; // 13-digit timestamp + 9-digit random number
+        assertTrue(Pattern.matches(regex, newFileName), "Filename does not match expected pattern: " + newFileName);
     }
     
     //10.LOGINBYEMAILANDPASSWORD() IN USER DAO LAYER
@@ -655,7 +623,6 @@ public class UserDAOTest {
     {
         String userEmail = "nonexistent@example.com";
         String userPassword = "anyPassword";
-
         when(userRepository.findByUserEmail(userEmail)).thenReturn(null);
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
             userDao.loginByEmailAndPassword(userEmail, userPassword);
