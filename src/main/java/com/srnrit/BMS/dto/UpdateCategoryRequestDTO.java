@@ -17,10 +17,10 @@ import lombok.ToString;
 @AllArgsConstructor
 public class UpdateCategoryRequestDTO 
 {
-	@NotNull(message = "Id cannot be null")
+	@NotBlank(message = "Id cannot be null or blank")
 	private String categoryId;
 
-	@NotNull(message = "Category Name must not be null")
+	
 	@NotBlank (message = "Category Name must not be blank")
 	@Size(min = 3, max = 50, message = "Name must be between 3 and 50 characters")
 	@Pattern(regexp = "^[A-Za-z ]+$",message = "Name must contain only alphabets")
