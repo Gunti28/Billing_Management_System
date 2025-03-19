@@ -1,10 +1,13 @@
 package com.srnrit.BMS.util;
 
-import org.springframework.stereotype.Component;
+
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
 
 @Component
 public class FileStorageProperties {
+
 
     
     @Value("${file.storage.images}")
@@ -20,6 +23,15 @@ public class FileStorageProperties {
     
     public long getMaxFileSize() {
         return getMaxfileSize;
+    }
+}
+
+
+    @Value("${file.storage.images}")
+    private String imageStoragePath;
+
+    public String getImageStoragePath() {
+        return imageStoragePath;
     }
 }
 

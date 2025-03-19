@@ -1,14 +1,17 @@
+
 package com.srnrit.BMS;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-
+	  
+	
 @SpringBootTest
-class BmsApplicationTests {
+class BmsApplicationTests 
+{	
 	@Test
-	void test()
-	{
-	 	
+	void contextLoads() {
 	}
-
+	
 }
+
+

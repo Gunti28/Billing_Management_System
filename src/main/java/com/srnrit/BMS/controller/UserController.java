@@ -37,7 +37,7 @@ import jakarta.validation.constraints.NotBlank;
 @RequestMapping(value = "/user")
 public class UserController {
 
-	@Autowired
+
 	private UserService userService;
 
 	@PostMapping(value = "/create", 
@@ -131,5 +131,6 @@ public class UserController {
 		UserResponseDTO updatePassword = this.userService.updatePassword(changePasswordRequestDTO);
 		return new ResponseEntity<UserResponseDTO>(updatePassword,HttpStatus.OK);
 	}
+
 
 }
