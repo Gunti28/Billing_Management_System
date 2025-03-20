@@ -40,13 +40,9 @@ public class CategoryDaoImpl implements ICategoryDao
 	@Override
 	public Optional<List<Category>> getAllCategory() 
 	{
-		long count = categoryRepository.count();
-		if(count > 0) {
-			List<Category> categories = categoryRepository.findAll();
-			return Optional.of(categories);
-		}else {
-			return Optional.empty();
-		}
+		List<Category> categories = categoryRepository.findAll();
+		return (categories!=null && categories.size()>0) ? Optional.of(categories) : Optional.empty();
+			
 	}
 
 
@@ -96,5 +92,12 @@ public class CategoryDaoImpl implements ICategoryDao
 		else {
 			return Optional.empty();
 		}
+	}
+
+	@Override
+	public List<String> fetchAllCategoryNames() 
+	{
+		List<String> categoryNames = this.categoryRepository.getAllCategoryNames();
+		return (categoryNames!=null && categoryNames.size()>0) ? categoryNames : null;
 	}
 }

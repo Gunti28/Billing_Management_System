@@ -12,6 +12,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -67,27 +68,54 @@ public class CategoryDAOTest
 	    }
 
 	    // Test for getAllCategory
+	
 	    @Test
 	    void testGetAllCategory_Success() {
+	        // Arrange: Create a list with one category
+	        Category category = new Category();
+	        category.setCategoryId("123");
+	        category.setCategoryName("Electronics");
+
 	        List<Category> categories = Arrays.asList(category);
-	        when(categoryRepository.count()).thenReturn(1L);
+
+	        // Mock repository behavior
 	        when(categoryRepository.findAll()).thenReturn(categories);
 
+	        // Act: Call the method
 	        Optional<List<Category>> result = categoryDaoImpl.getAllCategory();
 
+	        // Assert: Check if the result is present and has correct data
 	        assertTrue(result.isPresent());
 	        assertEquals(1, result.get().size());
+	        assertEquals("Electronics", result.get().get(0).getCategoryName());
 	    }
 
-	    //test for category empty or not
+	  //test for category empty or not
 	    @Test
-	    void testGetAllCategory_Empty() {
-	        when(categoryRepository.count()).thenReturn(0L);
+	    void testGetAllCategory_EmptyList() {
+	        // Arrange: Mock repository returning empty list
+	        when(categoryRepository.findAll()).thenReturn(Collections.emptyList());
 
+	        // Act: Call the method
 	        Optional<List<Category>> result = categoryDaoImpl.getAllCategory();
 
-	        assertTrue(result.isEmpty());
+	        // Assert: Should return empty Optional
+	        assertFalse(result.isPresent());
 	    }
+
+	    @Test
+	    void testGetAllCategory_NullList() {
+	        // Arrange: Mock repository returning null
+	        when(categoryRepository.findAll()).thenReturn(null);
+
+	        // Act: Call the method
+	        Optional<List<Category>> result = categoryDaoImpl.getAllCategory();
+
+	        // Assert: Should return empty Optional
+	        assertFalse(result.isPresent());
+	    }
+	    
+	   
 
 	    // Test for updateCategory
 	    @Test
@@ -313,14 +341,13 @@ public class CategoryDAOTest
 	    
 	    @Test
 	    void testGetAllCategory_EmptyDatabase() {
-	        when(categoryRepository.count()).thenReturn(0L);
+	        when(categoryRepository.findAll()).thenReturn(Collections.emptyList());
 
 	        Optional<List<Category>> result = categoryDaoImpl.getAllCategory();
 
 	        assertFalse(result.isPresent());
-	        verify(categoryRepository, never()).findAll();
-	    }
-	    
+	        verify(categoryRepository, times(1)).findAll();
+	    }	    
 	    
 	    @Test
 	    void testUpdateCategory_Failure_CategoryNotFound() {

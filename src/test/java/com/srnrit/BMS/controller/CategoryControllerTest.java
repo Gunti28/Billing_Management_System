@@ -27,7 +27,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -67,28 +66,34 @@ public class CategoryControllerTest {
 	// Positive Test: Add Category
 	@Test
 	void testAddCategory_Success() throws Exception {
-		when(categoryService.addCategoryWithProducts(any(CategoryRequestDTO.class)))
+		when(categoryService.addCategory(any(CategoryRequestDTO.class)))
 		.thenReturn(categoryResponseDTO);
 
-		mockMvc.perform(post("/category/addCategoryWithProducts")
+		mockMvc.perform(post("/category/addCategory")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(categoryRequestDTO)))
 		.andExpect(status().isCreated())
 		.andExpect(jsonPath("$.categoryName").value("Electronics"));
 
-		verify(categoryService, times(1)).addCategoryWithProducts(any(CategoryRequestDTO.class));
+		verify(categoryService, times(1)).addCategory(any(CategoryRequestDTO.class));
 	}
 
 	// Negative Test: Add Category with Invalid Data
+
 	@Test
 	void testAddCategory_Failure_InvalidData() throws Exception {
-		categoryRequestDTO.setCategoryName(""); // Invalid name
+	    // Arrange: Create an invalid category request (empty name)
+	    CategoryRequestDTO invalidRequest = new CategoryRequestDTO();
+	    invalidRequest.setCategoryName(""); // Invalid name
 
-		mockMvc.perform(post("/category/addCategoryWithProducts")
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(categoryRequestDTO)))
-		.andExpect(status().isBadRequest());
+	    // Act & Assert: Expect a Bad Request (400)
+	    mockMvc.perform(post("/category/addCategory") // Corrected API endpoint
+	            .contentType(MediaType.APPLICATION_JSON)
+	            .content(objectMapper.writeValueAsString(invalidRequest))) // Use invalidRequest
+	        .andExpect(status().isBadRequest());
 	}
+
+
 
 
 	// Positive Test: Get All Categories
@@ -138,7 +143,7 @@ public class CategoryControllerTest {
 		updateRequest.setCategoryId("123");
 		updateRequest.setCategoryName("UpdatedName");
 
-		when(categoryService.updateCategory("123", "UpdatedName"))
+		when(categoryService.updateCategory(any(UpdateCategoryRequestDTO.class)))
 		.thenReturn("Category updated successfully");
 
 		mockMvc.perform(put("/category/updateCategoryById")
