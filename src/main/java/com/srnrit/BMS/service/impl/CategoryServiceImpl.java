@@ -7,16 +7,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import com.srnrit.BMS.dao.ICategoryDao;
 import com.srnrit.BMS.dto.CategoryRequestDTO;
 import com.srnrit.BMS.dto.CategoryResponseDTO;
-import com.srnrit.BMS.dto.ProductResponseDTO;
+import com.srnrit.BMS.dto.UpdateCategoryRequestDTO;
 import com.srnrit.BMS.entity.Category;
-import com.srnrit.BMS.entity.Product;
 import com.srnrit.BMS.exception.categoryexceptions.CategoryNameAlreadyExistsException;
 import com.srnrit.BMS.exception.categoryexceptions.CategoryNotCreatedException;
 import com.srnrit.BMS.exception.categoryexceptions.CategoryNotFoundException;
@@ -37,82 +36,66 @@ public class CategoryServiceImpl implements ICategoryService
 
 	//service for to add category with products
 	@Override
-	public CategoryResponseDTO addCategoryWithProducts(CategoryRequestDTO categoryRequestDTO) {
-		if (categoryRequestDTO == null || categoryRequestDTO.getCategoryName() == null || categoryRequestDTO.getCategoryName().trim().isEmpty() || categoryRequestDTO.getCategoryName().equalsIgnoreCase("null")) {
-			throw new IllegalArgumentException("Category name cannot be blank and name mustn't be null");
+	public CategoryResponseDTO addCategory(CategoryRequestDTO categoryRequestDTO) 
+	{
+		if (categoryRequestDTO == null) {
+			throw new IllegalArgumentException("CategoryRequestDTO can't be null");
 		}
-		String newCategoryName = categoryRequestDTO.getCategoryName().trim();
 
-		List<Category> existingCategories = categoryDAO.getAllCategory().orElse(Collections.emptyList());
+		String categoryName = categoryRequestDTO.getCategoryName().trim();
+		
+		if (categoryName.isEmpty()) {  
+	        throw new IllegalArgumentException("Category name cannot be blank");
+	    }
+		
+		// Fetch all category names
+		List<String> categoryNames = this.categoryDAO.fetchAllCategoryNames();
 
-		existingCategories.stream()
-		.filter(existingCategory -> StringUtils.calculateSimilarCategoryCheck(newCategoryName, existingCategory.getCategoryName().trim()) <= 3)
-		.findFirst()
-		.ifPresent(existingCategory -> {
-			throw new CategoryNameAlreadyExistsException(
-					"A similar category already exists with the name: " + existingCategory.getCategoryName()
-					);
-		});
-
-
-		Category category=new Category();
-		category.setCategoryName(categoryRequestDTO.getCategoryName());
-
-		if(categoryRequestDTO.getProducts()!=null) {
-			List<Product> products = categoryRequestDTO.getProducts().stream()
-					.map(productRequest -> new Product(
-							productRequest.getProductName(),
-							productRequest.getProductImage().toString(),							
-							productRequest.getProductQuantity(),
-							productRequest.getProductPrice(),
-							productRequest.getInStock()
-							))
-					.collect(Collectors.toList());
-
-			products.stream().forEach(product -> category.addProduct(product));
-
-			Optional<Category> insertCategory = this.categoryDAO.insertCategory(category);
-			if(insertCategory.isPresent()) {
-				CategoryResponseDTO categoryResponse = EntityToDTO.toCategoryResponse(category);
-				return categoryResponse;
+		if(categoryNames!=null)
+		{
+			Optional<String> existingCategory = categoryNames.stream().filter(c-> c.equalsIgnoreCase(categoryName)).findFirst();
+		    
+			if(existingCategory.isPresent())
+		    	throw new CategoryNameAlreadyExistsException(
+						"A category already exists with the name: " + existingCategory.get());
+		    
+			existingCategory = categoryNames.stream().filter(c->categoryName.toLowerCase().contains(c.toLowerCase())).findFirst();
+		    
+			if(existingCategory.isPresent())
+		    	throw new CategoryNameAlreadyExistsException(
+						"A category already exists with the name: " + existingCategory.get());
+		 }
+		    Category category = new Category();
+		    BeanUtils.copyProperties(categoryRequestDTO, category);
+		    
+		    Optional<Category> insertCategory = categoryDAO.insertCategory(category);
+		    
+			if (insertCategory.isPresent()) 
+			{	
+				System.out.println(insertCategory.get());
+				return EntityToDTO.toCategoryResponse(insertCategory.get());
 			}
-			else {
-				throw new CategoryNotCreatedException("Category not created !");
-			}
-		}
-		else {
-			Optional<Category> insertedCategory = this.categoryDAO.insertCategory(category);
-
-			if(insertedCategory.isPresent()) {
-				CategoryResponseDTO categoryResponse = EntityToDTO.toCategoryResponse(category); 
-				return categoryResponse; 
-			} 
-			else {
-				throw new CategoryNotCreatedException("Category not created !"); 
-			}
-		}
+			
+			else throw new CategoryNotCreatedException("Category not created!");
 	}
+
+
+
 
 	//service for Get All Category details 
 	@Override
-	public List<CategoryResponseDTO> getAllCategory() {
+	public List<CategoryResponseDTO> getAllCategory() 
+	{
 		Optional<List<Category>> allCategory = categoryDAO.getAllCategory();
 
-		if(allCategory.isPresent() && !allCategory.get().isEmpty()) {
+		if(allCategory.isPresent() && !allCategory.get().isEmpty()) 
+		{
 			List<CategoryResponseDTO> allCategoryResponse=new ArrayList<>();
 			List<Category> categories=allCategory.get();
 
-			for(Category category:categories) {
-				List<Product> products=category.getProducts();
-				List<ProductResponseDTO> productResponse=new ArrayList<>();
-
-				for(Product product:products) {
-					ProductResponseDTO productResponseDTO=EntityToDTO.toProductResponseDTO(product);
-					productResponse.add(productResponseDTO);
-				}
+			for(Category category:categories) 
+			{
 				CategoryResponseDTO categoryResponseDTO=EntityToDTO.toCategoryResponse(category);
-				categoryResponseDTO.setProducts(productResponse);
-
 				allCategoryResponse.add(categoryResponseDTO);
 			}
 			return allCategoryResponse;
@@ -125,17 +108,11 @@ public class CategoryServiceImpl implements ICategoryService
 
 	//Service for updating CategoryName with CategoryId
 	@Override
-	public String updateCategory(String categoryId, String categoryName) {
+	public String updateCategory(UpdateCategoryRequestDTO dto)
+	{
+		String categoryId=dto.getCategoryId();
+		String categoryName=dto.getCategoryName();
 
-		if (categoryId == null || categoryId.isBlank()) {
-			throw new IllegalArgumentException("CategoryId must not be null or empty");
-		}
-		if (categoryName == null || categoryName.isBlank()  || categoryName.equalsIgnoreCase("Null")) {
-			throw new IllegalArgumentException("CategoryName must not be null or empty");
-		}
-		if (categoryName.length() < 3) {
-			throw new IllegalArgumentException("CategoryName must be at least 3 characters long");
-		}
 
 		Optional<String> updatedCategory = this.categoryDAO.updateCategory(categoryId, categoryName);
 		if (updatedCategory.isPresent()) 
