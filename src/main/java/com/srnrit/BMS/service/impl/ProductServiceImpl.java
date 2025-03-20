@@ -33,7 +33,7 @@ public class ProductServiceImpl implements IProductService {
     }
 
     /**
-     * Store a new product along with an image file
+     * Store a new product along with an image file.
      */
     @Override
     public ProductResponseDTO storeProduct(ProductRequestDTO productRequestDTO, MultipartFile productImage) {
@@ -57,7 +57,7 @@ public class ProductServiceImpl implements IProductService {
     }
 
     /**
-     * Save image file and return its stored path
+     * Save image file and return its stored path.
      */
     private String saveImage(MultipartFile imageFile) {
         try {
@@ -69,7 +69,7 @@ public class ProductServiceImpl implements IProductService {
                 directory.mkdirs();
             }
 
-            // Generate a unique filename with sequence (imageName_1.png)
+            // Generate a unique filename with sequence (e.g., imageName_1.png)
             String uniqueFileName = ProductImageFileNameGenerator.getNewFileName(imageFile.getOriginalFilename());
             String filePath = storagePath + File.separator + uniqueFileName;
 
@@ -84,7 +84,7 @@ public class ProductServiceImpl implements IProductService {
     }
 
     /**
-     * Fetch product by name
+     * Fetch product by name.
      */
     @Override
     public ProductResponseDTO getProductByProductName(String productName) {
@@ -94,7 +94,7 @@ public class ProductServiceImpl implements IProductService {
     }
 
     /**
-     * Delete product by ID
+     * Delete product by ID.
      */
     @Override
     public String deleteProductByProductId(String productId) {
@@ -103,7 +103,7 @@ public class ProductServiceImpl implements IProductService {
     }
 
     /**
-     * Update product by ID
+     * Update product by ID.
      */
     @Override
     public ProductResponseDTO updateProductByProductId(ProductRequestDTO productRequestDTO, String productId) {
@@ -111,11 +111,13 @@ public class ProductServiceImpl implements IProductService {
         product.setProductId(productId);
 
         Optional<Product> updatedProduct = this.productDao.updateProduct(product);
-        return EntityToDTO.toProductResponseDTO(updatedProduct.orElseThrow(() -> new ProductNotFoundException("Failed to update product with ID: " + productId)));
+        return EntityToDTO.toProductResponseDTO(
+            updatedProduct.orElseThrow(() -> new ProductNotFoundException("Failed to update product with ID: " + productId))
+        );
     }
 
     /**
-     * Fetch all products
+     * Fetch all products.
      */
     @Override
     public List<ProductResponseDTO> getAllProducts() {
@@ -127,7 +129,7 @@ public class ProductServiceImpl implements IProductService {
     }
 
     /**
-     * Fetch products by availability status
+     * Fetch products by availability status.
      */
     @Override
     public List<ProductResponseDTO> fetchProductByAvailability(Boolean inStock) {
