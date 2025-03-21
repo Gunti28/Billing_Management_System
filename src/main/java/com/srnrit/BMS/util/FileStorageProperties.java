@@ -6,10 +6,18 @@ import org.springframework.stereotype.Component;
 @Component
 public class FileStorageProperties {
 
-    @Value("${file.storage.images}")
-    private String imageStoragePath;
+	@Value("${file.storage.images}")
+	private String imageStoragePath;
 
-    public String getImageStoragePath() {
-        return imageStoragePath;
-    }
+	@Value("${spring.servlet.multipart.max-file-size}")
+	private Long getMaxFileSize;
+
+	public String getImageStoragePath() {
+		return imageStoragePath;
+	}
+
+	public Long getGetMaxFileSize() {
+		return getMaxFileSize;
+	}
+
 }

@@ -22,7 +22,6 @@ public class DTOToEntity
 	public static Product toProduct(ProductRequestDTO productRequestDTO) {
 		return new Product(
 				productRequestDTO.getProductName(),
-				productRequestDTO.getProductImage(),
 				productRequestDTO.getProductQuantity(),
 				productRequestDTO.getProductPrice(),
 				productRequestDTO.getInStock()
