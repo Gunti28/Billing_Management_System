@@ -9,20 +9,12 @@ public class ProductTest {
     private Product product;
     private Category category;
 
-
     @BeforeEach
     void setUp() {
         category = new Category();
         category.setCategoryName("Food");
         
         product = new Product("Bongu Biryani", 10, 299.99, true);
-
-    @Test
-    void productTest() {
-        // Create a product instance
-        Product product = new Product("Bongu Biryani", 10, 299.99, true);
-
-
         product.setProductId("P12345");
         product.setProductImage("biryani.jpg");
         product.setCategory(category);
@@ -39,20 +31,7 @@ public class ProductTest {
     }
 
     @Test
-
     void testProductCategory() {
-
-    void productWithCategoryTest() {
-        // Create a category
-        Category category = new Category();
-        category.setCategoryName("Food");
-
-        // Create a product and assign it to the category
-        Product product = new Product("Bongu Biryani", 10, 299.99, true);
-        product.setCategory(category);
-
-        // Assertions
-
         assertNotNull(product.getCategory());
         assertEquals("Food", product.getCategory().getCategoryName());
     }
