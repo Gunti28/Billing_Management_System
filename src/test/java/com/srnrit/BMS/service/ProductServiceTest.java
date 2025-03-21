@@ -1,8 +1,17 @@
 package com.srnrit.BMS.service;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.List;
@@ -22,7 +31,6 @@ import com.srnrit.BMS.dto.ProductResponseDTO;
 import com.srnrit.BMS.entity.Product;
 import com.srnrit.BMS.exception.productexceptions.ProductNotCreatedException;
 import com.srnrit.BMS.exception.productexceptions.ProductNotFoundException;
-import com.srnrit.BMS.exception.productexceptions.UnsupportedFileTypeException;
 import com.srnrit.BMS.service.impl.ProductServiceImpl;
 import com.srnrit.BMS.util.FileStorageProperties;
 

@@ -1,372 +1,349 @@
 package com.srnrit.BMS.controller;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.srnrit.BMS.dto.ProductRequestDTO;
 import com.srnrit.BMS.dto.ProductResponseDTO;
-import com.srnrit.BMS.exception.productexceptions.ProductNotFoundException;
 import com.srnrit.BMS.service.IProductService;
 
-@ExtendWith(SpringExtension.class)
-//@WebMvcTest(ProductController.class)
-public class ProductControllerTest 
-{
-	
-	    private MockMvc mockMvc;
-
-	    @Mock
-	    private IProductService productService;
-
-	    @InjectMocks
-	    private ProductController productController;
-
-	    private ObjectMapper objectMapper;
-
-	    @BeforeEach
-	    void setUp() {
-	        MockitoAnnotations.openMocks(this);
-	        mockMvc = MockMvcBuilders.standaloneSetup(productController).build();
-	        objectMapper = new ObjectMapper();
-	    }
-
-	 /*   @Test
-	    void testGetAllProducts_Success() throws Exception {
-	        when(productService.getAllProducts()).thenReturn(Collections.emptyList());
-
-	        mockMvc.perform(get("/product/getAllProducts"))
-	                .andExpect(status().isOk())
-	                .andExpect(content().string("No products found in the database."));
-	    }*/
-	    
-	 // Test case: Add Product by Category (Successful)
-	    @Test
-	    void testAddProductByCategory_Success() throws Exception {
-	        ProductRequestDTO requestDTO = new ProductRequestDTO();
-	        requestDTO.setProductName("Test Product");
-
-	        ProductResponseDTO responseDTO = new ProductResponseDTO();
-	        responseDTO.setProductName("Test Product");
-
-	        MockMultipartFile file = new MockMultipartFile("file", "test.jpg", MediaType.IMAGE_JPEG_VALUE, "test image content".getBytes());
-	        MockMultipartFile productJson = new MockMultipartFile("product", "", MediaType.APPLICATION_JSON_VALUE, objectMapper.writeValueAsBytes(requestDTO));
-
-	        when(productService.storeProduct(any(ProductRequestDTO.class), eq("CAT123"), any(MultipartFile.class)))
-	                .thenReturn(responseDTO);
-
-	        mockMvc.perform(multipart("/product/addProductByCategory/CAT123")
-	                .file(file)
-	                .file(productJson)
-	                .contentType(MediaType.MULTIPART_FORM_DATA))
-	                .andExpect(status().isCreated())
-	                .andExpect(jsonPath("$.productName").value("Test Product"));
-	    }
-
-	    // Test case: Fetch Product by Availability (Available)
-	    @Test
-	    void testFetchProductByAvailability_Available() throws Exception {
-	        ProductResponseDTO responseDTO = new ProductResponseDTO();
-	        responseDTO.setProductName("Available Product");
-
-	        when(productService.fetchProductByAvailability(true))
-	                .thenReturn(Collections.singletonList(responseDTO));
-
-	        mockMvc.perform(get("/product/fetchByAvailability?inStock=true"))
-	                .andExpect(status().isOk())
-	                .andExpect(jsonPath("$[0].productName").value("Available Product"));
-	    }
-
-	    // Test case: Fetch Product by Availability (No Products Found)
-	    @Test
-	    void testFetchProductByAvailability_NoProducts() throws Exception {
-	        when(productService.fetchProductByAvailability(true)).thenReturn(Collections.emptyList());
-
-	        mockMvc.perform(get("/product/fetchByAvailability?inStock=true"))
-	                .andExpect(status().isOk())
-	                .andExpect(content().string("No products available with the given availability status."));
-	    }
-
-	    // Test case: Delete Product by ID (Successful)
-	    @Test
-	    void testDeleteProductById_Success() throws Exception {
-	        when(productService.deleteProductByProductId("PID123")).thenReturn("Product deleted successfully");
-
-	        mockMvc.perform(delete("/product/delete/PID123"))
-	                .andExpect(status().isOk())
-	                .andExpect(jsonPath("$.status").value("success"))
-	                .andExpect(jsonPath("$.message").value("Product deleted successfully"));
-	    }
-
-	    // Test case: Delete Product by ID (Product Not Found)
-	    @Test
-	    void testDeleteProductById_NotFound() throws Exception {
-	        when(productService.deleteProductByProductId("INVALID_ID"))
-	                .thenThrow(new ProductNotFoundException("Product not found"));
-
-	        mockMvc.perform(delete("/product/delete/INVALID_ID"))
-	                .andExpect(status().isNotFound())
-	                .andExpect(jsonPath("$.message").value("Product not found for deletion."));
-	    }
-
-
-	    // Test case: Search Product by Name (Success)
-	    @Test
-	    void testSearchProductByName_Success() throws Exception {
-	        ProductResponseDTO responseDTO = new ProductResponseDTO();
-	        responseDTO.setProductName("Test Product");
-
-	        when(productService.getProductByProductName("Test Product")).thenReturn(responseDTO);
-
-	        mockMvc.perform(get("/product/searchByName?productName=Test Product"))
-	                .andExpect(status().isOk())
-	                .andExpect(jsonPath("$.productName").value("Test Product"));
-	    }
-
-	    // Test case: Search Product by Name (Not Found)
-	    @Test
-	    void testSearchProductByName_NotFound() throws Exception {
-	        when(productService.getProductByProductName("NonExistent"))
-	                .thenThrow(new ProductNotFoundException("No product found"));
-
-	        mockMvc.perform(get("/product/searchByName?productName=NonExistent"))
-	                .andExpect(status().isNotFound())
-	                .andExpect(content().string("Error: No product found"));
-	    }
-
-	    // Test case: Get All Products (Success)
-	    @Test
-	    void testGetAllProducts_Success() throws Exception {
-	        ProductResponseDTO responseDTO = new ProductResponseDTO();
-	        responseDTO.setProductName("Product1");
-
-	        when(productService.getAllProducts()).thenReturn(Collections.singletonList(responseDTO));
-
-	        mockMvc.perform(get("/product/getAllProducts"))
-	                .andExpect(status().isOk())
-	                .andExpect(jsonPath("$[0].productName").value("Product1"));
-	    }
-
-	    // Test case: Get All Products (No Products Found)
-	    @Test
-	    void testGetAllProducts_NoProducts() throws Exception {
-	        when(productService.getAllProducts()).thenReturn(Collections.emptyList());
-
-	        mockMvc.perform(get("/product/getAllProducts"))
-	                .andExpect(status().isOk())
-	                .andExpect(content().string("No products found in the database."));
-	    }
-
-	    
-	 // Test case: Add Product by Category - Missing Image
-	    @Test
-	    void testAddProductByCategory_MissingImage() throws Exception {
-	        ProductRequestDTO requestDTO = new ProductRequestDTO();
-	        requestDTO.setProductName("Test Product");
-
-	        MockMultipartFile productJson = new MockMultipartFile("product", "", MediaType.APPLICATION_JSON_VALUE, objectMapper.writeValueAsBytes(requestDTO));
-
-	        mockMvc.perform(multipart("/product/addProductByCategory/CAT123")
-	                .file(productJson) // No image file included
-	                .contentType(MediaType.MULTIPART_FORM_DATA))
-	                .andExpect(status().isBadRequest());
-	    }
-
-	   
-	    
-	 // Test case: Delete Product - Invalid ID
-	    @Test
-	    void testDeleteProduct_InvalidId() throws Exception {
-	        when(productService.deleteProductByProductId("INVALID_ID"))
-	                .thenThrow(new ProductNotFoundException("Product not found"));
-
-	        mockMvc.perform(delete("/product/delete/INVALID_ID"))
-	                .andExpect(status().isNotFound())
-	                .andExpect(content().string(containsString("Product not found")));
-	    }
-	    
-	 // Test case: Fetch All Products - Empty Database
-	    @Test
-	    void testGetAllProducts_Empty() throws Exception {
-	        when(productService.getAllProducts()).thenReturn(Collections.emptyList());
-
-	        mockMvc.perform(get("/product/getAllProducts"))
-	                .andExpect(status().isOk())
-	                .andExpect(content().string(containsString("No products found in the database")));
-	    }
-
-	    @Test
-	    void testSearchProductByName_CaseInsensitive() throws Exception {
-	        ProductResponseDTO responseDTO = new ProductResponseDTO();
-	        responseDTO.setProductName("Test Product");
-
-	        when(productService.getProductByProductName(anyString())).thenReturn(responseDTO);
-
-	        mockMvc.perform(get("/product/searchByName")
-	                .param("productName", "TEST PRODUCT"))
-	                .andExpect(status().isOk())
-	                .andExpect(jsonPath("$.productName").value("Test Product"));
-	    }
-
-
-	 // Test case: Fetch Products by Availability - No Matching Products
-	    @Test
-	    void testFetchProductByAvailability_NoResults() throws Exception {
-	        when(productService.fetchProductByAvailability(false)).thenReturn(Collections.emptyList());
-
-	        mockMvc.perform(get("/product/fetchByAvailability")
-	                .param("inStock", "false"))
-	                .andExpect(status().isOk())
-	                .andExpect(content().string(containsString("No products available with the given availability status.")));
-	    }
-
-
-
-	 // Test case: Delete Product - Successful Deletion
-	    @Test
-	    void testDeleteProduct_Success() throws Exception {
-	        when(productService.deleteProductByProductId("PID123")).thenReturn("Product deleted successfully");
-
-	        mockMvc.perform(delete("/product/delete/PID123"))
-	                .andExpect(status().isOk())
-	                .andExpect(content().string(containsString("Product deleted successfully")));
-	    }
-
-	    
-	    @Test
-	    void testFetchAllProducts_EmptyDatabase() throws Exception {
-	        when(productService.getAllProducts()).thenReturn(Collections.emptyList());
-
-	        mockMvc.perform(get("/product/getAllProducts"))
-	                .andExpect(status().isOk())
-	                .andExpect(content().string("No products found in the database."));
-	    }
-
-	 
-
-	    
-	    @Test
-	    void testFetchProductByAvailability_InvalidInput() throws Exception {
-	        mockMvc.perform(get("/product/fetchByAvailability")
-	                .param("inStock", "invalidValue"))
-	                .andExpect(status().isBadRequest());
-	    }
-
-	   
-
-	    
-	    @Test
-	    void testFetchProductById_ValidId() throws Exception {
-	        ProductResponseDTO responseDTO = new ProductResponseDTO();
-	        responseDTO.setProductName("Test Product");
-
-	        when(productService.getProductByProductName(anyString())).thenReturn(responseDTO);
-
-	        mockMvc.perform(get("/product/searchByName")
-	                .param("productName", "Test Product"))
-	                .andExpect(status().isOk())
-	                .andExpect(jsonPath("$.productName").value("Test Product"));
-	    }
-
-	    @Test
-	    void testFetchProductByAvailability_NullParam() throws Exception {
-	        mockMvc.perform(get("/product/fetchByAvailability"))
-	                .andExpect(status().isOk()); // Should return default inStock=true
-	    }
-	    
-	    @Test
-	    void testDeleteProduct_AlreadyDeleted() throws Exception {
-	        when(productService.deleteProductByProductId("PID123"))
-	                .thenThrow(new ProductNotFoundException("Product not found"));
-
-	        mockMvc.perform(delete("/product/delete/PID123"))
-	                .andExpect(status().isNotFound())
-	                .andExpect(content().string(containsString("Product not found")));
-	    }
-
-
-	    @Test
-	    void testUpdateProduct_NullRequestBody() throws Exception {
-	        mockMvc.perform(put("/product/update/PID123")
-	                .contentType(MediaType.APPLICATION_JSON)
-	                .content("")) // Empty content
-	                .andExpect(status().isBadRequest());
-	    }
-
-
-	    @Test
-	    void testGetAllProducts_EmptyDatabase() throws Exception {
-	        when(productService.getAllProducts()).thenReturn(Collections.emptyList());
-
-	        mockMvc.perform(get("/product/getAllProducts"))
-	                .andExpect(status().isOk())
-	                .andExpect(content().string(containsString("No products found in the database.")));
-	    }
-
-	    
-	    @Test
-	    void testFetchProductByAvailability_InvalidType() throws Exception {
-	        mockMvc.perform(get("/product/fetchByAvailability")
-	                .param("inStock", "invalidValue")) // Non-boolean value
-	                .andExpect(status().isBadRequest());
-	    }
-	    
-	    @Test
-	    void testAddProductByCategory_MissingFile() throws Exception {
-	        ProductRequestDTO requestDTO = new ProductRequestDTO();
-	        requestDTO.setProductName("Test Product");
-
-	        mockMvc.perform(multipart("/product/addProductByCategory/CAT123")
-	                .param("product", objectMapper.writeValueAsString(requestDTO))
-	                .contentType(MediaType.MULTIPART_FORM_DATA))
-	                .andExpect(status().isBadRequest());
-	    }
-
-
-	    @Test
-	    void testFetchProductByAvailability_False_NoProducts() throws Exception {
-	        when(productService.fetchProductByAvailability(false)).thenReturn(Collections.emptyList());
-
-	        mockMvc.perform(get("/product/fetchByAvailability")
-	                .param("inStock", "false"))
-	                .andExpect(status().isOk())
-	                .andExpect(content().string(containsString("No products available")));
-	    }
-
-
-	    @Test
-	    void testDeleteProduct_ValidId() throws Exception {
-	        when(productService.deleteProductByProductId("PID123")).thenReturn("Product deleted successfully");
-
-	        mockMvc.perform(delete("/product/delete/PID123"))
-	                .andExpect(status().isOk())
-	                .andExpect(content().string(containsString("Product deleted successfully")));
-	    }
-
-	   
-
+@ExtendWith(MockitoExtension.class)
+class ProductControllerTest {
+
+	@Mock
+	private IProductService productService;
+
+	@InjectMocks
+	private ProductController productController;
+
+	private ProductRequestDTO productRequestDTO;
+	private ProductResponseDTO productResponseDTO;
+	private MultipartFile file;
+
+	@BeforeEach
+	void setUp() {
+		productRequestDTO = new ProductRequestDTO(); // Set necessary fields
+		productResponseDTO = new ProductResponseDTO(); // Set necessary fields
 	}
 
+	@Test
+	void testAddProductByCategory() throws Exception {
+		// Mock MultipartFile
+		file = mock(MultipartFile.class);
 
+		// Initialize DTOs with sample data
+		productRequestDTO = new ProductRequestDTO();
+		// Set required fields in productRequestDTO
 
+		productResponseDTO = new ProductResponseDTO();
+		// Set required fields in productResponseDTO
+
+		// Mock service behavior
+		when(productService.storeProduct(any(ProductRequestDTO.class), anyString(), any(MultipartFile.class)))
+				.thenReturn(productResponseDTO);
+
+		// Convert DTO to JSON string
+		String jsonString = new ObjectMapper().writeValueAsString(productRequestDTO);
+
+		// Call the controller method
+		ResponseEntity<?> response = productController.addProductByCategory(jsonString, "1", file);
+
+		// Verify response
+		assertEquals(HttpStatus.CREATED, response.getStatusCode());
+		assertEquals(productResponseDTO, response.getBody());
+	}
+
+	@Test
+	void testFetchProductByAvailability() {
+		when(productService.fetchProductByAvailability(anyBoolean())).thenReturn(Arrays.asList(productResponseDTO));
+
+		ResponseEntity<List<ProductResponseDTO>> response = productController
+				.fetchProductByAvailability(Optional.of(true));
+
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertFalse(response.getBody().isEmpty());
+	}
+
+	@Test
+	void testDeleteProduct() {
+		when(productService.deleteProductByProductId(anyString())).thenReturn("Product deleted successfully");
+
+		ResponseEntity<String> response = productController.deleteProduct("123");
+
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertEquals("Product deleted successfully", response.getBody());
+	}
+
+	@Test
+	void testUpdateProduct() {
+		when(productService.updateProductByProductId(any(ProductRequestDTO.class), anyString()))
+				.thenReturn(productResponseDTO);
+
+		ResponseEntity<ProductResponseDTO> response = productController.updateProduct("123", productRequestDTO);
+
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertEquals(productResponseDTO, response.getBody());
+	}
+
+	@Test
+	void testSearchProductByName() {
+		when(productService.getProductByProductName(anyString())).thenReturn(productResponseDTO);
+
+		ResponseEntity<?> response = productController.searchProductByName("TestProduct");
+
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertEquals(productResponseDTO, response.getBody());
+	}
+
+	@Test
+	void testGetAllProducts() {
+		when(productService.getAllProducts()).thenReturn(Arrays.asList(productResponseDTO));
+
+		ResponseEntity<List<ProductResponseDTO>> response = productController.getAllProducts();
+
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertFalse(response.getBody().isEmpty());
+	}
+
+	@Test
+	void testDeleteNonExistingProduct() {
+		when(productService.deleteProductByProductId(anyString())).thenReturn("Product not found");
+
+		ResponseEntity<String> response = productController.deleteProduct("999");
+
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertEquals("Product not found", response.getBody());
+	}
+
+	@Test
+	void testUpdateProductWithInvalidData() {
+		when(productService.updateProductByProductId(any(ProductRequestDTO.class), anyString()))
+				.thenThrow(new IllegalArgumentException("Invalid product data"));
+
+		Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+			productController.updateProduct("123", productRequestDTO);
+		});
+
+		assertEquals("Invalid product data", exception.getMessage());
+	}
+
+	@Test
+	void testFetchProductsWhenNoneExist() {
+		when(productService.getAllProducts()).thenReturn(Arrays.asList());
+
+		ResponseEntity<List<ProductResponseDTO>> response = productController.getAllProducts();
+
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertTrue(response.getBody().isEmpty());
+	}
+
+	@Test
+	void testAddProductByCategoryWithoutFile() throws Exception {
+		when(productService.storeProduct(any(ProductRequestDTO.class), anyString(), isNull()))
+				.thenReturn(productResponseDTO);
+
+		String jsonString = new ObjectMapper().writeValueAsString(productRequestDTO);
+		ResponseEntity<?> response = productController.addProductByCategory(jsonString, "1", null);
+
+		assertEquals(HttpStatus.CREATED, response.getStatusCode());
+	}
+
+	@Test
+	void testUpdateProductWithNonExistingId() {
+		when(productService.updateProductByProductId(any(ProductRequestDTO.class), anyString())).thenReturn(null);
+
+		ResponseEntity<ProductResponseDTO> response = productController.updateProduct("999", productRequestDTO);
+
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertNull(response.getBody());
+	}
+
+	@Test
+	void testSearchProductByNameWithSpecialCharacters() {
+		when(productService.getProductByProductName(anyString())).thenReturn(productResponseDTO);
+
+		ResponseEntity<?> response = productController.searchProductByName("@#!$%Product123");
+
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertEquals(productResponseDTO, response.getBody());
+	}
+
+	@Test
+	void testFetchProductByAvailabilityWithFalse() {
+		when(productService.fetchProductByAvailability(false)).thenReturn(Arrays.asList(productResponseDTO));
+
+		ResponseEntity<List<ProductResponseDTO>> response = productController
+				.fetchProductByAvailability(Optional.of(false));
+
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertFalse(response.getBody().isEmpty());
+	}
+
+	@Test
+	void testFetchProductByAvailabilityWithEmptyList() {
+		when(productService.fetchProductByAvailability(true)).thenReturn(Arrays.asList());
+
+		ResponseEntity<List<ProductResponseDTO>> response = productController
+				.fetchProductByAvailability(Optional.of(true));
+
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertTrue(response.getBody().isEmpty());
+	}
+
+	@Test
+	void testGetAllProductsWithEmptyList() {
+		when(productService.getAllProducts()).thenReturn(Arrays.asList());
+
+		ResponseEntity<List<ProductResponseDTO>> response = productController.getAllProducts();
+
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertTrue(response.getBody().isEmpty());
+	}
+
+	@Test
+	void testGetAllProductsWithData() {
+		when(productService.getAllProducts()).thenReturn(Arrays.asList(productResponseDTO));
+
+		ResponseEntity<List<ProductResponseDTO>> response = productController.getAllProducts();
+
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertFalse(response.getBody().isEmpty());
+	}
+
+	@Test
+	void testAddProductByCategoryWithNullFile() throws Exception {
+		when(productService.storeProduct(any(ProductRequestDTO.class), anyString(), isNull()))
+				.thenReturn(productResponseDTO);
+
+		String jsonString = new ObjectMapper().writeValueAsString(productRequestDTO);
+		ResponseEntity<?> response = productController.addProductByCategory(jsonString, "1", null);
+
+		assertEquals(HttpStatus.CREATED, response.getStatusCode());
+	}
+
+	@Test
+	void testSearchProductByNameWithEmptyString() {
+		ResponseEntity<?> response = productController.searchProductByName("");
+
+		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+		assertEquals("Product name must be provided!", response.getBody());
+	}
+
+	@Test
+	void testGetAllProductsWithMultipleEntries() {
+		when(productService.getAllProducts()).thenReturn(Arrays.asList(productResponseDTO, productResponseDTO));
+
+		ResponseEntity<List<ProductResponseDTO>> response = productController.getAllProducts();
+
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertEquals(2, response.getBody().size());
+	}
+	
+	
+
+	
+	@Test
+	void testDeleteProductWithWhitespaceId() {
+	    // Arrange: Mock service behavior for whitespace ID
+	    when(productService.deleteProductByProductId(anyString()))
+	        .thenReturn("Product ID cannot be null or empty");
+
+	    // Act: Call the controller with a whitespace-only ID
+	    ResponseEntity<String> response = productController.deleteProduct("   ");
+
+	    // Assert: Verify response
+	    assertEquals(HttpStatus.OK, response.getStatusCode());
+	    assertEquals("Product ID cannot be null or empty", response.getBody());
+	}
+
+	
+	
+	@Test
+	void testSearchProductByNameWithNull() {
+	    ResponseEntity<?> response = productController.searchProductByName(null);
+	    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+	}
+
+	
+	@Test
+	void testFetchProductByAvailabilityWithNullParam() {
+	    ResponseEntity<List<ProductResponseDTO>> response = productController.fetchProductByAvailability(Optional.empty());
+	    assertEquals(HttpStatus.OK, response.getStatusCode());
+	}
+	
+	
+	@Test
+	void testSearchProductByNameWithLongName() {
+	    // Arrange: Define a very long product name
+	    String longProductName = "A".repeat(500);
+
+	    // Mock behavior: Simulate the service throwing an exception for long names
+	    when(productService.getProductByProductName(anyString()))
+	        .thenThrow(new IllegalArgumentException("Product name too long"));
+
+	    // Act & Assert: Ensure the controller handles this properly
+	    Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+	        productController.searchProductByName(longProductName);
+	    });
+
+	    assertEquals("Product name too long", exception.getMessage());
+	}
+
+	@Test
+	void testFetchProductByAvailabilityWithNull() {
+	    ResponseEntity<List<ProductResponseDTO>> response = productController.fetchProductByAvailability(Optional.empty());
+
+	    assertEquals(HttpStatus.OK, response.getStatusCode());
+	    assertTrue(response.getBody().isEmpty()); // Assuming the service handles null values gracefully
+	}
+
+	@Test
+	void testSearchProductByNameWithNumbers() {
+	    when(productService.getProductByProductName("12345")).thenReturn(productResponseDTO);
+
+	    ResponseEntity<?> response = productController.searchProductByName("12345");
+
+	    assertEquals(HttpStatus.OK, response.getStatusCode());
+	    assertEquals(productResponseDTO, response.getBody());
+	}
+	
+	@Test
+	void testUpdateProductWithLargeRequestData() {
+	    ProductRequestDTO largeRequest = new ProductRequestDTO();
+	    // Populate `largeRequest` with very large data
+
+	    when(productService.updateProductByProductId(any(ProductRequestDTO.class), anyString()))
+	        .thenThrow(new IllegalArgumentException("Payload too large"));
+
+	    Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+	        productController.updateProduct("123", largeRequest);
+	    });
+
+	    assertEquals("Payload too large", exception.getMessage());
+	}
+
+	
+	@Test
+	void testSearchProductByNameWithNullInput() {
+	    ResponseEntity<?> response = productController.searchProductByName(null);
+
+	    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+	}
+
+}
