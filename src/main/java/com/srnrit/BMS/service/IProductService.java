@@ -1,14 +1,16 @@
 package com.srnrit.BMS.service;
 
 import java.util.List;
+
 import org.springframework.web.multipart.MultipartFile;
+
 import com.srnrit.BMS.dto.ProductRequestDTO;
 import com.srnrit.BMS.dto.ProductResponseDTO;
 
 public interface IProductService {
     
     // Adding product by category (supports image upload)
-    ProductResponseDTO storeProduct(ProductRequestDTO productRequestDTO, MultipartFile productImage);
+    ProductResponseDTO storeProduct(ProductRequestDTO productRequestDTO,String categoryId,MultipartFile file);
     
     // Fetching product by name
     ProductResponseDTO getProductByProductName(String productName);
@@ -21,7 +23,8 @@ public interface IProductService {
     
     // Fetching products based on availability
     List<ProductResponseDTO> fetchProductByAvailability(Boolean inStock);
-
+    
+    
     // Fetch all products
     List<ProductResponseDTO> getAllProducts();
 }

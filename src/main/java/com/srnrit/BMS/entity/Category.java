@@ -1,21 +1,18 @@
 package com.srnrit.BMS.entity;
 
 import java.io.Serializable;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.hibernate.annotations.GenericGenerator;
-
-import com.srnrit.BMS.util.idgenerator.CategoryIdGenerator;
+import java.util.concurrent.ThreadLocalRandom;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -29,10 +26,8 @@ import lombok.NoArgsConstructor;
 @Table(name = "CATEGORY_TABLE")
 public class Category implements Serializable
 {
-	@SuppressWarnings("deprecation")
+	
 	@Id
-	@GenericGenerator(name = "category_id_generator",type = CategoryIdGenerator.class)
-	@GeneratedValue(generator = "category_id_generator", strategy = GenerationType.SEQUENCE)
 	@Column(name = "CATEGORY_ID")
 	private String categoryId;
 	
@@ -57,6 +52,23 @@ public class Category implements Serializable
 	{
 		this.products.remove(product);  //Here this.products.remove(product);
 		product.setCategory(null);
+	}
+	
+	@PrePersist
+	public void generateCategoryId()
+	{
+		if(categoryId==null)
+		{
+			String prefix="CID";
+	        String suffix="";
+	        
+	        long timestamp = Instant.now().toEpochMilli();
+	        int randomPart = ThreadLocalRandom.current().nextInt(100000000,999999999);
+	        
+	        suffix=timestamp+""+randomPart;
+	        
+	       this.categoryId=prefix+suffix;
+		}
 	}
 		
 }

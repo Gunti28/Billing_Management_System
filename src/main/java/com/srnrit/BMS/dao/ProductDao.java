@@ -3,6 +3,8 @@ package com.srnrit.BMS.dao;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import com.srnrit.BMS.entity.Product;
 
 public interface ProductDao {
@@ -19,6 +21,8 @@ public interface ProductDao {
 
 	Optional<List<Product>> fetchAllProduct();
 	
+	
+	boolean storeImage(MultipartFile file,String newImageName);
 	
 	
 }

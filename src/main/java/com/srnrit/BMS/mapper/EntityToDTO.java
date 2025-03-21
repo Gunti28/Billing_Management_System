@@ -1,5 +1,6 @@
 package com.srnrit.BMS.mapper;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -8,7 +9,8 @@ import com.srnrit.BMS.dto.ProductResponseDTO;
 import com.srnrit.BMS.entity.Category;
 import com.srnrit.BMS.entity.Product;
 
-public class EntityToDTO {
+@SuppressWarnings("serial")
+public class EntityToDTO implements Serializable {
 
 
 	public static ProductResponseDTO toProductResponseDTO(Product product) {
