@@ -63,7 +63,7 @@ class ProductServiceTest {
 
 		productRequestDTO = new ProductRequestDTO();
 		productRequestDTO.setProductName("Organic Apple");
-		productRequestDTO.setCategoryId("cat123");
+//		productRequestDTO.setCategoryId("cat123");
 
 		product = new Product();
 		product.setProductId("prod123");
@@ -73,7 +73,7 @@ class ProductServiceTest {
 	@Test
 	void testStoreProduct_NullRequest() {
 		MultipartFile mockFile = mock(MultipartFile.class);
-		assertThrows(IllegalArgumentException.class, () -> productService.storeProduct(null));
+		assertThrows(IllegalArgumentException.class, () -> productService.storeProduct(null, null, mockFile));
 	}
 
 	@Test
@@ -105,7 +105,7 @@ class ProductServiceTest {
 			when(productDao.saveProduct(any(Product.class), anyString())).thenReturn(Optional.of(product));
 
 			// Call the method under test.
-			ProductResponseDTO response = productService.storeProduct(productRequestDTO);
+			ProductResponseDTO response = productService.storeProduct(productRequestDTO, generatedFileName, imageFile);
 
 			// Verify that the response is correct.
 			assertNotNull(response);
@@ -138,7 +138,7 @@ class ProductServiceTest {
 			// When productDao.saveProduct is called, it won't be reached because saveImage
 			// should fail.
 			RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-				productService.storeProduct(productRequestDTO);
+				productService.storeProduct(productRequestDTO, generatedFileName, imageFile);
 			});
 			assertEquals("Error saving image file: Simulated IO failure", exception.getMessage());
 		}
@@ -154,7 +154,7 @@ class ProductServiceTest {
 
 		// Expect a ProductNotCreatedException.
 		Exception exception = assertThrows(ProductNotCreatedException.class,
-				() -> productService.storeProduct(productRequestDTO));
+				() -> productService.storeProduct(productRequestDTO, null, imageFile));
 		assertEquals("Failed to save product.", exception.getMessage());
 	}
 
