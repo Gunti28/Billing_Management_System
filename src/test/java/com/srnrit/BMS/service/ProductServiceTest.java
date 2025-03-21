@@ -1,23 +1,10 @@
 package com.srnrit.BMS.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,7 +13,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -36,237 +22,302 @@ import com.srnrit.BMS.dto.ProductResponseDTO;
 import com.srnrit.BMS.entity.Product;
 import com.srnrit.BMS.exception.productexceptions.ProductNotCreatedException;
 import com.srnrit.BMS.exception.productexceptions.ProductNotFoundException;
+import com.srnrit.BMS.exception.productexceptions.UnsupportedFileTypeException;
 import com.srnrit.BMS.service.impl.ProductServiceImpl;
 import com.srnrit.BMS.util.FileStorageProperties;
-import com.srnrit.BMS.util.idgenerator.ProductImageFileNameGenerator;
 
 @ExtendWith(MockitoExtension.class)
 class ProductServiceTest {
 
-	@Mock
-	private ProductDao productDao;
+    @Mock
+    private ProductDao productDao;
+    
+    @Mock
+    private FileStorageProperties fileStorageProperties;
+    
+    @InjectMocks
+    private ProductServiceImpl productService;
 
-	@Mock
-	private FileStorageProperties fileStorageProperties;
+    private Product product;
+    private ProductRequestDTO productRequestDTO;
+    private ProductResponseDTO productResponseDTO;
 
-	@InjectMocks
-	private ProductServiceImpl productService;
+    @BeforeEach
+    void setUp() {
+        product = new Product("Apple", 10, 20.5, true);
+        product.setProductId("PID12345");
 
-	private ProductServiceImpl productServiceSpy;
+        productRequestDTO = new ProductRequestDTO("Apple", 10, 20.5, true);
+        
+        productResponseDTO = new ProductResponseDTO("PID12345", "Apple", "image.jpg", 10, 20.5, true);
+    }
 
-	private ProductRequestDTO productRequestDTO;
-	private Product product;
+    @Test
+    void testGetProductByProductName_Success() {
+        when(productDao.searchProductByName("Apple")).thenReturn(Optional.of(List.of(product)));
 
-	@BeforeEach
-	void setUp() {
-		productServiceSpy = spy(productService);
+        ProductResponseDTO response = productService.getProductByProductName("Apple");
 
-		productRequestDTO = new ProductRequestDTO();
-		productRequestDTO.setProductName("Organic Apple");
-		productRequestDTO.setCategoryId("cat123");
+        assertNotNull(response);
+        assertEquals("Apple", response.getProductName());
+        verify(productDao, times(1)).searchProductByName("Apple");
+    }
 
-		product = new Product();
-		product.setProductId("prod123");
-		product.setProductName("Organic Apple");
-	}
+    @Test
+    void testGetProductByProductName_NotFound() {
+        when(productDao.searchProductByName("Mango")).thenReturn(Optional.empty());
 
-	@Test
-	void testStoreProduct_NullRequest() {
-		MultipartFile mockFile = mock(MultipartFile.class);
-		assertThrows(IllegalArgumentException.class, () -> productService.storeProduct(null));
-	}
+        assertThrows(ProductNotFoundException.class, () -> productService.getProductByProductName("Mango"));
+        verify(productDao, times(1)).searchProductByName("Mango");
+    }
 
-	@Test
-	void testStoreProduct_WithImage_Success() throws Exception {
-		// Prepare a non-empty MultipartFile mock.
-		MultipartFile imageFile = mock(MultipartFile.class);
-		when(imageFile.isEmpty()).thenReturn(false);
-		when(imageFile.getOriginalFilename()).thenReturn("test.png");
+    @Test
+    void testDeleteProductByProductId_Success() {
+        when(productDao.deleteProductById("PID12345")).thenReturn(Optional.of("Deleted"));
 
-		// Simulate fileStorageProperties returning a temporary directory.
-		String tempDir = System.getProperty("java.io.tmpdir");
-		when(fileStorageProperties.getImageStoragePath()).thenReturn(tempDir);
+        String result = productService.deleteProductByProductId("PID12345");
+        assertEquals("Deleted", result);
+        verify(productDao, times(1)).deleteProductById("PID12345");
+    }
 
-		// Use static mocking for ProductImageFileNameGenerator.
-		String generatedFileName = "test_unique.png";
-		try (MockedStatic<ProductImageFileNameGenerator> mockedStatic = mockStatic(
-				ProductImageFileNameGenerator.class)) {
-			mockedStatic.when(() -> ProductImageFileNameGenerator.getNewFileName(anyString()))
-					.thenReturn(generatedFileName);
+    @Test
+    void testDeleteProductByProductId_NotFound() {
+        when(productDao.deleteProductById("PID99999")).thenReturn(Optional.empty());
 
-			// Avoid writing to disk: stub transferTo to do nothing.
-			doAnswer(invocation -> {
-				File fileArg = invocation.getArgument(0);
-				// Optionally verify fileArg path if needed.
-				return null;
-			}).when(imageFile).transferTo(any(File.class));
+        assertThrows(ProductNotFoundException.class, () -> productService.deleteProductByProductId("PID99999"));
+    }
 
-			// Stub productDao.saveProduct to return the product.
-			when(productDao.saveProduct(any(Product.class), anyString())).thenReturn(Optional.of(product));
+    @Test
+    void testGetAllProducts_Success() {
+        when(productDao.fetchAllProduct()).thenReturn(Optional.of(Arrays.asList(product)));
+        
+        List<ProductResponseDTO> products = productService.getAllProducts();
+        
+        assertFalse(products.isEmpty());
+        assertEquals(1, products.size());
+        assertEquals("Apple", products.get(0).getProductName());
+    }
+    
+    @Test
+    void testGetAllProducts_NoProductsFound() {
+        when(productDao.fetchAllProduct()).thenReturn(Optional.empty());
+        
+        assertThrows(RuntimeException.class, () -> productService.getAllProducts());
+    }
+    
+    /*** Test Case: Fetch product by name - product not found ***/
+    @Test
+    void testGetProductByProductName_ProductNotFound() {
+        when(productDao.searchProductByName("Unknown Product")).thenReturn(Optional.empty());
+        assertThrows(ProductNotFoundException.class, () -> productService.getProductByProductName("Unknown Product"));
+    }
 
-			// Call the method under test.
-			ProductResponseDTO response = productService.storeProduct(productRequestDTO);
+    /*** Test Case: Delete product by valid ID ***/
+    @Test
+    void testDeleteProductByProductId_ValidId() {
+        when(productDao.deleteProductById("PID123")).thenReturn(Optional.of("Product deleted successfully"));
+        String result = productService.deleteProductByProductId("PID123");
+        assertEquals("Product deleted successfully", result);
+    }
+    
+    /*** Test Case: Delete product by invalid ID ***/
+    @Test
+    void testDeleteProductByProductId_InvalidId() {
+        when(productDao.deleteProductById("PID999")).thenReturn(Optional.empty());
+        assertThrows(ProductNotFoundException.class, () -> productService.deleteProductByProductId("PID999"));
+    }
 
-			// Verify that the response is correct.
-			assertNotNull(response);
-			assertEquals("Organic Apple", response.getProductName());
-			// Verify that transferTo was called once.
-			verify(imageFile, times(1)).transferTo(any(File.class));
-		}
-	}
+    
 
-	@Test
-	void testStoreProduct_ImageTransferFailure() throws Exception {
-		// Prepare a non-empty MultipartFile mock that throws IOException.
-		MultipartFile imageFile = mock(MultipartFile.class);
-		when(imageFile.isEmpty()).thenReturn(false);
-		when(imageFile.getOriginalFilename()).thenReturn("test.png");
+    /*** Test Case: Fetch all products - empty list ***/
+    @Test
+    void testGetAllProducts_NoProductsAvailable() {
+        when(productDao.fetchAllProduct()).thenReturn(Optional.empty());
+        assertThrows(RuntimeException.class, () -> productService.getAllProducts());
+    }
 
-		// Simulate fileStorageProperties returning a temporary directory.
-		when(fileStorageProperties.getImageStoragePath()).thenReturn(System.getProperty("java.io.tmpdir"));
+    /*** Test Case: Fetch products by availability (in stock) ***/
+    @Test
+    void testFetchProductByAvailability_InStock() {
+        when(productDao.fetchProductByAvailability(true)).thenReturn(Optional.of(Arrays.asList(product)));
+        List<ProductResponseDTO> result = productService.fetchProductByAvailability(true);
+        assertFalse(result.isEmpty());
+        assertTrue(result.get(0).getInStock());
+    }
 
-		// Use static mocking for ProductImageFileNameGenerator.
-		String generatedFileName = "test_unique.png";
-		try (MockedStatic<ProductImageFileNameGenerator> mockedStatic = mockStatic(
-				ProductImageFileNameGenerator.class)) {
-			mockedStatic.when(() -> ProductImageFileNameGenerator.getNewFileName(anyString()))
-					.thenReturn(generatedFileName);
+    /*** Test Case: Fetch products by availability - no products available ***/
+    @Test
+    void testFetchProductByAvailability_NoProductsAvailable() {
+        when(productDao.fetchProductByAvailability(false)).thenReturn(Optional.empty());
+        assertThrows(RuntimeException.class, () -> productService.fetchProductByAvailability(false));
+    }
 
-			// Stub transferTo to throw IOException.
-			doThrow(new IOException("Simulated IO failure")).when(imageFile).transferTo(any(File.class));
+    /*** Test Case: Validate image with valid format ***/
+    @Test
+    void testValidateProductImage_ValidImage() {
+        MultipartFile mockFile = mock(MultipartFile.class);
+        when(mockFile.getSize()).thenReturn(500L);
+        when(mockFile.getContentType()).thenReturn("image/png");
+        when(mockFile.getOriginalFilename()).thenReturn("test.png");
 
-			// When productDao.saveProduct is called, it won't be reached because saveImage
-			// should fail.
-			RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-				productService.storeProduct(productRequestDTO);
-			});
-			assertEquals("Error saving image file: Simulated IO failure", exception.getMessage());
-		}
-	}
+        when(fileStorageProperties.getGetMaxFileSize()).thenReturn(1000L);
+        
+        assertTrue(productService.validateProductImage(mockFile));
+    }
 
-	@Test
-	void testStoreProduct_ProductNotCreated() {
-		// Prepare a scenario where productDao.saveProduct returns Optional.empty()
-		MultipartFile imageFile = mock(MultipartFile.class);
-		when(imageFile.isEmpty()).thenReturn(true); // no image processing
+  
 
-		when(productDao.saveProduct(any(Product.class), anyString())).thenReturn(Optional.empty());
+    /*** Test Case: Validate image is null ***/
+    @Test
+    void testValidateProductImage_NullFile() {
+        assertThrows(RuntimeException.class, () -> productService.validateProductImage(null));
+    }
+    
+    
+    @Test
+    void testUpdateProductByProductId_ValidId() {
+        // Mock product
+        Product mockProduct = new Product();
+        mockProduct.setProductId("PID123");
+        mockProduct.setProductName("Test Product");
+        mockProduct.setProductQuantity(10);
+        mockProduct.setProductPrice(99.99);
+        mockProduct.setInStock(true);
 
-		// Expect a ProductNotCreatedException.
-		Exception exception = assertThrows(ProductNotCreatedException.class,
-				() -> productService.storeProduct(productRequestDTO));
-		assertEquals("Failed to save product.", exception.getMessage());
-	}
+        // Mock productRequestDTO
+        ProductRequestDTO productRequestDTO = new ProductRequestDTO();
+        productRequestDTO.setProductName("Test Product");
+        productRequestDTO.setProductQuantity(10);
+        productRequestDTO.setProductPrice(99.99);
+        productRequestDTO.setInStock(true);
 
-	@Test
-	void testGetProductByProductName_Success() {
-		when(productDao.searchProductByName(anyString())).thenReturn(Optional.of(Collections.singletonList(product)));
-		ProductResponseDTO response = productService.getProductByProductName("Organic Apple");
-		assertNotNull(response);
-		assertEquals("Organic Apple", response.getProductName());
-	}
+        // Mock repository behavior
+        when(productDao.updateProduct(any(Product.class))).thenReturn(Optional.of(mockProduct));
 
-	@Test
-	void testGetProductByProductName_NotFound() {
-		when(productDao.searchProductByName(anyString())).thenReturn(Optional.empty());
-		assertThrows(ProductNotFoundException.class,
-				() -> productService.getProductByProductName("NonExistentProduct"));
-	}
+        // Call method
+        ProductResponseDTO result = productService.updateProductByProductId(productRequestDTO, "PID123");
 
-	@Test
-	void testDeleteProductByProductId_Success() {
-		when(productDao.deleteProductById("prod123")).thenReturn(Optional.of("Product deleted successfully"));
-		String result = productService.deleteProductByProductId("prod123");
-		assertNotNull(result);
-		assertEquals("Product deleted successfully", result);
-		verify(productDao, times(1)).deleteProductById("prod123");
-	}
+        // Assertions
+        assertNotNull(result);
+        assertEquals("PID123", result.getProductId());  // Check if ID is set correctly
+        assertEquals("Test Product", result.getProductName());  // Check if name is correct
+    }
 
-	@Test
-	void testDeleteProductByProductId_DatabaseException() {
-		when(productDao.deleteProductById("prod123")).thenThrow(new RuntimeException("Database error"));
-		RuntimeException exception = assertThrows(RuntimeException.class,
-				() -> productService.deleteProductByProductId("prod123"));
-		assertEquals("Database error", exception.getMessage());
-		verify(productDao, times(1)).deleteProductById("prod123");
-	}
 
-	@Test
-	void testUpdateProductByProductId_Success() {
-		when(productDao.updateProduct(any(Product.class))).thenReturn(Optional.of(product));
-		ProductResponseDTO response = productService.updateProductByProductId(productRequestDTO, "prod123");
-		assertNotNull(response);
-		assertEquals("Organic Apple", response.getProductName());
-		verify(productDao, times(1)).updateProduct(any(Product.class));
-	}
+    /*** Test Case: Update product by invalid ID ***/
+    @Test
+    void testUpdateProductByProductId_InvalidId() {
+        when(productDao.updateProduct(any(Product.class))).thenReturn(Optional.empty());
 
-	@Test
-	void testUpdateProductByProductId_NotFound() {
-		when(productDao.updateProduct(any(Product.class))).thenReturn(Optional.empty());
-		Exception exception = assertThrows(ProductNotFoundException.class,
-				() -> productService.updateProductByProductId(productRequestDTO, "prod123"));
-		assertEquals("Failed to update product with ID: prod123", exception.getMessage());
-	}
+        assertThrows(ProductNotFoundException.class, 
+                     () -> productService.updateProductByProductId(productRequestDTO, "PID999"));
+    }
 
-	@Test
-	void testUpdateProductByProductId_DatabaseException() {
-		when(productDao.updateProduct(any(Product.class))).thenThrow(new RuntimeException("Database error"));
-		RuntimeException exception = assertThrows(RuntimeException.class,
-				() -> productService.updateProductByProductId(productRequestDTO, "prod123"));
-		assertEquals("Database error", exception.getMessage());
-		verify(productDao, times(1)).updateProduct(any(Product.class));
-	}
 
-	@Test
-	void testGetAllProducts_Success() {
-		when(productDao.fetchAllProduct()).thenReturn(Optional.of(Collections.singletonList(product)));
-		List<ProductResponseDTO> response = productService.getAllProducts();
-		assertNotNull(response);
-		assertFalse(response.isEmpty());
-		assertEquals(1, response.size());
-		verify(productDao, times(1)).fetchAllProduct();
-	}
+    /*** Test Case: Store product with missing image file ***/
+    @Test
+    void testStoreProduct_NullImage() {
+        assertThrows(RuntimeException.class, 
+                     () -> productService.storeProduct(productRequestDTO, "CAT123", null));
+    }
 
-	@Test
-	void testGetAllProducts_NoProducts() {
-		// Simulate no products available
-		when(productDao.fetchAllProduct()).thenReturn(Optional.empty());
-		RuntimeException exception = assertThrows(RuntimeException.class, () -> productService.getAllProducts());
-		assertEquals("No products available!", exception.getMessage());
-	}
+    /*** Test Case: Store product fails due to database error ***/
+    @Test
+    void testStoreProduct_FailedToSave() {
+        MultipartFile mockFile = mock(MultipartFile.class);
+        when(mockFile.getContentType()).thenReturn("image/png");
+        when(mockFile.getOriginalFilename()).thenReturn("test.png");
 
-	@Test
-	void testGetAllProducts_DatabaseException() {
-		when(productDao.fetchAllProduct()).thenThrow(new RuntimeException("Database error"));
-		RuntimeException exception = assertThrows(RuntimeException.class, () -> productService.getAllProducts());
-		assertEquals("Database error", exception.getMessage());
-		verify(productDao, times(1)).fetchAllProduct();
-	}
+        when(productDao.saveProduct(any(Product.class), eq("CAT123"))).thenReturn(Optional.empty());
 
-	@Test
-	void testFetchProductByAvailability_Success() {
-		when(productDao.fetchProductByAvailability(true)).thenReturn(Optional.of(Collections.singletonList(product)));
-		List<ProductResponseDTO> response = productService.fetchProductByAvailability(true);
-		assertNotNull(response);
-		assertFalse(response.isEmpty());
-		assertEquals(1, response.size());
-		verify(productDao, times(1)).fetchProductByAvailability(true);
-	}
+        assertThrows(ProductNotCreatedException.class, 
+                     () -> productService.storeProduct(productRequestDTO, "CAT123", mockFile));
+    }
 
-	@Test
-	void testFetchProductByAvailability_NoProducts() {
-		when(productDao.fetchProductByAvailability(true)).thenReturn(Optional.empty());
-		RuntimeException exception = assertThrows(RuntimeException.class,
-				() -> productService.fetchProductByAvailability(true));
-		assertEquals("No products found with specified availability!", exception.getMessage());
-	}
+    /*** Test Case: Store product successfully but image fails to save ***/
+    @Test
+    void testStoreProduct_ImageStorageFails() {
+        MultipartFile mockFile = mock(MultipartFile.class);
+        when(mockFile.getContentType()).thenReturn("image/png");
+        when(mockFile.getOriginalFilename()).thenReturn("test.png");
 
-	@Test
-	void testFetchProductByAvailability_DatabaseException() {
-		when(productDao.fetchProductByAvailability(true)).thenThrow(new RuntimeException("Database error"));
-		RuntimeException exception = assertThrows(RuntimeException.class,
-				() -> productService.fetchProductByAvailability(true));
-		assertEquals("Database error", exception.getMessage());
-		verify(productDao, times(1)).fetchProductByAvailability(true);
-	}
+        when(productDao.saveProduct(any(Product.class), eq("CAT123"))).thenReturn(Optional.of(product));
+        when(productDao.storeImage(any(MultipartFile.class), anyString())).thenReturn(false);
+
+        assertThrows(RuntimeException.class, 
+                     () -> productService.storeProduct(productRequestDTO, "CAT123", mockFile));
+    }
+
+    @Test
+    void testFetchProductByAvailability_OutOfStock() {
+        // Mock product (out of stock)
+        Product mockProduct = new Product();
+        mockProduct.setProductId("PID456");
+        mockProduct.setProductName("Out of Stock Product");
+        mockProduct.setProductQuantity(0);
+        mockProduct.setProductPrice(199.99);
+        mockProduct.setInStock(false); // This is important
+
+        // Mock DAO behavior
+        when(productDao.fetchProductByAvailability(false)).thenReturn(Optional.of(Arrays.asList(mockProduct)));
+
+        // Call service method
+        List<ProductResponseDTO> result = productService.fetchProductByAvailability(false);
+
+        // Assertions
+        assertFalse(result.isEmpty()); // Ensure the result is not empty
+        assertEquals(1, result.size()); // Check that exactly one product is returned
+        assertFalse(result.get(0).getInStock()); // Ensure product is out of stock
+        assertEquals("Out of Stock Product", result.get(0).getProductName()); // Check correct product
+    }
+
+
+    /*** Test Case: Fetch all products when database throws exception ***/
+    @Test
+    void testGetAllProducts_DatabaseException() {
+        when(productDao.fetchAllProduct()).thenThrow(new RuntimeException("Database error"));
+
+        assertThrows(RuntimeException.class, () -> productService.getAllProducts());
+    }
+
+    /*** Test Case: Delete product fails due to database error ***/
+    @Test
+    void testDeleteProductByProductId_DatabaseError() {
+        when(productDao.deleteProductById("PID123")).thenThrow(new RuntimeException("Database error"));
+
+        assertThrows(RuntimeException.class, () -> productService.deleteProductByProductId("PID123"));
+    }
+
+    @Test
+    void testStoreProduct_NullProductRequestDTO() {
+        MultipartFile mockFile = mock(MultipartFile.class);
+
+        Exception exception = assertThrows(RuntimeException.class, 
+            () -> productService.storeProduct(null, "CAT123", mockFile));
+
+        assertEquals("ProductRequestDTO must not be null", exception.getMessage());
+    }
+
+    
+
+    @Test
+    void testUpdateProductByProductId_NullId() {
+        Exception exception = assertThrows(ProductNotFoundException.class, 
+            () -> productService.updateProductByProductId(productRequestDTO, null));
+
+        assertTrue(exception.getMessage().contains("Failed to update product"));
+    }
+
+
+
+    @Test
+    void testGetAllProducts_EmptyList() {
+        when(productDao.fetchAllProduct()).thenReturn(Optional.empty());
+
+        Exception exception = assertThrows(RuntimeException.class, 
+            () -> productService.getAllProducts());
+
+        assertEquals("No products available!", exception.getMessage());
+    }
+
 }

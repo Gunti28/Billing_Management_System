@@ -153,7 +153,7 @@ public class ProductServiceImpl implements IProductService {
 	}
 	
 	
-	private boolean validateProductImage(MultipartFile file)
+	public boolean validateProductImage(MultipartFile file)
 	{
 		
 		if (file != null) 
