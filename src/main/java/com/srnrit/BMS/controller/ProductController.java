@@ -1,8 +1,6 @@
 package com.srnrit.BMS.controller;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -27,7 +25,6 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.srnrit.BMS.dto.ProductRequestDTO;
 import com.srnrit.BMS.dto.ProductResponseDTO;
-import com.srnrit.BMS.exception.productexceptions.ProductNotFoundException;
 import com.srnrit.BMS.service.IProductService;
 
 import jakarta.validation.Valid;
@@ -45,29 +42,23 @@ public class ProductController {
 
 	// Add Product by Category with Image Upload
 
-	@PostMapping(value = "/addProductByCategory/{categoryId}", consumes = {"multipart/form-data" },                                                             
-			                                                              
-	                                                           produces = {MediaType.APPLICATION_JSON_VALUE}
-	            )
-	public ResponseEntity<?> addProductByCategory( 
-			@RequestPart("product") String productRequestJsonString,
-			@PathVariable String categoryId, @RequestPart("file") MultipartFile file) throws JsonMappingException, JsonProcessingException
-	{
-		
-		ObjectMapper objectMapper = new ObjectMapper();
-		
-		ProductRequestDTO productRequestDTO = objectMapper.readValue(productRequestJsonString, ProductRequestDTO.class);
-		
-		
-		// Validate manually (since Spring doesn't automatically validate @RequestPart)
-        // If validation fails, return errors
-        if (validateUserRequest(productRequestDTO) != null) 
-          return ResponseEntity.badRequest().body(validateUserRequest(productRequestDTO));
-		
-		
-		
+	@PostMapping(value = "/addProductByCategory/{categoryId}", consumes = { "multipart/form-data" },
 
-		ProductResponseDTO productResponseDTO = this.productService.storeProduct(productRequestDTO,categoryId,file);
+			produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<?> addProductByCategory(@RequestPart("product") String productRequestJsonString,
+			@PathVariable String categoryId, @RequestPart("file") MultipartFile file)
+			throws JsonMappingException, JsonProcessingException {
+
+		ObjectMapper objectMapper = new ObjectMapper();
+
+		ProductRequestDTO productRequestDTO = objectMapper.readValue(productRequestJsonString, ProductRequestDTO.class);
+
+		// Validate manually (since Spring doesn't automatically validate @RequestPart)
+		// If validation fails, return errors
+		if (validateUserRequest(productRequestDTO) != null)
+			return ResponseEntity.badRequest().body(validateUserRequest(productRequestDTO));
+
+		ProductResponseDTO productResponseDTO = this.productService.storeProduct(productRequestDTO, categoryId, file);
 
 		return new ResponseEntity<ProductResponseDTO>(productResponseDTO, HttpStatus.CREATED);
 
@@ -75,102 +66,50 @@ public class ProductController {
 
 	// Fetch Products by Availability
 	@GetMapping(value = "/fetchByAvailability")
-	public ResponseEntity<?> fetchProductByAvailability(@RequestParam Optional<Boolean> inStock) {
-	    try {
-	        Boolean availability = inStock.orElse(true); // Default to true if not provided
-	        List<ProductResponseDTO> productList = this.productService.fetchProductByAvailability(availability);
-	        
-	        if (productList.isEmpty()) {
-	            return new ResponseEntity<>("No products available with the given availability status.", HttpStatus.OK);
-	        }
-	        return new ResponseEntity<>(productList, HttpStatus.OK);
-	    } catch (Exception e) {
-	        return new ResponseEntity<>("An unexpected error occurred while fetching products.",
-	                HttpStatus.INTERNAL_SERVER_ERROR);
-	    }
+	public ResponseEntity<List<ProductResponseDTO>> fetchProductByAvailability(
+			@RequestParam Optional<Boolean> inStock) {
+		Boolean availability = inStock.orElse(true);
+		List<ProductResponseDTO> productList = this.productService.fetchProductByAvailability(availability);
+		return ResponseEntity.ok(productList);
 	}
 
-	// Delete Product by ID with Validation
+	// Delete Product by ID
 	@DeleteMapping(value = "/delete/{productId}")
-	public ResponseEntity<Map<String, Object>> deleteProduct(@PathVariable String productId) {
-	    Map<String, Object> response = new HashMap<>();
-	    try {
-	        productId = productId.trim(); // Trim spaces to avoid mismatch issues
-	        String message = this.productService.deleteProductByProductId(productId);
-
-	        logger.info("Product deleted successfully: {}", productId);
-
-	        response.put("status", "success");
-	        response.put("message", message);
-	        response.put("productId", productId);
-
-	        return new ResponseEntity<>(response, HttpStatus.OK);
-	    } catch (ProductNotFoundException e) {
-	        logger.warn("Product deletion failed - Not Found: {}", e.getMessage());
-
-	        response.put("status", "error");
-	        response.put("message", "Product not found for deletion.");
-	        response.put("errorDetails", e.getMessage());
-
-	        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
-	    } catch (Exception e) {
-	        logger.error("❌ Unexpected error while deleting product with ID {}: {}", productId, e.getMessage(), e);
-
-	        response.put("status", "error");
-	        response.put("message", "An unexpected error occurred while deleting the product.");
-	        response.put("errorDetails", e.getMessage());
-
-	        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-	    }
+	public ResponseEntity<String> deleteProduct(@PathVariable String productId) {
+		String message = this.productService.deleteProductByProductId(productId.trim());
+		logger.info("Product deleted successfully: {}", productId);
+		return ResponseEntity.ok(message);
 	}
-
 
 	// Update Product by ID with Validation
 	@PutMapping(value = "/update/{productId}")
-	public ResponseEntity<ProductResponseDTO> updateProduct(
-	        @PathVariable String productId,
-	        @Valid @RequestBody ProductRequestDTO productRequestDTO) {
-	    
-	    ProductResponseDTO updatedProduct = this.productService.updateProductByProductId(productRequestDTO, productId);
-	    return ResponseEntity.ok(updatedProduct);
+	public ResponseEntity<ProductResponseDTO> updateProduct(@PathVariable String productId,
+			@Valid @RequestBody ProductRequestDTO productRequestDTO) {
+
+		ProductResponseDTO updatedProduct = this.productService.updateProductByProductId(productRequestDTO, productId);
+		return ResponseEntity.ok(updatedProduct);
 	}
 
-
-	// Search Product by Name with Validation
 	@GetMapping(value = "/searchByName")
 	public ResponseEntity<?> searchProductByName(@RequestParam String productName) {
-		try {
-			ProductResponseDTO productResponseDTO = this.productService.getProductByProductName(productName);
-			return new ResponseEntity<>(productResponseDTO, HttpStatus.OK);
-		} catch (ProductNotFoundException e) {
-			return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.NOT_FOUND);
-		} catch (Exception e) {
-			return new ResponseEntity<>("An unexpected error occurred while searching for the product.",
-					HttpStatus.INTERNAL_SERVER_ERROR);
+		if (productName == null || productName.trim().isEmpty()) {
+			return new ResponseEntity<>("Product name must be provided!", HttpStatus.BAD_REQUEST);
 		}
+
+		ProductResponseDTO productResponseDTO = this.productService.getProductByProductName(productName.trim());
+		return new ResponseEntity<>(productResponseDTO, HttpStatus.OK);
 	}
 
-	// Fetch All Products with Validation
+	// Fetch All Products
 	@GetMapping(value = "/getAllProducts")
-	public ResponseEntity<?> getAllProducts() {
-		try {
-			List<ProductResponseDTO> productList = this.productService.getAllProducts();
-			if (productList.isEmpty()) {
-				return new ResponseEntity<>("No products found in the database.", HttpStatus.OK);
-			}
-			return new ResponseEntity<>(productList, HttpStatus.OK);
-		} catch (Exception e) {
-			return new ResponseEntity<>("An unexpected error occurred while fetching all products.",
-					HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+	public ResponseEntity<List<ProductResponseDTO>> getAllProducts() {
+		List<ProductResponseDTO> productList = this.productService.getAllProducts();
+		return ResponseEntity.ok(productList);
 	}
-	
+
 	// Manual validation method (since @RequestPart doesn't auto-validate)
-    private String validateUserRequest(@Valid ProductRequestDTO productRequestDTO) 
-    {
-    	return null;
-    }
-	
-	
-	
+	private String validateUserRequest(@Valid ProductRequestDTO productRequestDTO) {
+		return null;
+	}
+
 }
