@@ -1,0 +1,26 @@
+package com.srnrit.BMS.util.idgenerator;
+
+import java.time.Instant;
+import java.util.concurrent.ThreadLocalRandom;
+
+import org.springframework.stereotype.Component;
+
+@Component
+public class ImageFileNameGenerator {
+
+	public  static String getNewFileName(String fileName)
+	 {
+		 String suffix=fileName;
+		 String prefix="";
+		 
+		 long timeStamp = Instant.now().toEpochMilli();
+		 int randomPart = ThreadLocalRandom.current().nextInt(100000000, 999999999);
+		 
+		 prefix=timeStamp+""+randomPart;
+		
+		
+		 return prefix+suffix;
+		 
+	 }
+
+}
